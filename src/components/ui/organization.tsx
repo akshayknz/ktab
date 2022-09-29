@@ -41,11 +41,11 @@ function Organization() {
   const [itemst, setItemst] = useState([
     {
       id: 12,
-      name: "manoj",
+      name: "aaaaaaaaaaaaa",
     },
     {
       id: 22,
-      name: "2nd manoj",
+      name: "2nd aaaaaaaaaaaaa",
     },
   ]);
   const activationConstraint = {
@@ -93,6 +93,14 @@ function Organization() {
           {items.map((item) => (
             <DragGroup {...item} key={item.id} />
           ))}
+          <SortableContext
+          items={itemst.map((item) => item.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {itemst.map((item) => (
+            <DragGroup {...item} key={item.id} />
+          ))}
+        </SortableContext>
         </SortableContext>
           <DragOverlay>
             {activeId ? (

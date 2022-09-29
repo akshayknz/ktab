@@ -28,6 +28,15 @@ const DragGroup = ({ name, id }: DragGroupProps) => {
           name: "4nd manoj",
         },
       ]);
+      const [itemst, setItemst] = useState({
+        A: ["a1","a2","a3","a4"],
+        B: ["b1","b2","b3","b4"],
+        C: ["c1","c2"],
+        D: ["d1","d2","d3","d4","d5","d6"],
+      });
+      const [containers, setContainers] = useState(
+        Object.keys(itemst) as UniqueIdentifier[]
+      );
     const activationConstraint = {
         distance: 15,
       };
