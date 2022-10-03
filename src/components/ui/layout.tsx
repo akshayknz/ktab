@@ -164,6 +164,7 @@ export function Layout({ children }: DoubleHeaderProps) {
           </Text>
         </Box>
       </Header>
+      
       <div ref={inputRef}></div>
       {children}
     </>
