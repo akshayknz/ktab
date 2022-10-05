@@ -3,8 +3,10 @@ import Organization from "../ui/organization";
 import { MdDragIndicator } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 import { BiMessageAltAdd } from "react-icons/bi";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UniqueIdentifier } from "@dnd-kit/core";
+import { collection, doc, getDocs, query, setDoc, where } from "firebase/firestore"; 
+import { db } from "../data/firebaseConfig";
 
 const HEADER_HEIGHT = 28;
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
@@ -18,7 +20,7 @@ export function createRange<T = number>(
 
 function Home() {
   const { classes, cx } = useStyles();
-  let itemCount = 3;
+  let itemCount = 10;
   const [items, setItems] = useState<Items>({
     A: createRange(itemCount, (index) => `A${index + 1}`),
     B: createRange(itemCount, (index) => `B${index + 1}`),
@@ -28,8 +30,21 @@ function Home() {
   const [containers, setContainers] = useState(
     Object.keys(items) as UniqueIdentifier[]
   );
-  console.log(items);
-  console.log(containers);
+
+  const q = query(collection(db, "ktab-manager"));
+
+  async function  getDatastuff(){
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      // console.log(doc.id, " => ", doc.data());
+    });
+    return 0;
+  }
+  useEffect(()=>{
+    getDatastuff();
+
+  },[])
+  
   /*
   Organization Firestore collection
   Each entry is a new organization
@@ -168,3 +183,5 @@ const useStyles = createStyles((theme) => ({
     display: "flex"
   },
 }));
+
+

@@ -38,40 +38,41 @@ import {
   createStyles,
   Chip,
   Badge,
+  Tooltip,
 } from "@mantine/core";
-import { SetStateAction, useCallback, useRef, useState } from "react";
+import { SetStateAction, useCallback, useRef, useState, useEffect } from "react";
 import { MdDragIndicator } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 import { BiMessageAltAdd } from "react-icons/bi";
-import { FiEdit3 } from "react-icons/fi";
+import { FiEdit3, FiMaximize2, FiMinimize2 } from "react-icons/fi";
 
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
 const useStyles = createStyles((theme) => ({
   titleInput: {
     padding: "0px",
     fontWeight: 100,
-      margin: "0px",
-      paddingInline: 10,
-      height: "36px",
-      lineHeight: "36px",
-      minHeight: "20px",
-      fontSize:"20px",
-      "& input": {
-      fontSize:"20px",  
+    margin: "0px",
+    paddingInline: 10,
+    height: "36px",
+    lineHeight: "36px",
+    minHeight: "20px",
+    fontSize: "20px",
+    "& input": {
+      fontSize: "20px",
       fontWeight: 100,
       margin: "0px",
       paddingInline: 10,
       height: "36px",
       minHeight: "20px",
-    }
+    },
   },
-  buttonGroup:{
+  buttonGroup: {
     transition: "all .5s",
-    transform:"translatex(0px)",
+    transform: "translatex(0px)",
   },
-  buttonGroupDragging:{
-    opacity:0,
-    transform:"translatex(100px)",
+  buttonGroupDragging: {
+    opacity: 0,
+    transform: "translatex(100px)",
   },
 }));
 interface OrganizationProps {
@@ -80,9 +81,15 @@ interface OrganizationProps {
   containers: UniqueIdentifier[];
   setContainers: React.Dispatch<React.SetStateAction<UniqueIdentifier[]>>;
 }
-function Organization({items, setItems, containers, setContainers}:OrganizationProps) {
+function Organization({
+  items,
+  setItems,
+  containers,
+  setContainers,
+}: OrganizationProps) {
   const [cursor, setCursor] = useState("auto");
   const [currentlyContainer, setCurrentlyContainer] = useState(false);
+  const [globalMinifyContainers, setGlobalMinifyContainers] = useState(false);
   const findContainer = (id: UniqueIdentifier) => {
     if (id in items) {
       return id;
@@ -271,8 +278,8 @@ function Organization({items, setItems, containers, setContainers}:OrganizationP
       ];
     },
     duration: 300,
-    sideEffects({ active, dragOverlay }) {
-      active.node.style.opacity = ".5";
+    sideEffects({ active, dragOverlay, draggableNodes, droppableContainers }) {
+      active.node.style.opacity = ".5"
       dragOverlay.node.animate([{ opacity: "1" }, { opacity: "0.7" }], {
         duration: 250,
         easing: "ease",
@@ -285,7 +292,7 @@ function Organization({items, setItems, containers, setContainers}:OrganizationP
       });
 
       return () => {
-        active.node.style.opacity = "0";
+        active.node.style.opacity = "0"
       };
     },
   };
@@ -303,28 +310,26 @@ function Organization({items, setItems, containers, setContainers}:OrganizationP
           items={containers}
           strategy={verticalListSortingStrategy}
         >
-          {containers.map((containerId) => (
-            <>
-              <ContainerItem name={containerId} key={containerId}>
-                <SortableContext
-                  items={items[containerId]}
-                  strategy={horizontalListSortingStrategy}
-                >
-                  <div className="items">
-                    {items[containerId].map((value, index) => (
-                      <SortableItem
-                        name={value}
-                        id={index}
-                        key={`${index}${value}`}
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </ContainerItem>
-            </>
+          {containers.map((containerId, index) => (
+            <ContainerItem name={containerId} key={containerId} globalMinifyContainers={globalMinifyContainers} setGlobalMinifyContainers={setGlobalMinifyContainers}>
+              <SortableContext
+                items={items[containerId]}
+                strategy={horizontalListSortingStrategy}
+              >
+                <div className="items">
+                  {items[containerId].map((value, index) => (
+                    <SortableItem
+                      name={value}
+                      id={index}
+                      key={`${index}${value}`}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </ContainerItem>
           ))}
         </SortableContext>
-        <DragOverlay dropAnimation={dropAnimationConfig}>
+        <DragOverlay adjustScale={true} dropAnimation={dropAnimationConfig}>
           {activeId ? (
             <>
               <Overlay currentlyContainer={currentlyContainer} />
@@ -369,7 +374,7 @@ const Overlay = ({ currentlyContainer }: OverlayProps) => {
   );
 };
 
-const ContainerItem = ({ name, children }: any) => {
+const ContainerItem = ({ name, globalMinifyContainers, setGlobalMinifyContainers, children }: any) => {
   const {
     setNodeRef,
     attributes,
@@ -382,6 +387,7 @@ const ContainerItem = ({ name, children }: any) => {
   } = useSortable({ id: name });
   const { classes, cx } = useStyles();
   const [edit, setEdit] = useState(false);
+  const [minimize, setMinimize] = useState(false);
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -396,6 +402,9 @@ const ContainerItem = ({ name, children }: any) => {
     opacity: isDragging ? 0.3 : 1,
     borderRadius: 8,
   };
+  useEffect(()=>{
+      setGlobalMinifyContainers(isDragging)
+  },[isDragging])
   return (
     <Box
       ref={setNodeRef}
@@ -407,57 +416,112 @@ const ContainerItem = ({ name, children }: any) => {
             : theme.colors.gray[0],
         padding: 4,
         paddingTop: 9,
-        paddingInline: 50
+        paddingInline: 50,
       })}
     >
-      <Container sx={{height:"50px"}}>
+      <Container sx={{ height: "50px" }}>
         <Grid>
           <Grid.Col span={6}>
-            {edit?
-            <Group>
-              <Input
-                onKeyDown={(e:React.KeyboardEvent)=>{if(e.key=="Enter") setEdit(false)}}
-                variant={edit?"default":"unstyled"}
-                radius="xs" p={0}
-                size="xl" style={{fontWeight:100, fontSize:"10px"}}
-                defaultValue={name}
-                className={classes.titleInput}
-              />
-              <Button variant="light" size="xs" onClick={()=>setEdit(false)}>
-                Save
-              </Button>
-            </Group>
-            :
-            <Group spacing={"xs"}>
-              <Text onClick={()=>setEdit(true)} className={classes.titleInput}>{name} </Text> 
-              <Badge size="xs" radius="md">Modern Javascript</Badge>
-            </Group>
-            }
+            {edit ? (
+              <Group>
+                <Input
+                  onKeyDown={(e: React.KeyboardEvent) => {
+                    if (e.key == "Enter") setEdit(false);
+                  }}
+                  variant={edit ? "default" : "unstyled"}
+                  radius="xs"
+                  p={0}
+                  size="xl"
+                  style={{ fontWeight: 100, fontSize: "10px" }}
+                  defaultValue={name}
+                  className={classes.titleInput}
+                />
+                <Button
+                  variant="light"
+                  size="xs"
+                  onClick={() => setEdit(false)}
+                >
+                  Save
+                </Button>
+              </Group>
+            ) : (
+              <Group spacing={"xs"}>
+                <Text
+                  onClick={() => setEdit(true)}
+                  className={classes.titleInput}
+                >
+                  {name}{" "}
+                </Text>
+                <Badge size="xs" radius="md">
+                  Modern Javascript
+                </Badge>
+              </Group>
+            )}
           </Grid.Col>
           <Grid.Col span={6}>
-            <Group position="right" sx={{overflow:"hidden"}}>
-              <Group className={`${classes.buttonGroup} ${isDragging && classes.buttonGroupDragging}`}>
-                <Button variant="default" radius="md" size="xs" onClick={()=>setEdit(true)}><FiEdit3 /></Button>
-                <Button variant="default" radius="md" size="xs"><BiMessageAltAdd /></Button>
-                <Button variant="default" radius="md" size="xs"><AiOutlineDelete /></Button>
-              </Group>
-              <Button
-                style={{ cursor: "grab" }}
-                variant="default"
-                radius="md"
-                size="xs"
-                {...listeners}
-                {...attributes}
+            <Group position="right">
+              <Group
+                className={`${classes.buttonGroup} ${
+                  isDragging && classes.buttonGroupDragging
+                }`}
               >
-                <MdDragIndicator />
-              </Button>
+                <Tooltip label="Edit title">
+                  <Button
+                    variant="default"
+                    radius="md"
+                    size="xs"
+                    onClick={() => setEdit(true)}
+                  >
+                    <FiEdit3 />
+                  </Button>
+                </Tooltip>
+                <Tooltip label="Add new item">
+                  <Button variant="default" radius="md" size="xs">
+                    <BiMessageAltAdd />
+                  </Button>
+                </Tooltip>
+                <Tooltip label="Delete this collection">
+                  <Button variant="default" radius="md" size="xs">
+                    <AiOutlineDelete />
+                  </Button>
+                </Tooltip>
+                <Tooltip label="Minimize this collection">
+                  <Button
+                    variant="default"
+                    radius="md"
+                    size="xs"
+                    onClick={() => setMinimize((prev) => !prev)}
+                  >
+                    {minimize ? <FiMaximize2 /> : <FiMinimize2 />}
+                  </Button>
+                </Tooltip>
+              </Group>
+              <Tooltip label="Reorder collections">
+                <Button
+                  style={{ cursor: "grab" }}
+                  variant="default"
+                  radius="md"
+                  size="xs"
+                  {...listeners}
+                  {...attributes}
+                >
+                  <MdDragIndicator />
+                </Button>
+              </Tooltip>
             </Group>
           </Grid.Col>
         </Grid>
       </Container>
-      <div style={{maxHeight:isDragging? "0px":"500px", transition:"all .2s"}}>
-      {children}
-      </div>
+      {!minimize && !globalMinifyContainers && (
+        <div
+          style={{
+            maxHeight: isDragging ? "0px" : "500px",
+            transition: "all .2s",
+          }}
+        >
+          {children}
+        </div>
+      )}
     </Box>
   );
 };
@@ -494,7 +558,7 @@ const SortableItem = ({ name, id }: any) => {
             ? theme.colors.dark[6]
             : theme.colors.gray[0],
         padding: 5,
-        paddingInline:20
+        paddingInline: 20,
       })}
     >
       <Text>{name}</Text>
