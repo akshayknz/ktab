@@ -367,7 +367,7 @@ const Overlay = ({ currentlyContainer }: OverlayProps) => {
             padding: 10,
           })}
         >
-          C2
+          Text from inside the data obj
         </Box>
       )}
     </>

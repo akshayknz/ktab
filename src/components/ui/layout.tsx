@@ -1,13 +1,30 @@
-import { createStyles, Header, Box, Text, Button, Menu } from "@mantine/core";
-import { useRef } from "react";
+import {
+  createStyles,
+  Header,
+  Image,
+  Box,
+  Text,
+  Button,
+  Menu,
+  Footer,
+  Popover,
+  ScrollArea,
+  ActionIcon,
+  Card,
+  Group,
+  SimpleGrid,
+} from "@mantine/core";
+import { useRef, useState } from "react";
 import { RiTableFill } from "react-icons/ri";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { SpotlightProvider, openSpotlight } from "@mantine/spotlight";
 import type { SpotlightAction } from "@mantine/spotlight";
+import LoginModal from "./LoginModal";
 
 export function Layout({ children }: DoubleHeaderProps) {
   const { classes, cx } = useStyles();
   const inputRef = useRef<any>(null);
+  const [loginModal, setLoginModal] = useState(false);
 
   function closeMenu() {
     inputRef.current!.click();
@@ -73,6 +90,18 @@ export function Layout({ children }: DoubleHeaderProps) {
                       className={classes.submenuItem}
                       onClick={closeMenu}
                     >
+                      Organization
+                    </Menu.Item>
+                    <Menu.Item
+                      className={classes.submenuItem}
+                      onClick={closeMenu}
+                    >
+                      Collection
+                    </Menu.Item>
+                    <Menu.Item
+                      className={classes.submenuItem}
+                      onClick={closeMenu}
+                    >
                       Tab
                     </Menu.Item>
                     <Menu.Item
@@ -86,6 +115,12 @@ export function Layout({ children }: DoubleHeaderProps) {
                       onClick={closeMenu}
                     >
                       Todo
+                    </Menu.Item>
+                    <Menu.Item
+                      className={classes.submenuItem}
+                      onClick={closeMenu}
+                    >
+                      Reminder
                     </Menu.Item>
                   </Menu.Dropdown>
                 </Menu>
@@ -156,17 +191,98 @@ export function Layout({ children }: DoubleHeaderProps) {
           </SpotlightProvider>
         </Box>
         <Box className={classes.vmiddle} style={{ float: "right" }}>
+          <Popover
+            transition="pop"
+            width={400}
+            position="bottom-end"
+            withArrow
+            shadow="md"
+          >
+            <Popover.Target>
+              <Button
+                variant="default"
+                radius="xs"
+                size="xs"
+                compact
+                className={cx(classes.vmiddle, classes.menuitem)}
+              >
+                Notifications
+              </Button>
+            </Popover.Target>
+            <Popover.Dropdown pr={6}>
+              <ScrollArea
+                style={{ height: "80vh" }}
+                offsetScrollbars
+                scrollbarSize={12}
+              >
+                {[1,2,3,4,5,6,8].map(e=>(
+                  <Card key={e} my={10} withBorder shadow="sm" radius="md">
+                    <Card.Section withBorder inheritPadding py="xs">
+                      <Group position="apart">
+                        <Text weight={500}>Item reminder for the next day</Text>
+                        <Menu withinPortal position="bottom-end" shadow="sm">
+                          <Menu.Target>
+                            <ActionIcon>
+                              <MdKeyboardArrowRight size={16} />
+                            </ActionIcon>
+                          </Menu.Target>
+                          <Menu.Dropdown>
+                            <Menu.Item icon={<MdKeyboardArrowRight size={14} />}>
+                              Show Item
+                            </Menu.Item>
+                            <Menu.Item
+                              icon={<MdKeyboardArrowRight size={14} />}
+                              color="red"
+                            >
+                              Remove
+                            </Menu.Item>
+                          </Menu.Dropdown>
+                        </Menu>
+                      </Group>
+                    </Card.Section>
+                    {(e<3) &&
+                    <Text mt="sm" color="dimmed" size="sm">
+                      <Text component="span" inherit color="blue">
+                        200+ images uploaded
+                      </Text>{" "}
+                      since last visit, review them to select which one should be
+                      added to your gallery
+                    </Text>
+                    }
+                  </Card>
+
+                ))}
+              </ScrollArea>
+            </Popover.Dropdown>
+          </Popover>
+
+          <Button
+            variant="default"
+            radius="xs"
+            size="xs"
+            compact
+            className={cx(classes.vmiddle, classes.menuitem)}
+            onClick={()=>setLoginModal(prevState => (!prevState))}
+          >
+            Login
+          </Button>
+          <LoginModal open={loginModal} setOpen={setLoginModal} />
+        </Box>
+      </Header>
+
+      <div ref={inputRef}></div>
+      {children}
+      <Footer height={HEADER_HEIGHT} px={57}>
+        <Box className={classes.vmiddle}>
           <Text
             size={"xs"}
+            style={{ textAlign: "center" }}
             className={cx(classes.vmiddle, classes.lineHeightFix)}
           >
             Created by <a href="#">Akshay K Nair</a>
           </Text>
         </Box>
-      </Header>
-      
-      <div ref={inputRef}></div>
-      {children}
+      </Footer>
     </>
   );
 }
