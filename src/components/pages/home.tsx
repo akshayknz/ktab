@@ -22,7 +22,7 @@ function Home() {
   const { classes, cx } = useStyles();
   let itemCount = 10;
   const [items, setItems] = useState<Items>({
-    A: createRange(itemCount, (index) => `A${index + 1}`),
+    A: ["a1","a2"],
     B: createRange(itemCount, (index) => `B${index + 1}`),
     C: createRange(itemCount, (index) => `C${index + 1}`),
     D: createRange(itemCount, (index) => `D${index + 1}`),

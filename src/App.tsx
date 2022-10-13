@@ -10,7 +10,6 @@ function App() {
   return (
     <AuthProvider>
       <>
-      {JSON.stringify(auth.currentUser?.email)}
       <MantineProvider theme={{ colorScheme: 'dark' }} withGlobalStyles withNormalizeCSS>
         <Layout>
           <Home />

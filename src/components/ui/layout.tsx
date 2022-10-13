@@ -1,7 +1,6 @@
 import {
   createStyles,
   Header,
-  Image,
   Box,
   Text,
   Button,
@@ -12,23 +11,38 @@ import {
   ActionIcon,
   Card,
   Group,
-  SimpleGrid,
 } from "@mantine/core";
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { RiTableFill } from "react-icons/ri";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { SpotlightProvider, openSpotlight } from "@mantine/spotlight";
 import type { SpotlightAction } from "@mantine/spotlight";
 import LoginModal from "./LoginModal";
+import { AuthContext } from "../data/contexts/AuthContext";
+import { auth } from "../data/firebaseConfig";
+import { OrganizationModal } from "./OrganizationModal";
+import AboutModal from "./AboutModal";
+import SettingsModal from "./SettingsModal";
 
 export function Layout({ children }: DoubleHeaderProps) {
+  const user = useContext(AuthContext);
   const { classes, cx } = useStyles();
   const inputRef = useRef<any>(null);
   const [loginModal, setLoginModal] = useState(false);
+  const [organizationModal, setOrganizationModal] = useState(false);
+  const [organizationOrCollection, setOrganizationOrCollection] = useState('');
+  const [aboutModal, setAboutModal] = useState(false);
+  const [settingsModal, setSettingsModal] = useState(false);
+  const [personalizeModal, setPersonalizeModal] = useState(false);
+  const [itemModal, setItemModal] = useState(false);
 
   function closeMenu() {
     inputRef.current!.click();
   }
+
+  const signOut = async () => {
+    await auth.signOut();
+  };
 
   return (
     <>
@@ -88,13 +102,13 @@ export function Layout({ children }: DoubleHeaderProps) {
                   <Menu.Dropdown>
                     <Menu.Item
                       className={classes.submenuItem}
-                      onClick={closeMenu}
+                      onClick={()=>{closeMenu();setOrganizationModal(prevState => (!prevState));setOrganizationOrCollection('organization')}}
                     >
                       Organization
                     </Menu.Item>
                     <Menu.Item
                       className={classes.submenuItem}
-                      onClick={closeMenu}
+                      onClick={()=>{closeMenu();setOrganizationModal(prevState => (!prevState));setOrganizationOrCollection('collection')}}
                     >
                       Collection
                     </Menu.Item>
@@ -156,9 +170,13 @@ export function Layout({ children }: DoubleHeaderProps) {
               </Button>
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Item className={classes.submenuItem}>Settings</Menu.Item>
-              <Menu.Item className={classes.submenuItem}>About</Menu.Item>
-              <Menu.Item className={classes.submenuItem}>Log out</Menu.Item>
+              <Menu.Item className={classes.submenuItem}
+                onClick={()=>{closeMenu();setSettingsModal(prevState => (!prevState));setPersonalizeModal(false)}}
+                >Settings</Menu.Item>
+              <Menu.Item className={classes.submenuItem}
+                onClick={()=>{closeMenu();setAboutModal(prevState => (!prevState));}}
+                >About</Menu.Item>
+              <Menu.Item className={classes.submenuItem} onClick={signOut}>Log out</Menu.Item>
             </Menu.Dropdown>
           </Menu>
           <Button
@@ -166,6 +184,7 @@ export function Layout({ children }: DoubleHeaderProps) {
             radius="xs"
             size="xs"
             compact
+            onClick={()=>{setSettingsModal(prevState => (!prevState));setPersonalizeModal(true)}}
             className={cx(classes.vmiddle, classes.menuitem)}
           >
             Personalize
@@ -215,7 +234,7 @@ export function Layout({ children }: DoubleHeaderProps) {
                 offsetScrollbars
                 scrollbarSize={12}
               >
-                {[1,2,3,4,5,6,8].map(e=>(
+                {[1,2].map(e=>(
                   <Card key={e} my={10} withBorder shadow="sm" radius="md">
                     <Card.Section withBorder inheritPadding py="xs">
                       <Group position="apart">
@@ -240,7 +259,7 @@ export function Layout({ children }: DoubleHeaderProps) {
                         </Menu>
                       </Group>
                     </Card.Section>
-                    {(e<3) &&
+                    {(e<2) &&
                     <Text mt="sm" color="dimmed" size="sm">
                       <Text component="span" inherit color="blue">
                         200+ images uploaded
@@ -255,21 +274,37 @@ export function Layout({ children }: DoubleHeaderProps) {
               </ScrollArea>
             </Popover.Dropdown>
           </Popover>
-
+          {user?
           <Button
             variant="default"
             radius="xs"
             size="xs"
             compact
             className={cx(classes.vmiddle, classes.menuitem)}
-            onClick={()=>setLoginModal(prevState => (!prevState))}
+            onClick={signOut}
           >
-            Login
+            Logout
           </Button>
+          :
+          <>
+            <Button
+              variant="default"
+              radius="xs"
+              size="xs"
+              compact
+              className={cx(classes.vmiddle, classes.menuitem)}
+              onClick={()=>setLoginModal(prevState => (!prevState))}
+            >
+              Login
+            </Button>
+          </>
+          }
           <LoginModal open={loginModal} setOpen={setLoginModal} />
         </Box>
       </Header>
-
+      <OrganizationModal open={organizationModal} setOpen={setOrganizationModal} organizationOrCollection={organizationOrCollection}/>
+      <AboutModal open={aboutModal} setOpen={setAboutModal}/>
+      <SettingsModal open={settingsModal} setOpen={setSettingsModal} personalize={personalizeModal}/>
       <div ref={inputRef}></div>
       {children}
       <Footer height={HEADER_HEIGHT} px={57}>
@@ -377,3 +412,7 @@ const useStyles = createStyles((theme) => ({
     lineHeight: HEADER_HEIGHT - 2 + "px",
   },
 }));
+function useForm(arg0: { initialValues: { email: string; termsOfService: boolean; }; validate: { email: (value: any) => "Invalid email" | null; }; }) {
+  throw new Error("Function not implemented.");
+}
+
