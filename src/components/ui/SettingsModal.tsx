@@ -3,22 +3,13 @@ import {
   Modal,
   Text,
   Image,
-  Button,
-  Group,
-  SimpleGrid,
-  Accordion,
-  createStyles,
-  Input,
-  PasswordInput,
-  Avatar,
-  Blockquote,
   Tabs,
   Box,
   FileInput,
   AlphaSlider,
   Slider,
 } from "@mantine/core";
-import { MdOutlineMarkEmailUnread } from "react-icons/md";
+
 interface Props {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;

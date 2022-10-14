@@ -11,3 +11,26 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.sort-item{
+  cursor: pointer;
+  border: 2px solid rgb(255 255 255 / 10%);
+  border-radius: 8px;
+  display: inline-block;
+  width: 250px;
+  margin: 5px;
+  transition: all .1s;
+}
+
+.sort-item:hover{
+  transform: scale(1.02);
+  transition: all .04s;
+}
+
+.sort-item:active{
+  transform: scale(0.98);
+}
+
+.ql-editor p{
+  margin-bottom: 0;
+}

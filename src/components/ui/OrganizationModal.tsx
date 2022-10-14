@@ -1,11 +1,31 @@
 import { TextInput, Text, Checkbox, Button, Group, Box, Modal, ColorPicker, ColorInput, Tabs, Select } from '@mantine/core';
 import { useForm } from '@mantine/form';
-interface OrganizationProps {
+import { addDoc, collection, getDocs, query, where } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { db } from '../data/firebaseConfig';
+
+interface OrganizationModalProps {
     open: boolean;
     setOpen: React.Dispatch<React.SetStateAction<boolean>>;
     organizationOrCollection: string;
   }
-export function OrganizationModal({open, setOpen, organizationOrCollection}:OrganizationProps) {
+
+interface OrganizationProps {
+  id?: string;
+  name: string;
+  icon: string;
+  color: string;
+  accent: string;
+}
+
+interface CollectionProps {
+  id?: string;
+  parent: string;
+  name: string;
+  color: string;
+}
+export default function OrganizationModal({open, setOpen, organizationOrCollection}:OrganizationModalProps) {
+  const [organizations, setOrganizations] = useState<OrganizationProps[]>([]);
   const organizationForm = useForm({
     initialValues: {
       name: '',
@@ -33,6 +53,62 @@ export function OrganizationModal({open, setOpen, organizationOrCollection}:Orga
     },
   });
 
+  function handleSubmitOrganization(values: OrganizationProps){
+    const upload = async() => {
+      await addDoc(collection(db, 'ktab-manager'), {
+        name: values.name,
+        icon: values.icon,
+        color: values.color,
+        accent: values.accent,
+      })
+    }
+    upload().then(()=>{
+      // showNotification({
+      //   title: 'Entry added',
+      //   message: 'Recalculating and updating the counters',
+      //   loading: true
+      // })
+    })
+  }
+
+  function handleSubmitCollection(values: CollectionProps){
+    console.log(values);
+    
+    const upload = async() => {
+      await addDoc(collection(db, 'ktab-manager', values.parent, 'collections'), {
+        parent: values.parent,
+        name: values.name,
+        color: values.color,
+      })
+    }
+    upload().then(()=>{
+      // showNotification({
+      //   title: 'Entry added',
+      //   message: 'Recalculating and updating the counters',
+      //   loading: true
+      // })
+    })
+  }
+
+  useEffect(()=>{
+    const runQuery = async () => {
+      const q = query(collection(db, "ktab-manager"));
+      getDocs(q).then( r => {
+        const re : OrganizationProps[] = r.docs.map(doc=>({
+          id: doc.id, 
+          name: doc.data().name,
+          icon: doc.data().icon,
+          color: doc.data().color,
+          accent: doc.data().accent,
+          //...doc.data(),
+        }))
+        console.log('load organizaiton parents');
+        setOrganizations(re);
+      }).catch(err=>console.log(err))
+    }
+    runQuery();
+  },[open])
+
   return (
     <Modal opened={open} onClose={() => setOpen(false)} title={`Manage ${organizationOrCollection.charAt(0).toUpperCase()+organizationOrCollection.slice(1)}`}>
         <Tabs defaultValue={organizationOrCollection}>
@@ -43,7 +119,7 @@ export function OrganizationModal({open, setOpen, organizationOrCollection}:Orga
 
             <Tabs.Panel value="organization" pt="xs">
             <Box px={20} pt={10} pb={20} mx="auto">
-                <form onSubmit={organizationForm.onSubmit((values) => console.log(values))}>
+                <form onSubmit={organizationForm.onSubmit((values) => handleSubmitOrganization(values))}>
                     <TextInput label="Name" placeholder='Name' {...organizationForm.getInputProps('name')} pb={20}/>
                     <TextInput label="Icon" placeholder='Icon' {...organizationForm.getInputProps('icon')} pb={20}/>
                     <Text weight={500} sx={{fontSize:14}} pb={5}>Organization Color</Text>
@@ -60,13 +136,12 @@ export function OrganizationModal({open, setOpen, organizationOrCollection}:Orga
 
             <Tabs.Panel value="collection" pt="xs">
                 <Box px={20} pt={10} pb={20} mx="auto">
-                    <form onSubmit={collectionForm.onSubmit((values) => console.log(values))}>
+                    <form onSubmit={collectionForm.onSubmit((values) => handleSubmitCollection(values))}>
                         <Select
                             label="Parent Organization"
                             placeholder="Pick one" pb={20}
                             {...collectionForm.getInputProps('parent')}
-                            data={[
-                            ]}
+                            data={organizations.map(org=>({value:org.id,label:org.name}))}
                         />
                         <TextInput label="Name" placeholder='Name' {...collectionForm.getInputProps('name')} pb={20}/>
                         <Text weight={500} sx={{fontSize:14}} pb={5}>Organization Color</Text>

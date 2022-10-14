@@ -11,8 +11,9 @@ import {
   ActionIcon,
   Card,
   Group,
+  Transition,
 } from "@mantine/core";
-import { useContext, useRef, useState } from "react";
+import { Suspense, useContext, useRef, useState } from "react";
 import { RiTableFill } from "react-icons/ri";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { SpotlightProvider, openSpotlight } from "@mantine/spotlight";
@@ -20,7 +21,11 @@ import type { SpotlightAction } from "@mantine/spotlight";
 import LoginModal from "./LoginModal";
 import { AuthContext } from "../data/contexts/AuthContext";
 import { auth } from "../data/firebaseConfig";
-import { OrganizationModal } from "./OrganizationModal";
+import React from "react";
+// const OrganizationModal = React.lazy(() => import("./OrganizationModal"));
+// const AboutModal = React.lazy(() => import("./AboutModal"));
+// const SettingsModal = React.lazy(() => import("./SettingsModal"));
+import OrganizationModal from "./OrganizationModal";
 import AboutModal from "./AboutModal";
 import SettingsModal from "./SettingsModal";
 
@@ -30,7 +35,7 @@ export function Layout({ children }: DoubleHeaderProps) {
   const inputRef = useRef<any>(null);
   const [loginModal, setLoginModal] = useState(false);
   const [organizationModal, setOrganizationModal] = useState(false);
-  const [organizationOrCollection, setOrganizationOrCollection] = useState('');
+  const [organizationOrCollection, setOrganizationOrCollection] = useState("");
   const [aboutModal, setAboutModal] = useState(false);
   const [settingsModal, setSettingsModal] = useState(false);
   const [personalizeModal, setPersonalizeModal] = useState(false);
@@ -102,13 +107,21 @@ export function Layout({ children }: DoubleHeaderProps) {
                   <Menu.Dropdown>
                     <Menu.Item
                       className={classes.submenuItem}
-                      onClick={()=>{closeMenu();setOrganizationModal(prevState => (!prevState));setOrganizationOrCollection('organization')}}
+                      onClick={() => {
+                        closeMenu();
+                        setOrganizationModal((prevState) => !prevState);
+                        setOrganizationOrCollection("organization");
+                      }}
                     >
                       Organization
                     </Menu.Item>
                     <Menu.Item
                       className={classes.submenuItem}
-                      onClick={()=>{closeMenu();setOrganizationModal(prevState => (!prevState));setOrganizationOrCollection('collection')}}
+                      onClick={() => {
+                        closeMenu();
+                        setOrganizationModal((prevState) => !prevState);
+                        setOrganizationOrCollection("collection");
+                      }}
                     >
                       Collection
                     </Menu.Item>
@@ -170,13 +183,28 @@ export function Layout({ children }: DoubleHeaderProps) {
               </Button>
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Item className={classes.submenuItem}
-                onClick={()=>{closeMenu();setSettingsModal(prevState => (!prevState));setPersonalizeModal(false)}}
-                >Settings</Menu.Item>
-              <Menu.Item className={classes.submenuItem}
-                onClick={()=>{closeMenu();setAboutModal(prevState => (!prevState));}}
-                >About</Menu.Item>
-              <Menu.Item className={classes.submenuItem} onClick={signOut}>Log out</Menu.Item>
+              <Menu.Item
+                className={classes.submenuItem}
+                onClick={() => {
+                  closeMenu();
+                  setSettingsModal((prevState) => !prevState);
+                  setPersonalizeModal(false);
+                }}
+              >
+                Settings
+              </Menu.Item>
+              <Menu.Item
+                className={classes.submenuItem}
+                onClick={() => {
+                  closeMenu();
+                  setAboutModal((prevState) => !prevState);
+                }}
+              >
+                About
+              </Menu.Item>
+              <Menu.Item className={classes.submenuItem} onClick={signOut}>
+                Log out
+              </Menu.Item>
             </Menu.Dropdown>
           </Menu>
           <Button
@@ -184,7 +212,10 @@ export function Layout({ children }: DoubleHeaderProps) {
             radius="xs"
             size="xs"
             compact
-            onClick={()=>{setSettingsModal(prevState => (!prevState));setPersonalizeModal(true)}}
+            onClick={() => {
+              setSettingsModal((prevState) => !prevState);
+              setPersonalizeModal(true);
+            }}
             className={cx(classes.vmiddle, classes.menuitem)}
           >
             Personalize
@@ -234,7 +265,7 @@ export function Layout({ children }: DoubleHeaderProps) {
                 offsetScrollbars
                 scrollbarSize={12}
               >
-                {[1,2].map(e=>(
+                {[1, 2].map((e) => (
                   <Card key={e} my={10} withBorder shadow="sm" radius="md">
                     <Card.Section withBorder inheritPadding py="xs">
                       <Group position="apart">
@@ -246,7 +277,9 @@ export function Layout({ children }: DoubleHeaderProps) {
                             </ActionIcon>
                           </Menu.Target>
                           <Menu.Dropdown>
-                            <Menu.Item icon={<MdKeyboardArrowRight size={14} />}>
+                            <Menu.Item
+                              icon={<MdKeyboardArrowRight size={14} />}
+                            >
                               Show Item
                             </Menu.Item>
                             <Menu.Item
@@ -259,52 +292,83 @@ export function Layout({ children }: DoubleHeaderProps) {
                         </Menu>
                       </Group>
                     </Card.Section>
-                    {(e<2) &&
-                    <Text mt="sm" color="dimmed" size="sm">
-                      <Text component="span" inherit color="blue">
-                        200+ images uploaded
-                      </Text>{" "}
-                      since last visit, review them to select which one should be
-                      added to your gallery
-                    </Text>
-                    }
+                    {e < 2 && (
+                      <Text mt="sm" color="dimmed" size="sm">
+                        <Text component="span" inherit color="blue">
+                          200+ images uploaded
+                        </Text>{" "}
+                        since last visit, review them to select which one should
+                        be added to your gallery
+                      </Text>
+                    )}
                   </Card>
-
                 ))}
               </ScrollArea>
             </Popover.Dropdown>
           </Popover>
-          {user?
-          <Button
-            variant="default"
-            radius="xs"
-            size="xs"
-            compact
-            className={cx(classes.vmiddle, classes.menuitem)}
-            onClick={signOut}
-          >
-            Logout
-          </Button>
-          :
-          <>
+          {user ? (
             <Button
               variant="default"
               radius="xs"
               size="xs"
               compact
               className={cx(classes.vmiddle, classes.menuitem)}
-              onClick={()=>setLoginModal(prevState => (!prevState))}
+              onClick={signOut}
             >
-              Login
+              Logout
             </Button>
-          </>
-          }
+          ) : (
+            <>
+              <Button
+                variant="default"
+                radius="xs"
+                size="xs"
+                compact
+                className={cx(classes.vmiddle, classes.menuitem)}
+                onClick={() => setLoginModal((prevState) => !prevState)}
+              >
+                Login
+              </Button>
+            </>
+          )}
           <LoginModal open={loginModal} setOpen={setLoginModal} />
         </Box>
       </Header>
-      <OrganizationModal open={organizationModal} setOpen={setOrganizationModal} organizationOrCollection={organizationOrCollection}/>
-      <AboutModal open={aboutModal} setOpen={setAboutModal}/>
-      <SettingsModal open={settingsModal} setOpen={setSettingsModal} personalize={personalizeModal}/>
+      {/* {organizationModal && (
+        <Suspense fallback={<div>Loading...</div>}>
+          <OrganizationModal
+            open={organizationModal}
+            setOpen={setOrganizationModal}
+            organizationOrCollection={organizationOrCollection}
+          />
+        </Suspense>
+      )}
+      {aboutModal && (
+        <Suspense fallback={<div>Loading...</div>}>
+          <AboutModal open={aboutModal} setOpen={setAboutModal} />
+        </Suspense>
+      )}
+      {settingsModal && (
+        <Suspense fallback={<div>Loading...</div>}>
+          <SettingsModal
+            open={settingsModal}
+            setOpen={setSettingsModal}
+            personalize={personalizeModal}
+          />
+        </Suspense>
+      )} */}
+      <OrganizationModal
+        open={organizationModal}
+        setOpen={setOrganizationModal}
+        organizationOrCollection={organizationOrCollection}
+      />
+      <AboutModal open={aboutModal} setOpen={setAboutModal} />
+      <SettingsModal
+        open={settingsModal}
+        setOpen={setSettingsModal}
+        personalize={personalizeModal}
+      />
+
       <div ref={inputRef}></div>
       {children}
       <Footer height={HEADER_HEIGHT} px={57}>
@@ -412,7 +476,9 @@ const useStyles = createStyles((theme) => ({
     lineHeight: HEADER_HEIGHT - 2 + "px",
   },
 }));
-function useForm(arg0: { initialValues: { email: string; termsOfService: boolean; }; validate: { email: (value: any) => "Invalid email" | null; }; }) {
+function useForm(arg0: {
+  initialValues: { email: string; termsOfService: boolean };
+  validate: { email: (value: any) => "Invalid email" | null };
+}) {
   throw new Error("Function not implemented.");
 }
-

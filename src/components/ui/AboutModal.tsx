@@ -17,7 +17,7 @@ interface Props {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
-export default function LoginModal({ open, setOpen }: Props) {
+export default function AboutModal({ open, setOpen }: Props) {
   return (
     <>
       <Modal opened={open} onClose={() => setOpen(false)} title="About Me">

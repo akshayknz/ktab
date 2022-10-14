@@ -40,11 +40,18 @@ import {
   Badge,
   Tooltip,
 } from "@mantine/core";
-import { SetStateAction, useCallback, useRef, useState, useEffect } from "react";
+import {
+  SetStateAction,
+  useCallback,
+  useRef,
+  useState,
+  useEffect,
+} from "react";
 import { MdDragIndicator } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 import { BiMessageAltAdd } from "react-icons/bi";
 import { FiEdit3, FiMaximize2, FiMinimize2 } from "react-icons/fi";
+import ItemModal from "./ItemModal";
 
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
 const useStyles = createStyles((theme) => ({
@@ -96,7 +103,7 @@ function Organization({
     }
     return Object.keys(items).find((key) => items[key].includes(id));
   };
-  const activationConstraint = { distance: 0 };
+  const activationConstraint = { distance: 6 };
   const sensors = [
     useSensor(PointerSensor, { activationConstraint }),
     useSensor(MouseSensor, { activationConstraint }),
@@ -279,7 +286,7 @@ function Organization({
     },
     duration: 300,
     sideEffects({ active, dragOverlay, draggableNodes, droppableContainers }) {
-      active.node.style.opacity = ".5"
+      active.node.style.opacity = ".5";
       dragOverlay.node.animate([{ opacity: "1" }, { opacity: "0.7" }], {
         duration: 250,
         easing: "ease",
@@ -292,7 +299,7 @@ function Organization({
       });
 
       return () => {
-        active.node.style.opacity = "0"
+        active.node.style.opacity = "0";
       };
     },
   };
@@ -311,7 +318,12 @@ function Organization({
           strategy={verticalListSortingStrategy}
         >
           {containers.map((containerId, index) => (
-            <ContainerItem name={containerId} key={containerId} globalMinifyContainers={globalMinifyContainers} setGlobalMinifyContainers={setGlobalMinifyContainers}>
+            <ContainerItem
+              name={containerId}
+              key={containerId}
+              globalMinifyContainers={globalMinifyContainers}
+              setGlobalMinifyContainers={setGlobalMinifyContainers}
+            >
               <SortableContext
                 items={items[containerId]}
                 strategy={horizontalListSortingStrategy}
@@ -374,7 +386,12 @@ const Overlay = ({ currentlyContainer }: OverlayProps) => {
   );
 };
 
-const ContainerItem = ({ name, globalMinifyContainers, setGlobalMinifyContainers, children }: any) => {
+const ContainerItem = ({
+  name,
+  globalMinifyContainers,
+  setGlobalMinifyContainers,
+  children,
+}: any) => {
   const {
     setNodeRef,
     attributes,
@@ -402,9 +419,9 @@ const ContainerItem = ({ name, globalMinifyContainers, setGlobalMinifyContainers
     opacity: isDragging ? 0.3 : 1,
     borderRadius: 8,
   };
-  useEffect(()=>{
-      setGlobalMinifyContainers(isDragging)
-  },[isDragging])
+  useEffect(() => {
+    setGlobalMinifyContainers(isDragging);
+  }, [isDragging]);
   return (
     <Box
       ref={setNodeRef}
@@ -538,30 +555,35 @@ const SortableItem = ({ name, id }: any) => {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    width: "250px",
-    margin: "5px",
-    border: "2px solid rgb(255 255 255 / 10%)",
     zIndex: isDragging ? "100" : "auto",
-    display: "inline-block",
     opacity: isDragging ? 0.5 : 1,
-    borderRadius: 8,
+  };
+  const [itemOpened, setItemOpened] = useState(false);
+  const openModal = () => {
+    setItemOpened((prev) => !prev);
+    console.log("open modal");
   };
   return (
-    <Box
-      ref={setNodeRef}
-      style={style}
-      {...listeners}
-      {...attributes}
-      sx={(theme) => ({
-        backgroundColor:
-          theme.colorScheme === "dark"
-            ? theme.colors.dark[6]
-            : theme.colors.gray[0],
-        padding: 5,
-        paddingInline: 20,
-      })}
-    >
-      <Text>{name}</Text>
-    </Box>
+    <>
+      <Box
+        ref={setNodeRef}
+        onClick={openModal}
+        className={itemOpened ? "sort-item item-opened" : "sort-item"}
+        style={style}
+        {...listeners}
+        {...attributes}
+        sx={(theme) => ({
+          backgroundColor:
+            theme.colorScheme === "dark"
+              ? theme.colors.dark[6]
+              : theme.colors.gray[0],
+          padding: 5,
+          paddingInline: 20,
+        })}
+      >
+        <Text>{name}</Text>
+      </Box>
+      {itemOpened&&<ItemModal open={itemOpened} setOpen={setItemOpened} />}
+    </>
   );
 };
