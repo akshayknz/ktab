@@ -1,7 +1,8 @@
 import { TextInput, Text, Checkbox, Button, Group, Box, Modal, ColorPicker, ColorInput, Tabs, Select } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { addDoc, collection, getDocs, query, where } from 'firebase/firestore';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { AuthContext } from '../data/contexts/AuthContext';
 import { db } from '../data/firebaseConfig';
 
 interface OrganizationModalProps {
@@ -25,6 +26,7 @@ interface CollectionProps {
   color: string;
 }
 export default function OrganizationModal({open, setOpen, organizationOrCollection}:OrganizationModalProps) {
+  const user = useContext(AuthContext);
   const [organizations, setOrganizations] = useState<OrganizationProps[]>([]);
   const organizationForm = useForm({
     initialValues: {
@@ -55,7 +57,7 @@ export default function OrganizationModal({open, setOpen, organizationOrCollecti
 
   function handleSubmitOrganization(values: OrganizationProps){
     const upload = async() => {
-      await addDoc(collection(db, 'ktab-manager'), {
+      await addDoc(collection(db, 'ktab-manager', user?.uid? user.uid:"guest", "organizations"), {
         name: values.name,
         icon: values.icon,
         color: values.color,
@@ -75,7 +77,7 @@ export default function OrganizationModal({open, setOpen, organizationOrCollecti
     console.log(values);
     
     const upload = async() => {
-      await addDoc(collection(db, 'ktab-manager', values.parent, 'collections'), {
+      await addDoc(collection(db, 'ktab-manager', user?.uid? user.uid:"guest", "organizations", values.parent, 'collections'), {
         parent: values.parent,
         name: values.name,
         color: values.color,
@@ -92,7 +94,7 @@ export default function OrganizationModal({open, setOpen, organizationOrCollecti
 
   useEffect(()=>{
     const runQuery = async () => {
-      const q = query(collection(db, "ktab-manager"));
+      const q = query(collection(db, 'ktab-manager', user?.uid? user.uid:"guest", "organizations"));
       getDocs(q).then( r => {
         const re : OrganizationProps[] = r.docs.map(doc=>({
           id: doc.id, 

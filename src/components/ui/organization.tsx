@@ -288,12 +288,12 @@ function Organization({
     sideEffects({ active, dragOverlay, draggableNodes, droppableContainers }) {
       active.node.style.opacity = ".5";
       dragOverlay.node.animate([{ opacity: "1" }, { opacity: "0.7" }], {
-        duration: 250,
+        duration: 50,
         easing: "ease",
         fill: "forwards",
       });
       active.node.animate([{ opacity: ".3" }, { opacity: "1" }], {
-        duration: 250,
+        duration: 50,
         easing: "ease",
         fill: "forwards",
       });
@@ -360,26 +360,33 @@ interface OverlayProps {
 }
 const Overlay = ({ currentlyContainer }: OverlayProps) => {
   const style = {
-    width: "250px",
-    margin: "10px",
-    border: "2px solid rgb(255 255 255 / 10%)",
-    display: "inline-block",
-    borderRadius: 8,
   };
   return (
     <>
       {!currentlyContainer && (
         <Box
+          className="sort-item"
           style={style}
           sx={(theme) => ({
             backgroundColor:
               theme.colorScheme === "dark"
                 ? theme.colors.dark[6]
                 : theme.colors.gray[0],
-            padding: 10,
+            padding: 5,
+            paddingInline: 20,
           })}
         >
-          Text from inside the data obj
+          <span
+            style={{
+              height: 10,
+              width: 10,
+              background: "rgb(255 255 255 / 60%)",
+              borderRadius: 10,
+              display: "inline-block",
+              marginRight: 12,
+            }}
+          ></span>
+          <Text style={{ display: "inline-block" }}>{currentlyContainer}</Text>
         </Box>
       )}
     </>
@@ -581,9 +588,19 @@ const SortableItem = ({ name, id }: any) => {
           paddingInline: 20,
         })}
       >
-        <Text>{name}</Text>
+        <span
+          style={{
+            height: 10,
+            width: 10,
+            background: "rgb(255 255 255 / 60%)",
+            borderRadius: 10,
+            display: "inline-block",
+            marginRight: 12,
+          }}
+        ></span>
+        <Text style={{ display: "inline-block" }}>{name}</Text>
       </Box>
-      {itemOpened&&<ItemModal open={itemOpened} setOpen={setItemOpened} />}
+      {itemOpened && <ItemModal open={itemOpened} setOpen={setItemOpened} />}
     </>
   );
 };
