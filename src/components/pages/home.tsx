@@ -14,10 +14,14 @@ import { useContext, useEffect, useState } from "react";
 import { UniqueIdentifier } from "@dnd-kit/core";
 import {
   collection,
+  collectionGroup,
   doc,
+  DocumentData,
   getDocs,
   onSnapshot,
+  orderBy,
   query,
+  QuerySnapshot,
   setDoc,
   where,
 } from "firebase/firestore";
@@ -46,6 +50,7 @@ function Home() {
   const { classes, cx } = useStyles();
   let itemCount = 4;
   const [organizations, setOrganizations] = useState<OrganizationProps[]>();
+  const [activeTab, setActiveTab] = useState<string | null>(null);
   const [items, setItems] = useState<Items>({
     A: ["a1", "a2"],
     B: createRange(itemCount, (index) => `B${index + 1}`),
@@ -57,46 +62,68 @@ function Home() {
   );
 
   useEffect(() => {
-    const runQuery = async () => {
-      const q = query(
-        collection(
-          db,
-          "ktab-manager",
-          user?.uid ? user.uid : "guest",
-          "organizations"
-        )
-      );
-      console.log(
+    //organizations live updates
+    const unsub = onSnapshot(
+      collection(
         db,
         "ktab-manager",
         user?.uid ? user.uid : "guest",
         "organizations"
-      );
-
-      getDocs(q)
-        .then((r) => {
-          const re: OrganizationProps[] = r.docs.map((doc) => ({
-            id: doc.id,
-            name: doc.data().name,
-            icon: doc.data().icon,
-            color: doc.data().color,
-            accent: doc.data().accent,
-            //...doc.data(),
-          }));
-          console.log("load organizaiton parents", re);
-          setOrganizations(re);
-        })
-        .catch((err) => console.log(err));
-    };
-    runQuery();
-    const unsub = onSnapshot(
-      doc(db, "ktab-manager", user?.uid ? user.uid : "guest"),
-      (doc) => {
-        console.log("Current data: ", doc.data());
+      ),
+      (organizationSnapshot) => {
+        const re: OrganizationProps[] = organizationSnapshot.docs.map((doc) => {
+          const unsub = onSnapshot(
+            collection(
+              db,
+              "ktab-manager",
+              user?.uid ? user.uid : "guest",
+              "organizations",
+              doc.id,
+              "collections"
+            ),
+            (collectionSnapshot) => {
+              collectionSnapshot.docs.map((doc) => {
+                console.log("collections", doc.data().name);
+              });
+            }
+          );
+          return docsToOrganizations(doc);
+        });
+        setOrganizations(re);
       }
     );
-    unsub()
+    // const items = query(collectionGroup(db, 'items'));
+    // const unsubii = onSnapshot(items, querySnapshot => {
+    //     querySnapshot.forEach((doc) => {
+    //       console.log(doc.id, ' => ', doc.data());
+    //   });
+    // })
   }, [user?.uid]);
+
+  //function to map doc data to OrganizationProps[]
+  const docsToOrganizations = (doc: DocumentData) => {
+    return {
+      id: doc.id,
+      name: doc.data().name,
+      icon: doc.data().icon,
+      color: doc.data().color,
+      accent: doc.data().accent,
+      //...doc.data(),
+    };
+  };
+
+  useEffect(() => {
+    //update active tab on organization change (happens when user logs in from guest mode)
+    if (organizations && organizations[0] && organizations[0].id) {
+      setActiveTab(
+        organizations
+          ? organizations[0].id
+            ? organizations[0].id
+            : null
+          : "guest"
+      );
+    }
+  }, [organizations]);
 
   /*
   Organization Firestore collection
@@ -158,7 +185,7 @@ function Home() {
   */
   return (
     <>
-      <Tabs radius="xs" defaultValue={organizations? organizations[0].id:"guest"}>
+      <Tabs radius="xs" value={activeTab} onTabChange={setActiveTab}>
         <Header
           height={HEADER_HEIGHT}
           sx={{ overflow: "hidden", border: "none", paddingLeft: 0 }}

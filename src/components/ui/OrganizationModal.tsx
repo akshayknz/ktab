@@ -62,6 +62,10 @@ export default function OrganizationModal({open, setOpen, organizationOrCollecti
         icon: values.icon,
         color: values.color,
         accent: values.accent,
+        order: 0,
+        archive: false,
+        updatedAt: + new Date(),
+        createdAt: + new Date(),
       })
     }
     upload().then(()=>{
@@ -81,6 +85,10 @@ export default function OrganizationModal({open, setOpen, organizationOrCollecti
         parent: values.parent,
         name: values.name,
         color: values.color,
+        order: 0,
+        archive: false,
+        updatedAt: + new Date(),
+        createdAt: + new Date(),
       })
     }
     upload().then(()=>{
