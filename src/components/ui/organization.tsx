@@ -46,12 +46,16 @@ import {
   useRef,
   useState,
   useEffect,
+  useContext,
 } from "react";
 import { MdDragIndicator } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 import { BiMessageAltAdd } from "react-icons/bi";
 import { FiEdit3, FiMaximize2, FiMinimize2 } from "react-icons/fi";
 import ItemModal from "./ItemModal";
+import { onSnapshot, collection, DocumentData, where, query, orderBy, limit } from "firebase/firestore";
+import { db } from "../data/firebaseConfig";
+import { AuthContext } from "../data/contexts/AuthContext";
 
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
 const useStyles = createStyles((theme) => ({
@@ -82,26 +86,116 @@ const useStyles = createStyles((theme) => ({
     transform: "translatex(100px)",
   },
 }));
+const defaultInitializer = (index: number) => index;
+export function createRange<T = number>(
+  length: number,
+  initializer: (index: number) => any = defaultInitializer
+): T[] {
+  return [...new Array(length)].map((_, index) => initializer(index));
+}
+interface OrganizationComponentProps {
+  organization: string;
+}
 interface OrganizationProps {
-  items: Items;
-  setItems: React.Dispatch<React.SetStateAction<Items>>;
-  containers: UniqueIdentifier[];
-  setContainers: React.Dispatch<React.SetStateAction<UniqueIdentifier[]>>;
+  id?: string;
+  name: string;
+  icon: string;
+  color: string;
+  accent: string;
+}
+interface CollectionProps {
+  id: UniqueIdentifier;
+  parent: string;
+  name: string;
+  color: string;
+}
+interface ItemProps {
+  id: UniqueIdentifier;
+  orgparent: string;
+  parent: string;
+  name: string;
+  color: string;
+}
+interface ItemCollection {
+  [key: UniqueIdentifier] : ItemProps[];
 }
 function Organization({
-  items,
-  setItems,
-  containers,
-  setContainers,
-}: OrganizationProps) {
+  organization
+}: OrganizationComponentProps) {
+  const user = useContext(AuthContext);
   const [cursor, setCursor] = useState("auto");
   const [currentlyContainer, setCurrentlyContainer] = useState(false);
   const [globalMinifyContainers, setGlobalMinifyContainers] = useState(false);
+  const [items, setItems] = useState<ItemCollection>({"empty":[]});
+  const [collections, setCollections] = useState<CollectionProps[]>([{id:"",name:"",color:"",parent:""}]);
+  const [itemss, setItemss] = useState<ItemProps[]>();
+  useEffect(()=>{
+    const unsub1 = onSnapshot(
+      query(collection(
+        db,
+        "ktab-manager",
+        user?.uid ? user.uid : "guest",
+        "collections"
+      ), where("parent", "==", organization), orderBy("order")),
+      (collectionSnapshot) => {
+        const re: CollectionProps[] = collectionSnapshot.docs.map((doc) => {
+          return docsToCollections(doc);
+        });
+        setCollections(re);
+      }
+    );
+    const unsub2 = onSnapshot(
+      query(collection(
+        db,
+        "ktab-manager",
+        user?.uid ? user.uid : "guest",
+        "items"
+      ), where("orgparent", "==", organization), orderBy("order")),
+      (itemSnapshot) => {
+        const re2: ItemProps[] = itemSnapshot.docs.map((doc) => {
+          return docsToItems(doc);
+        });
+        setItemss(re2);
+      }
+    );
+  },[])
+  useEffect(()=>{
+    const getItems = (key:UniqueIdentifier) => {
+      return itemss?.filter(e=>e.parent == key);
+    }
+    if(collections&&itemss){
+      let ob = collections.reduce((prev,key)=>{
+        return Object.assign(prev,{[key.id]: getItems(key.id)})
+      },{})
+      console.log('ob ',ob);
+      // setContainers(collections)
+      setItems(ob)
+    }
+    
+  },[collections,itemss])
+  const docsToCollections = (doc: DocumentData) => {
+    return {
+      id: doc.id,
+      name: doc.data().name,
+      color: doc.data().color,
+      parent: doc.data().parent,
+    };
+  };
+  const docsToItems = (doc: DocumentData) => {
+    return {
+      id: doc.id,
+      name: doc.data().name,
+      color: doc.data().color,
+      parent: doc.data().parent,
+      orgparent: doc.data().orgparent,
+    };
+  };
   const findContainer = (id: UniqueIdentifier) => {
     if (id in items) {
       return id;
     }
-    return Object.keys(items).find((key) => items[key].includes(id));
+    // return Object.keys(items).find((key) => items[key].includes(id));
+    return "99zK8ZclVj3ghs1OaCjf";
   };
   const activationConstraint = { distance: 6 };
   const sensors = [
@@ -119,11 +213,13 @@ function Organization({
   };
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
     setCursor("auto");
+    console.log(active,over);
+    
     if (active.id in items && over?.id) {
       setCurrentlyContainer(false);
-      setContainers((containers) => {
-        const activeIndex = containers.indexOf(active.id);
-        const overIndex = containers.indexOf(over.id);
+      setCollections((containers) => {
+        const activeIndex = containers.findIndex(e=> e.id===active.id) || -1 
+        const overIndex = containers.findIndex(e=> e.id===over.id) || -1 
 
         return arrayMove(containers, activeIndex, overIndex);
       });
@@ -132,8 +228,10 @@ function Organization({
       const activeContainer = findContainer(active.id);
       const overContainer = findContainer(over?.id);
       if (overContainer && activeContainer) {
-        const activeIndex = items[activeContainer].indexOf(active.id);
-        const overIndex = items[overContainer].indexOf(over?.id);
+        // console.log(overContainer, activeContainer, items,items[activeContainer]);
+        
+        const activeIndex = items[activeContainer].findIndex(e=> e.id===active.id) || -1
+        const overIndex = items[overContainer].findIndex(e=> e.id===over.id) || -1
         if (activeIndex !== overIndex) {
           setItems((items) => ({
             ...items,
@@ -166,8 +264,8 @@ function Organization({
       setItems((items) => {
         const activeItems = items[activeContainer];
         const overItems = items[overContainer];
-        const overIndex = overItems.indexOf(overId);
-        const activeIndex = activeItems.indexOf(active.id);
+        const overIndex = overItems.findIndex(e=>e.id === overId) || -1
+        const activeIndex = activeItems.findIndex(e=>e.id === active.id) || -1
 
         let newIndex: number;
 
@@ -189,7 +287,7 @@ function Organization({
         return {
           ...items,
           [activeContainer]: items[activeContainer].filter(
-            (item) => item !== active.id
+            (item) => item.id !== active.id
           ),
           [overContainer]: [
             ...items[overContainer].slice(0, newIndex),
@@ -242,7 +340,7 @@ function Organization({
               droppableContainers: args.droppableContainers.filter(
                 (container) =>
                   container.id !== overId &&
-                  containerItems.includes(container.id)
+                  containerItems.findIndex(e=> e.id===container.id)
               ),
             })[0]?.id;
           }
@@ -313,41 +411,70 @@ function Organization({
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
       >
-        <SortableContext
-          items={containers}
-          strategy={verticalListSortingStrategy}
-        >
-          {containers.map((containerId, index) => (
-            <ContainerItem
-              name={containerId}
-              key={containerId}
-              globalMinifyContainers={globalMinifyContainers}
-              setGlobalMinifyContainers={setGlobalMinifyContainers}
-            >
-              <SortableContext
-                items={items[containerId]}
-                strategy={horizontalListSortingStrategy}
+        {collections&&itemss&&items&&
+        <>
+          <SortableContext
+            items={collections}
+            strategy={verticalListSortingStrategy}
+          >
+            {collections?.map((collection,index)=>(
+              <ContainerItem
+                name={collection.name}
+                id={collection.id}
+                key={collection.id}
+                globalMinifyContainers={globalMinifyContainers}
+                setGlobalMinifyContainers={setGlobalMinifyContainers}
               >
-                <div className="items">
-                  {items[containerId].map((value, index) => (
-                    <SortableItem
-                      name={value}
-                      id={index}
-                      key={`${index}${value}`}
-                    />
-                  ))}
-                </div>
-              </SortableContext>
-            </ContainerItem>
-          ))}
-        </SortableContext>
-        <DragOverlay adjustScale={true} dropAnimation={dropAnimationConfig}>
-          {activeId ? (
-            <>
-              <Overlay currentlyContainer={currentlyContainer} />
-            </>
-          ) : null}
-        </DragOverlay>
+                <SortableContext
+                  items={items[collection.id]?.map(item=>item.id) || ['asdf']}
+                  strategy={horizontalListSortingStrategy}
+                >
+                  <div className="items">
+                    {items[collection.id]?.map((value, index) => (
+                      <SortableItem
+                        name={value.name}
+                        id={value.id}
+                        key={`${value.id}${value.name}`}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </ContainerItem>
+            ))}
+            {/* {collections?.map((collection, index) => (
+              <ContainerItem
+                name={collection.name}
+                key={collection.id}
+                globalMinifyContainers={globalMinifyContainers}
+                setGlobalMinifyContainers={setGlobalMinifyContainers}
+              >
+                <SortableContext
+                  items={items[collection.id]}
+                  strategy={horizontalListSortingStrategy}
+                >
+                  <div className="items">
+                    {items[collection.id].map((value, index) => (
+                      <SortableItem
+                        name={value}
+                        id={index}
+                        key={`${index}${value}`}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </ContainerItem>
+            ))} */}
+          </SortableContext>
+          <DragOverlay adjustScale={true} dropAnimation={dropAnimationConfig}>
+            {activeId ? (
+              <>
+                <Overlay currentlyContainer={currentlyContainer} />
+              </>
+            ) : null}
+          </DragOverlay>
+      </>
+        }
+        
       </DndContext>
     </Container>
   );
@@ -395,6 +522,7 @@ const Overlay = ({ currentlyContainer }: OverlayProps) => {
 
 const ContainerItem = ({
   name,
+  id,
   globalMinifyContainers,
   setGlobalMinifyContainers,
   children,
@@ -408,7 +536,7 @@ const ContainerItem = ({
     transition,
     transform,
     isDragging,
-  } = useSortable({ id: name });
+  } = useSortable({ id: id });
   const { classes, cx } = useStyles();
   const [edit, setEdit] = useState(false);
   const [minimize, setMinimize] = useState(false);
@@ -558,7 +686,7 @@ const SortableItem = ({ name, id }: any) => {
     transition,
     transform,
     isDragging,
-  } = useSortable({ id: name });
+  } = useSortable({ id: id });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,

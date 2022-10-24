@@ -3,6 +3,7 @@ import {
   Container,
   createStyles,
   Header,
+  Skeleton,
   Tabs,
   Text,
 } from "@mantine/core";
@@ -37,30 +38,25 @@ interface OrganizationProps {
   color: string;
   accent: string;
 }
-const defaultInitializer = (index: number) => index;
-export function createRange<T = number>(
-  length: number,
-  initializer: (index: number) => any = defaultInitializer
-): T[] {
-  return [...new Array(length)].map((_, index) => initializer(index));
+interface CollectionProps {
+  id?: string;
+  parent: string;
+  name: string;
+  color: string;
+}
+interface ItemProps {
+  id?: string;
+  orgparent: string;
+  parent: string;
+  name: string;
+  color: string;
 }
 
 function Home() {
   const user = useContext(AuthContext);
   const { classes, cx } = useStyles();
-  let itemCount = 4;
   const [organizations, setOrganizations] = useState<OrganizationProps[]>();
-  const [activeTab, setActiveTab] = useState<string | null>(null);
-  const [items, setItems] = useState<Items>({
-    A: ["a1", "a2"],
-    B: createRange(itemCount, (index) => `B${index + 1}`),
-    C: createRange(itemCount, (index) => `C${index + 1}`),
-    D: createRange(itemCount, (index) => `D${index + 1}`),
-  });
-  const [containers, setContainers] = useState(
-    Object.keys(items) as UniqueIdentifier[]
-  );
-
+  const [activeTab, setActiveTab] = useState<string | null>('skeleton');
   useEffect(() => {
     //organizations live updates
     const unsub = onSnapshot(
@@ -72,26 +68,12 @@ function Home() {
       ),
       (organizationSnapshot) => {
         const re: OrganizationProps[] = organizationSnapshot.docs.map((doc) => {
-          const unsub = onSnapshot(
-            collection(
-              db,
-              "ktab-manager",
-              user?.uid ? user.uid : "guest",
-              "organizations",
-              doc.id,
-              "collections"
-            ),
-            (collectionSnapshot) => {
-              collectionSnapshot.docs.map((doc) => {
-                console.log("collections", doc.data().name);
-              });
-            }
-          );
           return docsToOrganizations(doc);
         });
         setOrganizations(re);
       }
     );
+    
     // const items = query(collectionGroup(db, 'items'));
     // const unsubii = onSnapshot(items, querySnapshot => {
     //     querySnapshot.forEach((doc) => {
@@ -185,7 +167,7 @@ function Home() {
   */
   return (
     <>
-      <Tabs radius="xs" value={activeTab} onTabChange={setActiveTab}>
+      <Tabs radius="xs" value={activeTab} onTabChange={setActiveTab} keepMounted={false}>
         <Header
           height={HEADER_HEIGHT}
           sx={{ overflow: "hidden", border: "none", paddingLeft: 0 }}
@@ -195,7 +177,7 @@ function Home() {
               className={cx(classes.vmiddle, classes.lineHeightFix)}
               sx={{ paddingInline: 53 }}
             >
-              {organizations?.map((organization) => (
+              {organizations ? organizations?.map((organization) => (
                 <Tabs.Tab
                   key={organization.id ? organization.id : ""}
                   value={organization.id ? organization.id : ""}
@@ -204,11 +186,17 @@ function Home() {
                 >
                   {organization.name}
                 </Tabs.Tab>
-              ))}
+              ))
+            :
+            <>
+            <Tabs.Tab value="skeleton"><Skeleton height={8} mt={6} radius="xl" /></Tabs.Tab>
+            <Skeleton height={8} mt={6} radius="xl" />
+            </>
+            }
             </Tabs.List>
           </Box>
         </Header>
-        {organizations?.map((organization) => (
+        {organizations ? organizations?.map((organization) => (
           <Tabs.Panel
             key={organization.id ? organization.id : ""}
             value={organization.id ? organization.id : ""}
@@ -216,14 +204,17 @@ function Home() {
           >
             <Container size={"xl"} mt={"xl"}>
               <Organization
-                items={items}
-                setItems={setItems}
-                containers={containers}
-                setContainers={setContainers}
+                organization={organization.id ? organization.id : ""}
               />
             </Container>
           </Tabs.Panel>
-        ))}
+        )) :
+        <Tabs.Panel value="skeleton">
+          <Skeleton height={50} circle mb="xl" />
+          <Skeleton height={8} radius="xl" />
+          <Skeleton height={8} mt={6} radius="xl" />
+          <Skeleton height={8} mt={6} width="70%" radius="xl" />
+        </Tabs.Panel>}
       </Tabs>
     </>
   );
