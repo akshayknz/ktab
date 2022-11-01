@@ -136,7 +136,7 @@ function Organization({
         "ktab-manager",
         user?.uid ? user.uid : "guest",
         "collections"
-      ), where("parent", "==", organization), orderBy("order")),
+      ), where("parent", "==", organization)),
       (collectionSnapshot) => {
         const re: CollectionProps[] = collectionSnapshot.docs.map((doc) => {
           return docsToCollections(doc);
@@ -150,7 +150,7 @@ function Organization({
         "ktab-manager",
         user?.uid ? user.uid : "guest",
         "items"
-      ), where("orgparent", "==", organization), orderBy("order")),
+      ), where("orgparent", "==", organization)),
       (itemSnapshot) => {
         const re2: ItemProps[] = itemSnapshot.docs.map((doc) => {
           return docsToItems(doc);
@@ -194,6 +194,8 @@ function Organization({
     if (id in items) {
       return id;
     }
+    console.log("find container: ", id);
+    
     // return Object.keys(items).find((key) => items[key].includes(id));
     return "99zK8ZclVj3ghs1OaCjf";
   };
