@@ -126,9 +126,20 @@ function Organization({
   const [cursor, setCursor] = useState("auto");
   const [currentlyContainer, setCurrentlyContainer] = useState(false);
   const [globalMinifyContainers, setGlobalMinifyContainers] = useState(false);
-  const [items, setItems] = useState<ItemCollection>({"empty":[]});
+  // const [items, setItems] = useState<ItemCollection>({"empty":[]});
   const [collections, setCollections] = useState<CollectionProps[]>([{id:"",name:"",color:"",parent:""}]);
   const [itemss, setItemss] = useState<ItemProps[]>();
+  let itemCount = 4;
+  const [items, setItems] = useState<Items>({
+    A: ["a1", "a2"],
+    B: createRange(itemCount, (index) => `B${index + 1}`),
+    C: createRange(itemCount, (index) => `C${index + 1}`),
+    D: createRange(itemCount, (index) => `D${index + 1}`),
+  });
+  const [containers, setContainers] = useState(
+    Object.keys(items) as UniqueIdentifier[]
+  );
+  
   useEffect(()=>{
     const unsub1 = onSnapshot(
       query(collection(
@@ -160,19 +171,22 @@ function Organization({
     );
   },[])
   useEffect(()=>{
-    const getItems = (key:UniqueIdentifier) => {
-      return itemss?.filter(e=>e.parent == key);
-    }
-    if(collections&&itemss){
-      let ob = collections.reduce((prev,key)=>{
-        return Object.assign(prev,{[key.id]: getItems(key.id)})
-      },{})
-      console.log('ob ',ob);
-      // setContainers(collections)
-      setItems(ob)
+    // const getItems = (key:UniqueIdentifier) => {
+    //   return itemss?.filter(e=>e.parent == key);
+    // }
+    // if(containers&&itemss){
+    //   let ob = containers.reduce((prev,key)=>{
+    //     return Object.assign(prev,{[key.id]: getItems(key.id)})
+    //   },{})
+    //   console.log('ob ',ob);
+    //   // setContainers(containers)
+    //   setItems(ob)
+    // }
+    if(containers&&itemss){
+      
     }
     
-  },[collections,itemss])
+  },[containers,itemss])
   const docsToCollections = (doc: DocumentData) => {
     return {
       id: doc.id,
@@ -190,14 +204,16 @@ function Organization({
       orgparent: doc.data().orgparent,
     };
   };
+  useEffect(()=>{
+    console.log(items, containers);
+
+  },[])
   const findContainer = (id: UniqueIdentifier) => {
+    
     if (id in items) {
       return id;
     }
-    console.log("find container: ", id);
-    
-    // return Object.keys(items).find((key) => items[key].includes(id));
-    return "99zK8ZclVj3ghs1OaCjf";
+    return Object.keys(items).find((key) => items[key].includes(id));
   };
   const activationConstraint = { distance: 6 };
   const sensors = [
@@ -215,13 +231,11 @@ function Organization({
   };
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
     setCursor("auto");
-    console.log(active,over);
-    
     if (active.id in items && over?.id) {
       setCurrentlyContainer(false);
-      setCollections((containers) => {
-        const activeIndex = containers.findIndex(e=> e.id===active.id) || -1 
-        const overIndex = containers.findIndex(e=> e.id===over.id) || -1 
+      setContainers((containers) => {
+        const activeIndex = containers.indexOf(active.id);
+        const overIndex = containers.indexOf(over.id);
 
         return arrayMove(containers, activeIndex, overIndex);
       });
@@ -230,10 +244,8 @@ function Organization({
       const activeContainer = findContainer(active.id);
       const overContainer = findContainer(over?.id);
       if (overContainer && activeContainer) {
-        // console.log(overContainer, activeContainer, items,items[activeContainer]);
-        
-        const activeIndex = items[activeContainer].findIndex(e=> e.id===active.id) || -1
-        const overIndex = items[overContainer].findIndex(e=> e.id===over.id) || -1
+        const activeIndex = items[activeContainer].indexOf(active.id);
+        const overIndex = items[overContainer].indexOf(over?.id);
         if (activeIndex !== overIndex) {
           setItems((items) => ({
             ...items,
@@ -266,8 +278,8 @@ function Organization({
       setItems((items) => {
         const activeItems = items[activeContainer];
         const overItems = items[overContainer];
-        const overIndex = overItems.findIndex(e=>e.id === overId) || -1
-        const activeIndex = activeItems.findIndex(e=>e.id === active.id) || -1
+        const overIndex = overItems.indexOf(overId);
+        const activeIndex = activeItems.indexOf(active.id);
 
         let newIndex: number;
 
@@ -289,7 +301,7 @@ function Organization({
         return {
           ...items,
           [activeContainer]: items[activeContainer].filter(
-            (item) => item.id !== active.id
+            (item) => item !== active.id
           ),
           [overContainer]: [
             ...items[overContainer].slice(0, newIndex),
@@ -342,7 +354,7 @@ function Organization({
               droppableContainers: args.droppableContainers.filter(
                 (container) =>
                   container.id !== overId &&
-                  containerItems.findIndex(e=> e.id===container.id)
+                  containerItems.includes(container.id)
               ),
             })[0]?.id;
           }
@@ -386,7 +398,7 @@ function Organization({
     },
     duration: 300,
     sideEffects({ active, dragOverlay, draggableNodes, droppableContainers }) {
-      active.node.style.opacity = ".5";
+      // active.node.style.opacity = ".5";
       dragOverlay.node.animate([{ opacity: "1" }, { opacity: "0.7" }], {
         duration: 50,
         easing: "ease",
@@ -413,70 +425,41 @@ function Organization({
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
       >
-        {collections&&itemss&&items&&
-        <>
-          <SortableContext
-            items={collections}
-            strategy={verticalListSortingStrategy}
-          >
-            {collections?.map((collection,index)=>(
-              <ContainerItem
-                name={collection.name}
-                id={collection.id}
-                key={collection.id}
-                globalMinifyContainers={globalMinifyContainers}
-                setGlobalMinifyContainers={setGlobalMinifyContainers}
+        <SortableContext
+          items={containers}
+          strategy={verticalListSortingStrategy}
+        >
+          {containers.map((containerId, index) => (
+            <ContainerItem
+              name={containerId}
+              key={containerId}
+              globalMinifyContainers={globalMinifyContainers}
+              setGlobalMinifyContainers={setGlobalMinifyContainers}
+            >
+              <SortableContext
+                items={items[containerId]}
+                strategy={horizontalListSortingStrategy}
               >
-                <SortableContext
-                  items={items[collection.id]?.map(item=>item.id) || ['asdf']}
-                  strategy={horizontalListSortingStrategy}
-                >
-                  <div className="items">
-                    {items[collection.id]?.map((value, index) => (
-                      <SortableItem
-                        name={value.name}
-                        id={value.id}
-                        key={`${value.id}${value.name}`}
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </ContainerItem>
-            ))}
-            {/* {collections?.map((collection, index) => (
-              <ContainerItem
-                name={collection.name}
-                key={collection.id}
-                globalMinifyContainers={globalMinifyContainers}
-                setGlobalMinifyContainers={setGlobalMinifyContainers}
-              >
-                <SortableContext
-                  items={items[collection.id]}
-                  strategy={horizontalListSortingStrategy}
-                >
-                  <div className="items">
-                    {items[collection.id].map((value, index) => (
-                      <SortableItem
-                        name={value}
-                        id={index}
-                        key={`${index}${value}`}
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </ContainerItem>
-            ))} */}
-          </SortableContext>
-          <DragOverlay adjustScale={true} dropAnimation={dropAnimationConfig}>
-            {activeId ? (
-              <>
-                <Overlay currentlyContainer={currentlyContainer} />
-              </>
-            ) : null}
-          </DragOverlay>
-      </>
-        }
-        
+                <div className="items">
+                  {items[containerId].map((value, index) => (
+                    <SortableItem
+                      name={value}
+                      id={index}
+                      key={`${index}${value}`}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </ContainerItem>
+          ))}
+        </SortableContext>
+        <DragOverlay adjustScale={true} dropAnimation={dropAnimationConfig}>
+          {activeId ? (
+            <>
+              <Overlay currentlyContainer={currentlyContainer} />
+            </>
+          ) : null}
+        </DragOverlay>
       </DndContext>
     </Container>
   );
@@ -524,7 +507,6 @@ const Overlay = ({ currentlyContainer }: OverlayProps) => {
 
 const ContainerItem = ({
   name,
-  id,
   globalMinifyContainers,
   setGlobalMinifyContainers,
   children,
@@ -538,7 +520,7 @@ const ContainerItem = ({
     transition,
     transform,
     isDragging,
-  } = useSortable({ id: id });
+  } = useSortable({ id: name });
   const { classes, cx } = useStyles();
   const [edit, setEdit] = useState(false);
   const [minimize, setMinimize] = useState(false);
@@ -688,7 +670,7 @@ const SortableItem = ({ name, id }: any) => {
     transition,
     transform,
     isDragging,
-  } = useSortable({ id: id });
+  } = useSortable({ id: name });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
