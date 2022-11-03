@@ -112,7 +112,8 @@ function Home() {
   }, [organizations]);
 
   function handleNewOrganization(event: SyntheticEvent) {
-    console.log(event.stopPropagation());
+    console.log(event);
+    //TODO: open organization modal with organization/collection preselected, ready to add.
     
   }
 
