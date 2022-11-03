@@ -435,6 +435,7 @@ function Organization({ organization }: OrganizationComponentProps) {
     <Box
       style={{
         background: `linear-gradient(${organization.color} 0px,transparent 400px)`,
+        minHeight: "84vh"
       }}
     >
       <Container

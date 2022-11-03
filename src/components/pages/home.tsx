@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Container,
   createStyles,
   Header,
@@ -8,10 +9,10 @@ import {
   Text,
 } from "@mantine/core";
 import Organization from "../ui/organization";
-import { MdDragIndicator } from "react-icons/md";
+import { MdDragIndicator, MdOutlineAdd } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 import { BiMessageAltAdd } from "react-icons/bi";
-import { useContext, useEffect, useState } from "react";
+import { SyntheticEvent, useContext, useEffect, useState } from "react";
 import { UniqueIdentifier } from "@dnd-kit/core";
 import {
   collection,
@@ -110,6 +111,11 @@ function Home() {
     }
   }, [organizations]);
 
+  function handleNewOrganization(event: SyntheticEvent) {
+    console.log(event.stopPropagation());
+    
+  }
+
   /*
   Organization Firestore collection
   Each entry is a new organization
@@ -200,6 +206,7 @@ function Home() {
                     {organization.name}
                   </Tabs.Tab>
                 ))
+                
               ) : (
                 <>
                   <Tabs.Tab value="skeleton">
@@ -208,6 +215,17 @@ function Home() {
                   <Skeleton height={8} mt={6} radius="xl" />
                 </>
               )}
+              <Button
+                    onClick={handleNewOrganization}
+                    variant="subtle"
+                    py={0}
+                    px={6}
+                    sx={{
+                      height: 28,
+                      fontSize: "12px",
+                    }}
+                  ><MdOutlineAdd/>
+                  </Button>
             </Tabs.List>
           </Box>
         </Header>
