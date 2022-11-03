@@ -51,7 +51,15 @@ export function Layout({ children }: DoubleHeaderProps) {
 
   return (
     <>
-      <Header height={HEADER_HEIGHT} px={57} style={{position:"sticky",backgroundColor:"#1a1b1eba",backdropFilter:"blur(7px)"}}>
+      <Header
+        height={HEADER_HEIGHT}
+        px={57}
+        style={{
+          position: "sticky",
+          backgroundColor: "#1a1b1eba",
+          backdropFilter: "blur(7px)",
+        }}
+      >
         <Box pr={5} py={4} className={classes.vmiddle}>
           <RiTableFill size={"22"} className={classes.vmiddle} />
           <Text pl={7} pr={15} px={17} className={classes.vmiddle}>
@@ -378,7 +386,10 @@ export function Layout({ children }: DoubleHeaderProps) {
             style={{ textAlign: "center" }}
             className={cx(classes.vmiddle, classes.lineHeightFix)}
           >
-            Created by <a href="#">Akshay K Nair</a>
+            Created by{" "}
+            <a href="https://akshaykn.vercel.app/" target={"_blank"}>
+              Akshay K Nair
+            </a>
           </Text>
         </Box>
       </Footer>
@@ -458,7 +469,7 @@ const useStyles = createStyles((theme) => ({
     lineHeight: HEADER_HEIGHT - 2 + "px",
     paddingInline: theme.spacing.sm,
     border: "none",
-    backgroundColor:"transparent"
+    backgroundColor: "transparent",
   },
   submenuItem: {
     height: "28px",

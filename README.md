@@ -28,3 +28,16 @@ User A (ID)
 - - Item 1 (parent: collection)
 - - Item 2
 - - Item 3
+
+### TODO
+
+- Create a context and keep states in the context
+- CURD from organization tabs
+- CURD form collections box
+- Other types of items
+- Refresh
+- Sync with server
+- Set background
+- Edit profile
+- Add functional entries to the spotlight
+- Maybe cache orgs, collections, items to localStorage for faster init 
