@@ -114,7 +114,6 @@ function Home() {
   function handleNewOrganization(event: SyntheticEvent) {
     console.log(event);
     //TODO: open organization modal with organization/collection preselected, ready to add.
-    
   }
 
   /*
@@ -207,7 +206,6 @@ function Home() {
                     {organization.name}
                   </Tabs.Tab>
                 ))
-                
               ) : (
                 <>
                   <Tabs.Tab value="skeleton">
@@ -217,16 +215,16 @@ function Home() {
                 </>
               )}
               <Button
-                    onClick={handleNewOrganization}
-                    variant="subtle"
-                    py={0}
-                    px={6}
-                    sx={{
-                      height: 28,
-                      fontSize: "12px",
-                    }}
-                  ><MdOutlineAdd/>
-                  </Button>
+                onClick={handleNewOrganization}
+                variant="subtle"
+                compact
+                sx={{
+                  height: 28,
+                  fontSize: "12px",
+                }}
+              >
+                <MdOutlineAdd />
+              </Button>
             </Tabs.List>
           </Box>
         </Header>
