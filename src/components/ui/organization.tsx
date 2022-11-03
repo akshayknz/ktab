@@ -124,6 +124,7 @@ interface ItemProps {
   parent: string;
   name: string;
   color: string;
+  content?: string;
 }
 interface ItemCollection {
   [key: UniqueIdentifier]: ItemProps[];
@@ -158,7 +159,8 @@ function Organization({ organization }: OrganizationComponentProps) {
           user?.uid ? user.uid : "guest",
           "collections"
         ),
-        where("parent", "==", organization.id)
+        where("parent", "==", organization.id),
+        where("isDeleted", "==", 0),
       ),
       (collectionSnapshot) => {
         const re: CollectionProps[] = collectionSnapshot.docs.map((doc) => {
@@ -170,7 +172,8 @@ function Organization({ organization }: OrganizationComponentProps) {
     const unsub2 = onSnapshot(
       query(
         collection(db, "ktab-manager", user?.uid ? user.uid : "guest", "items"),
-        where("orgparent", "==", organization.id)
+        where("orgparent", "==", organization.id),
+        where("isDeleted", "==", 0),
       ),
       (itemSnapshot) => {
         const re2: ItemProps[] = itemSnapshot.docs.map((doc) => {
@@ -219,6 +222,7 @@ function Organization({ organization }: OrganizationComponentProps) {
       color: doc.data().color,
       parent: doc.data().parent,
       orgparent: doc.data().orgparent,
+      content: doc.data().content,
     };
   };
   const findContainer = (id: UniqueIdentifier) => {

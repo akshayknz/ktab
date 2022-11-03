@@ -56,15 +56,18 @@ function Home() {
   const user = useContext(AuthContext);
   const { classes, cx } = useStyles();
   const [organizations, setOrganizations] = useState<OrganizationProps[]>();
-  const [activeTab, setActiveTab] = useState<string | null>('skeleton');
+  const [activeTab, setActiveTab] = useState<string | null>("skeleton");
   useEffect(() => {
     //organizations live updates
     const unsub = onSnapshot(
-      collection(
-        db,
-        "ktab-manager",
-        user?.uid ? user.uid : "guest",
-        "organizations"
+      query(
+        collection(
+          db,
+          "ktab-manager",
+          user?.uid ? user.uid : "guest",
+          "organizations"
+        ),
+        where("isDeleted", "==", 0)
       ),
       (organizationSnapshot) => {
         const re: OrganizationProps[] = organizationSnapshot.docs.map((doc) => {
@@ -73,7 +76,7 @@ function Home() {
         setOrganizations(re);
       }
     );
-    
+
     // const items = query(collectionGroup(db, 'items'));
     // const unsubii = onSnapshot(items, querySnapshot => {
     //     querySnapshot.forEach((doc) => {
@@ -167,7 +170,12 @@ function Home() {
   */
   return (
     <>
-      <Tabs radius="xs" value={activeTab} onTabChange={setActiveTab} keepMounted={false}>
+      <Tabs
+        radius="xs"
+        value={activeTab}
+        onTabChange={setActiveTab}
+        keepMounted={false}
+      >
         <Header
           height={HEADER_HEIGHT}
           sx={{ overflow: "hidden", border: "none", paddingLeft: 0 }}
@@ -177,41 +185,49 @@ function Home() {
               className={cx(classes.vmiddle, classes.lineHeightFix)}
               sx={{ paddingInline: 53 }}
             >
-              {organizations ? organizations?.map((organization) => (
-                <Tabs.Tab
-                  key={organization.id ? organization.id : ""}
-                  value={organization.id ? organization.id : ""}
-                  icon={organization.icon}
-                  sx={{ height: 28, fontSize: "12px", borderBottomColor:organization.color }}
-                >
-                  {organization.name}
-                </Tabs.Tab>
-              ))
-            :
-            <>
-            <Tabs.Tab value="skeleton"><Skeleton height={8} mt={6} radius="xl" /></Tabs.Tab>
-            <Skeleton height={8} mt={6} radius="xl" />
-            </>
-            }
+              {organizations ? (
+                organizations?.map((organization) => (
+                  <Tabs.Tab
+                    key={organization.id ? organization.id : ""}
+                    value={organization.id ? organization.id : ""}
+                    icon={organization.icon}
+                    sx={{
+                      height: 28,
+                      fontSize: "12px",
+                      borderBottomColor: organization.color,
+                    }}
+                  >
+                    {organization.name}
+                  </Tabs.Tab>
+                ))
+              ) : (
+                <>
+                  <Tabs.Tab value="skeleton">
+                    <Skeleton height={8} mt={6} radius="xl" />
+                  </Tabs.Tab>
+                  <Skeleton height={8} mt={6} radius="xl" />
+                </>
+              )}
             </Tabs.List>
           </Box>
         </Header>
-        {organizations ? organizations?.map((organization) => (
-          <Tabs.Panel
-            key={organization.id ? organization.id : ""}
-            value={organization.id ? organization.id : ""}
-          >
-              <Organization
-                organization={organization}
-              />
+        {organizations ? (
+          organizations?.map((organization) => (
+            <Tabs.Panel
+              key={organization.id ? organization.id : ""}
+              value={organization.id ? organization.id : ""}
+            >
+              <Organization organization={organization} />
+            </Tabs.Panel>
+          ))
+        ) : (
+          <Tabs.Panel value="skeleton">
+            <Skeleton height={50} circle mb="xl" />
+            <Skeleton height={8} radius="xl" />
+            <Skeleton height={8} mt={6} radius="xl" />
+            <Skeleton height={8} mt={6} width="70%" radius="xl" />
           </Tabs.Panel>
-        )) :
-        <Tabs.Panel value="skeleton">
-          <Skeleton height={50} circle mb="xl" />
-          <Skeleton height={8} radius="xl" />
-          <Skeleton height={8} mt={6} radius="xl" />
-          <Skeleton height={8} mt={6} width="70%" radius="xl" />
-        </Tabs.Panel>}
+        )}
       </Tabs>
     </>
   );

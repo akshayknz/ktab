@@ -113,6 +113,7 @@ export default function OrganizationModal({
           accent: values.accent,
           order: 0,
           archive: false,
+          isDeleted: 0,
           updatedAt: +new Date(),
           createdAt: +new Date(),
         }
@@ -145,6 +146,7 @@ export default function OrganizationModal({
           color: values.color,
           order: 0,
           archive: false,
+          isDeleted: 0,
           updatedAt: +new Date(),
           createdAt: +new Date(),
         }
@@ -168,6 +170,7 @@ export default function OrganizationModal({
           color: values.color,
           order: 0,
           archive: false,
+          isDeleted: 0,
           updatedAt: +new Date(),
           createdAt: +new Date(),
         }
