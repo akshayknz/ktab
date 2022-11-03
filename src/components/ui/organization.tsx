@@ -129,12 +129,8 @@ function Organization({
   // const [items, setItems] = useState<ItemCollection>({"empty":[]});
   const [collections, setCollections] = useState<CollectionProps[]>([{id:"",name:"",color:"",parent:""}]);
   const [itemss, setItemss] = useState<ItemProps[]>();
-  let itemCount = 4;
   const [items, setItems] = useState<Items>({
-    A: ["a1", "a2"],
-    B: createRange(itemCount, (index) => `B${index + 1}`),
-    C: createRange(itemCount, (index) => `C${index + 1}`),
-    D: createRange(itemCount, (index) => `D${index + 1}`),
+    A: createRange(3, (index) => `A${index + 1}`),
   });
   const [containers, setContainers] = useState(
     Object.keys(items) as UniqueIdentifier[]
@@ -171,22 +167,26 @@ function Organization({
     );
   },[])
   useEffect(()=>{
-    // const getItems = (key:UniqueIdentifier) => {
-    //   return itemss?.filter(e=>e.parent == key);
-    // }
-    // if(containers&&itemss){
-    //   let ob = containers.reduce((prev,key)=>{
-    //     return Object.assign(prev,{[key.id]: getItems(key.id)})
-    //   },{})
-    //   console.log('ob ',ob);
-    //   // setContainers(containers)
-    //   setItems(ob)
-    // }
-    if(containers&&itemss){
-      
+    const getItems = (key:UniqueIdentifier) => {
+      return itemss?.filter(e=>e.parent == key)?.map(e=>e.id);
+    }
+    if(collections&&itemss){
+      let cont = collections.map(e=>e.id)
+      setContainers(cont)
+
+      let ob = collections.reduce((prev,key)=>{
+        return Object.assign(prev,{[key.id]: getItems(key.id)})
+      },{})
+      setItems(ob)
+    }
+    if(collections&&itemss){
+      /**
+       * My: collections,itemss
+       * Their: containers, items
+       */
     }
     
-  },[containers,itemss])
+  },[collections,itemss])
   const docsToCollections = (doc: DocumentData) => {
     return {
       id: doc.id,
