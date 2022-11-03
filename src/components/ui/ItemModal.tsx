@@ -8,10 +8,10 @@ import { RichTextEditor } from "@mantine/rte";
 interface Props {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  data:any;
 }
-const initialValue = "";
-export default function ItemModal({ open, setOpen }: Props) {
-  const [value, onChange] = useState(initialValue);
+export default function ItemModal({ open, setOpen, data }: Props) {
+  const [value, onChange] = useState(data?.value);
   return (
     <>
       <Modal
@@ -25,6 +25,7 @@ export default function ItemModal({ open, setOpen }: Props) {
             placeholder="Name"
             variant="unstyled"
             size="xl"
+            defaultValue={data?.name}
           />
           <RichTextEditor stickyOffset={"-45px"} value={value} onChange={onChange} id="rte" />
         </SimpleGrid>

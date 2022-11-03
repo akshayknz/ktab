@@ -51,7 +51,7 @@ export function Layout({ children }: DoubleHeaderProps) {
 
   return (
     <>
-      <Header height={HEADER_HEIGHT} px={57}>
+      <Header height={HEADER_HEIGHT} px={57} style={{position:"sticky",backgroundColor:"#1a1b1eba",backdropFilter:"blur(7px)"}}>
         <Box pr={5} py={4} className={classes.vmiddle}>
           <RiTableFill size={"22"} className={classes.vmiddle} />
           <Text pl={7} pr={15} px={17} className={classes.vmiddle}>
@@ -93,7 +93,7 @@ export function Layout({ children }: DoubleHeaderProps) {
                   transitionDuration={65}
                   trigger={"hover"}
                   transition={"rotate-right"}
-                  closeDelay={1200}
+                  closeDelay={1000}
                 >
                   <Menu.Target>
                     <Box className={classes.submenuParent}>
@@ -458,6 +458,7 @@ const useStyles = createStyles((theme) => ({
     lineHeight: HEADER_HEIGHT - 2 + "px",
     paddingInline: theme.spacing.sm,
     border: "none",
+    backgroundColor:"transparent"
   },
   submenuItem: {
     height: "28px",

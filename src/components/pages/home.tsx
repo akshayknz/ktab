@@ -182,7 +182,7 @@ function Home() {
                   key={organization.id ? organization.id : ""}
                   value={organization.id ? organization.id : ""}
                   icon={organization.icon}
-                  sx={{ height: 28, fontSize: "12px" }}
+                  sx={{ height: 28, fontSize: "12px", borderBottomColor:organization.color }}
                 >
                   {organization.name}
                 </Tabs.Tab>
@@ -200,13 +200,10 @@ function Home() {
           <Tabs.Panel
             key={organization.id ? organization.id : ""}
             value={organization.id ? organization.id : ""}
-            pt="xs"
           >
-            <Container size={"xl"} mt={"xl"}>
               <Organization
-                organization={organization.id ? organization.id : ""}
+                organization={organization}
               />
-            </Container>
           </Tabs.Panel>
         )) :
         <Tabs.Panel value="skeleton">

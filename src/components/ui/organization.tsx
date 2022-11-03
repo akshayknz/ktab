@@ -47,13 +47,22 @@ import {
   useState,
   useEffect,
   useContext,
+  MutableRefObject,
 } from "react";
 import { MdDragIndicator } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 import { BiMessageAltAdd } from "react-icons/bi";
 import { FiEdit3, FiMaximize2, FiMinimize2 } from "react-icons/fi";
 import ItemModal from "./ItemModal";
-import { onSnapshot, collection, DocumentData, where, query, orderBy, limit } from "firebase/firestore";
+import {
+  onSnapshot,
+  collection,
+  DocumentData,
+  where,
+  query,
+  orderBy,
+  limit,
+} from "firebase/firestore";
 import { db } from "../data/firebaseConfig";
 import { AuthContext } from "../data/contexts/AuthContext";
 
@@ -94,7 +103,7 @@ export function createRange<T = number>(
   return [...new Array(length)].map((_, index) => initializer(index));
 }
 interface OrganizationComponentProps {
-  organization: string;
+  organization: OrganizationProps;
 }
 interface OrganizationProps {
   id?: string;
@@ -117,33 +126,40 @@ interface ItemProps {
   color: string;
 }
 interface ItemCollection {
-  [key: UniqueIdentifier] : ItemProps[];
+  [key: UniqueIdentifier]: ItemProps[];
 }
-function Organization({
-  organization
-}: OrganizationComponentProps) {
+function Organization({ organization }: OrganizationComponentProps) {
   const user = useContext(AuthContext);
   const [cursor, setCursor] = useState("auto");
   const [currentlyContainer, setCurrentlyContainer] = useState(false);
   const [globalMinifyContainers, setGlobalMinifyContainers] = useState(false);
-  // const [items, setItems] = useState<ItemCollection>({"empty":[]});
-  const [collections, setCollections] = useState<CollectionProps[]>([{id:"",name:"",color:"",parent:""}]);
+  /**
+   * My states: collections,itemss
+   * States from DnD kit: containers, items
+   */
+  const [collections, setCollections] = useState<CollectionProps[]>([
+    { id: "", name: "", color: "", parent: "" },
+  ]);
   const [itemss, setItemss] = useState<ItemProps[]>();
+  const [allItems, setAllItems] = useState<any>();
   const [items, setItems] = useState<Items>({
-    A: createRange(3, (index) => `A${index + 1}`),
+    // Loading: createRange(0, (index) => `Loading...${index + 1}`),
   });
   const [containers, setContainers] = useState(
     Object.keys(items) as UniqueIdentifier[]
   );
-  
-  useEffect(()=>{
+
+  useEffect(() => {
     const unsub1 = onSnapshot(
-      query(collection(
-        db,
-        "ktab-manager",
-        user?.uid ? user.uid : "guest",
-        "collections"
-      ), where("parent", "==", organization)),
+      query(
+        collection(
+          db,
+          "ktab-manager",
+          user?.uid ? user.uid : "guest",
+          "collections"
+        ),
+        where("parent", "==", organization.id)
+      ),
       (collectionSnapshot) => {
         const re: CollectionProps[] = collectionSnapshot.docs.map((doc) => {
           return docsToCollections(doc);
@@ -152,12 +168,10 @@ function Organization({
       }
     );
     const unsub2 = onSnapshot(
-      query(collection(
-        db,
-        "ktab-manager",
-        user?.uid ? user.uid : "guest",
-        "items"
-      ), where("orgparent", "==", organization)),
+      query(
+        collection(db, "ktab-manager", user?.uid ? user.uid : "guest", "items"),
+        where("orgparent", "==", organization.id)
+      ),
       (itemSnapshot) => {
         const re2: ItemProps[] = itemSnapshot.docs.map((doc) => {
           return docsToItems(doc);
@@ -165,28 +179,31 @@ function Organization({
         setItemss(re2);
       }
     );
-  },[])
-  useEffect(()=>{
-    const getItems = (key:UniqueIdentifier) => {
-      return itemss?.filter(e=>e.parent == key)?.map(e=>e.id);
-    }
-    if(collections&&itemss){
-      let cont = collections.map(e=>e.id)
-      setContainers(cont)
+  }, []);
+  useEffect(() => {
+    const getItems = (key: UniqueIdentifier) => {
+      return itemss?.filter((e) => e.parent == key)?.map((e) => e.id);
+    };
+    if (collections && itemss) {
+      let cont = collections.map((e) => e.id);
+      setContainers(cont);
 
-      let ob = collections.reduce((prev,key)=>{
-        return Object.assign(prev,{[key.id]: getItems(key.id)})
-      },{})
-      setItems(ob)
+      let ob = collections.reduce((prev, key) => {
+        return Object.assign(prev, { [key.id]: getItems(key.id) });
+      }, {});
+      setItems(ob);
+
+      const itemsi = Object.assign(
+        collections.reduce((prev, curr) => {
+          return Object.assign(prev, { [curr.id]: curr });
+        }, {}),
+        itemss.reduce((prev, curr) => {
+          return Object.assign(prev, { [curr.id]: curr });
+        }, {})
+      );
+      setAllItems(itemsi);
     }
-    if(collections&&itemss){
-      /**
-       * My: collections,itemss
-       * Their: containers, items
-       */
-    }
-    
-  },[collections,itemss])
+  }, [collections, itemss]);
   const docsToCollections = (doc: DocumentData) => {
     return {
       id: doc.id,
@@ -204,12 +221,7 @@ function Organization({
       orgparent: doc.data().orgparent,
     };
   };
-  useEffect(()=>{
-    console.log(items, containers);
-
-  },[])
   const findContainer = (id: UniqueIdentifier) => {
-    
     if (id in items) {
       return id;
     }
@@ -416,52 +428,68 @@ function Organization({
     },
   };
   return (
-    <Container size={"xl"} mt={"xl"} style={{ cursor: cursor }}>
-      <Title weight={100}>Organization One</Title>
-      <DndContext
-        sensors={sensors}
-        collisionDetection={collisionDetectionStrategy}
-        onDragEnd={handleDragEnd}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
+    <Box
+      style={{
+        background: `linear-gradient(${organization.color} 0px,transparent 400px)`,
+      }}
+    >
+      <Container
+        size={"xl"}
+        pt={20}
+        pb={50}
+        px={"5%"}
+        style={{
+          cursor: cursor,
+        }}
       >
-        <SortableContext
-          items={containers}
-          strategy={verticalListSortingStrategy}
+        <Title weight={100}>{organization.name}</Title>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={collisionDetectionStrategy}
+          onDragEnd={handleDragEnd}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
         >
-          {containers.map((containerId, index) => (
-            <ContainerItem
-              name={containerId}
-              key={containerId}
-              globalMinifyContainers={globalMinifyContainers}
-              setGlobalMinifyContainers={setGlobalMinifyContainers}
-            >
-              <SortableContext
-                items={items[containerId]}
-                strategy={horizontalListSortingStrategy}
+          <SortableContext
+            items={containers}
+            strategy={verticalListSortingStrategy}
+          >
+            {containers.map((containerId, index) => (
+              <ContainerItem
+                name={containerId}
+                data={allItems && allItems[containerId]}
+                key={containerId}
+                globalMinifyContainers={globalMinifyContainers}
+                setGlobalMinifyContainers={setGlobalMinifyContainers}
               >
-                <div className="items">
-                  {items[containerId].map((value, index) => (
-                    <SortableItem
-                      name={value}
-                      id={index}
-                      key={`${index}${value}`}
-                    />
-                  ))}
-                </div>
-              </SortableContext>
-            </ContainerItem>
-          ))}
-        </SortableContext>
-        <DragOverlay adjustScale={true} dropAnimation={dropAnimationConfig}>
-          {activeId ? (
-            <>
-              <Overlay currentlyContainer={currentlyContainer} />
-            </>
-          ) : null}
-        </DragOverlay>
-      </DndContext>
-    </Container>
+                <SortableContext
+                  items={items[containerId]}
+                  strategy={horizontalListSortingStrategy}
+                >
+                  <div className="items">
+                    {items[containerId].map((value, index) => (
+                      <SortableItem
+                        name={value}
+                        data={allItems && (allItems[value] as ItemProps)}
+                        id={index}
+                        key={`${index}${value}`}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </ContainerItem>
+            ))}
+          </SortableContext>
+          <DragOverlay adjustScale={true} dropAnimation={dropAnimationConfig}>
+            {activeId ? (
+              <>
+                <Overlay currentlyContainer={currentlyContainer} />
+              </>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
+      </Container>
+    </Box>
   );
 }
 
@@ -471,8 +499,7 @@ interface OverlayProps {
   currentlyContainer: boolean;
 }
 const Overlay = ({ currentlyContainer }: OverlayProps) => {
-  const style = {
-  };
+  const style = {};
   return (
     <>
       {!currentlyContainer && (
@@ -507,6 +534,7 @@ const Overlay = ({ currentlyContainer }: OverlayProps) => {
 
 const ContainerItem = ({
   name,
+  data,
   globalMinifyContainers,
   setGlobalMinifyContainers,
   children,
@@ -524,23 +552,26 @@ const ContainerItem = ({
   const { classes, cx } = useStyles();
   const [edit, setEdit] = useState(false);
   const [minimize, setMinimize] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    width: "90vw",
+    width: "100%",
     overflow: "hidden",
-    margin: "10px",
+    marginBlock: "10px",
     border: isDragging
       ? "3px solid rgb(255 255 255 / 20%)"
       : "3px solid rgb(255 255 255 / 0%)",
-    // height: isDragging ? "55px" : "auto",
     zIndex: isDragging ? "100" : "auto",
     opacity: isDragging ? 0.3 : 1,
     borderRadius: 8,
   };
   useEffect(() => {
-    setGlobalMinifyContainers(isDragging);
+    setGlobalMinifyContainers(isDragging)
   }, [isDragging]);
+  useEffect(() => {
+    if (edit) inputRef.current?.select()
+  }, [edit]);
   return (
     <Box
       ref={setNodeRef}
@@ -561,15 +592,16 @@ const ContainerItem = ({
             {edit ? (
               <Group>
                 <Input
+                  ref={inputRef}
                   onKeyDown={(e: React.KeyboardEvent) => {
                     if (e.key == "Enter") setEdit(false);
                   }}
-                  variant={edit ? "default" : "unstyled"}
+                  variant={edit ? "unstyled" : "unstyled"}
                   radius="xs"
                   p={0}
                   size="xl"
                   style={{ fontWeight: 100, fontSize: "10px" }}
-                  defaultValue={name}
+                  defaultValue={data?.name}
                   className={classes.titleInput}
                 />
                 <Button
@@ -586,7 +618,7 @@ const ContainerItem = ({
                   onClick={() => setEdit(true)}
                   className={classes.titleInput}
                 >
-                  {name}{" "}
+                  {data?.name}
                 </Text>
                 <Badge size="xs" radius="md">
                   Modern Javascript
@@ -662,7 +694,7 @@ const ContainerItem = ({
   );
 };
 
-const SortableItem = ({ name, id }: any) => {
+const SortableItem = ({ name, id, data }: any) => {
   const {
     setNodeRef,
     attributes,
@@ -680,7 +712,6 @@ const SortableItem = ({ name, id }: any) => {
   const [itemOpened, setItemOpened] = useState(false);
   const openModal = () => {
     setItemOpened((prev) => !prev);
-    console.log("open modal");
   };
   return (
     <>
@@ -704,15 +735,17 @@ const SortableItem = ({ name, id }: any) => {
           style={{
             height: 10,
             width: 10,
-            background: "rgb(255 255 255 / 60%)",
+            background: data?.color,
             borderRadius: 10,
             display: "inline-block",
             marginRight: 12,
           }}
         ></span>
-        <Text style={{ display: "inline-block" }}>{name}</Text>
+        <Text style={{ display: "inline-block" }}>{data?.name}</Text>
       </Box>
-      {itemOpened && <ItemModal open={itemOpened} setOpen={setItemOpened} />}
+      {itemOpened && (
+        <ItemModal open={itemOpened} setOpen={setItemOpened} data={data} />
+      )}
     </>
   );
 };
