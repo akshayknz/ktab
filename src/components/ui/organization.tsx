@@ -488,7 +488,7 @@ function Organization({ organization }: OrganizationComponentProps) {
           <DragOverlay adjustScale={true} dropAnimation={dropAnimationConfig}>
             {activeId ? (
               <>
-                <Overlay currentlyContainer={currentlyContainer} />
+                <Overlay currentlyContainer={currentlyContainer} data={allItems[activeId]}/>
               </>
             ) : null}
           </DragOverlay>
@@ -502,8 +502,9 @@ export default Organization;
 
 interface OverlayProps {
   currentlyContainer: boolean;
+  data: ItemProps;
 }
-const Overlay = ({ currentlyContainer }: OverlayProps) => {
+const Overlay = ({ currentlyContainer, data }: OverlayProps) => {
   const style = {};
   return (
     <>
@@ -524,13 +525,13 @@ const Overlay = ({ currentlyContainer }: OverlayProps) => {
             style={{
               height: 10,
               width: 10,
-              background: "rgb(255 255 255 / 60%)",
+              background: data.color? data.color : "rgb(255 255 255 / 60%)",
               borderRadius: 10,
               display: "inline-block",
               marginRight: 12,
             }}
           ></span>
-          <Text style={{ display: "inline-block" }}>{currentlyContainer}</Text>
+          <Text style={{ display: "inline-block" }}>{data.name}</Text>
         </Box>
       )}
     </>

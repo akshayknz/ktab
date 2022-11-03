@@ -21,30 +21,53 @@ export default function ItemModal({ open, setOpen, data }: Props) {
   const user = useContext(AuthContext);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [value, onChange] = useState(data?.content);
-  async function handleSubmit(){
-    await updateDoc(doc(db, "ktab-manager", user?.uid ? user.uid : "guest", "items", data?.id), {
-      content: value? value:"",
-      name: inputRef.current?.value
-    })
+  async function handleSubmit() {
+    await updateDoc(
+      doc(
+        db,
+        "ktab-manager",
+        user?.uid ? user.uid : "guest",
+        "items",
+        data?.id
+      ),
+      {
+        content: value ? value : "",
+        name: inputRef.current?.value,
+      }
+    );
+    setOpen(false);
   }
-  async function handleDelete(){
-    await updateDoc(doc(db, "ktab-manager", user?.uid ? user.uid : "guest", "items", data?.id), {
-      isDeleted: 1
-    })
+  async function handleDelete() {
+    await updateDoc(
+      doc(
+        db,
+        "ktab-manager",
+        user?.uid ? user.uid : "guest",
+        "items",
+        data?.id
+      ),
+      {
+        isDeleted: 1,
+      }
+    );
+    setOpen(false);
+  }
+  function handleClose() {
+    setOpen(false);
   }
   return (
     <>
       <Modal
         size={"70%"}
         opened={open}
-        onClose={() => setOpen(false)}
+        onClose={handleClose}
         withCloseButton={false}
       >
         <SimpleGrid verticalSpacing={20} pb={20}>
           <Grid align="center">
             <Grid.Col span={11}>
               <TextInput
-              ref={inputRef}
+                ref={inputRef}
                 placeholder="Name"
                 variant="unstyled"
                 size="xl"
@@ -52,10 +75,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
               />
             </Grid.Col>
             <Grid.Col span={1}>
-              <CloseButton
-                title="Close popover"
-                onClick={() => setOpen(false)}
-              />
+              <CloseButton title="Close popover" onClick={handleClose} />
             </Grid.Col>
           </Grid>
           <RichTextEditor
@@ -69,7 +89,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
               <Button variant="outline" color="red" onClick={handleDelete}>
                 Delete
               </Button>
-              <Button variant="outline" onClick={() => setOpen(false)}>
+              <Button variant="outline" onClick={handleClose}>
                 Close
               </Button>
               <Button onClick={handleSubmit}>Save</Button>
