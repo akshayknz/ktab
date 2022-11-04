@@ -49,7 +49,7 @@ import {
   useContext,
   MutableRefObject,
 } from "react";
-import { MdDragIndicator } from "react-icons/md";
+import { MdDragIndicator, MdOutlineAdd } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 import { BiMessageAltAdd } from "react-icons/bi";
 import { FiEdit3, FiMaximize2, FiMinimize2 } from "react-icons/fi";
@@ -65,6 +65,8 @@ import {
 } from "firebase/firestore";
 import { db } from "../data/firebaseConfig";
 import { AuthContext } from "../data/contexts/AuthContext";
+import { useDispatch } from "react-redux";
+import { toggleOrganizationModal } from "../data/contexts/redux/states";
 
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
 const useStyles = createStyles((theme) => ({
@@ -133,6 +135,7 @@ function Organization({ organization }: OrganizationComponentProps) {
   const user = useContext(AuthContext);
   const [cursor, setCursor] = useState("auto");
   const [currentlyContainer, setCurrentlyContainer] = useState(false);
+  const dispatch = useDispatch();
   const [globalMinifyContainers, setGlobalMinifyContainers] = useState(false);
   /**
    * My states: collections,itemss
@@ -160,7 +163,7 @@ function Organization({ organization }: OrganizationComponentProps) {
           "collections"
         ),
         where("parent", "==", organization.id),
-        where("isDeleted", "==", 0),
+        where("isDeleted", "==", 0)
       ),
       (collectionSnapshot) => {
         const re: CollectionProps[] = collectionSnapshot.docs.map((doc) => {
@@ -173,7 +176,7 @@ function Organization({ organization }: OrganizationComponentProps) {
       query(
         collection(db, "ktab-manager", user?.uid ? user.uid : "guest", "items"),
         where("orgparent", "==", organization.id),
-        where("isDeleted", "==", 0),
+        where("isDeleted", "==", 0)
       ),
       (itemSnapshot) => {
         const re2: ItemProps[] = itemSnapshot.docs.map((doc) => {
@@ -435,7 +438,7 @@ function Organization({ organization }: OrganizationComponentProps) {
     <Box
       style={{
         background: `linear-gradient(${organization.color} 0px,transparent 400px)`,
-        minHeight: "84vh"
+        minHeight: "84vh",
       }}
     >
       <Container
@@ -447,7 +450,47 @@ function Organization({ organization }: OrganizationComponentProps) {
           cursor: cursor,
         }}
       >
-        <Title weight={100}>{organization.name}</Title>
+        <Grid>
+          <Grid.Col span={6}>
+            <Title weight={100}>{organization.name}</Title>
+          </Grid.Col>
+          <Grid.Col
+            span={6}
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+            }}
+          >
+            <Button
+              variant="light"
+              compact
+              mx={4}
+              leftIcon={<MdOutlineAdd />}
+              onClick={() => dispatch(toggleOrganizationModal("collection"))}
+            >
+              Add New Collection
+            </Button>
+            <Button
+              variant="light"
+              compact
+              mx={4}
+              leftIcon={<FiEdit3 />}
+              onClick={() => dispatch(toggleOrganizationModal("organization"))}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="light"
+              compact
+              mx={4}
+              leftIcon={<AiOutlineDelete />}
+            >
+              Delete
+            </Button>
+          </Grid.Col>
+        </Grid>
+
         <DndContext
           sensors={sensors}
           collisionDetection={collisionDetectionStrategy}
@@ -488,7 +531,10 @@ function Organization({ organization }: OrganizationComponentProps) {
           <DragOverlay adjustScale={true} dropAnimation={dropAnimationConfig}>
             {activeId ? (
               <>
-                <Overlay currentlyContainer={currentlyContainer} data={allItems[activeId]}/>
+                <Overlay
+                  currentlyContainer={currentlyContainer}
+                  data={allItems[activeId]}
+                />
               </>
             ) : null}
           </DragOverlay>
@@ -525,7 +571,7 @@ const Overlay = ({ currentlyContainer, data }: OverlayProps) => {
             style={{
               height: 10,
               width: 10,
-              background: data.color? data.color : "rgb(255 255 255 / 60%)",
+              background: data.color ? data.color : "rgb(255 255 255 / 60%)",
               borderRadius: 10,
               display: "inline-block",
               marginRight: 12,
@@ -573,10 +619,10 @@ const ContainerItem = ({
     borderRadius: 8,
   };
   useEffect(() => {
-    setGlobalMinifyContainers(isDragging)
+    setGlobalMinifyContainers(isDragging);
   }, [isDragging]);
   useEffect(() => {
-    if (edit) inputRef.current?.select()
+    if (edit) inputRef.current?.select();
   }, [edit]);
   return (
     <Box
