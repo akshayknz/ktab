@@ -2,6 +2,15 @@
 ## A tab management system for chrome
 ### Application structure
 
+Project URL: ktab manager
+
+Organize notes, todos, reminders, tabs, links, videos, images and more using the KTab manager webapp. Its fast, responsive, snappy and is beautiful. Use the public Guest dashboard to keep items in a publically available board or create your own account or login with your Google account to use your private boards. Boards are called Organizations. Each Organization has multiple Collections and Collections contain several Items that is the basic unit of data. The app uses Firestore database to store all the data of each user in its NoSQL database. Other packages and technologies used in KTab manager are;
+- Mantine UI
+- Firebase Auth
+- Firestore
+- DnD kit
+- CRA React
+
 User A (User based access)
 - Organization A
 - - Collection AA
@@ -31,7 +40,7 @@ User A (ID)
 
 ### TODO
 
-- Create a context and keep states in the context
+- Create a context and keep states in the context ✔
 - CURD from organization tabs
 - CURD form collections box
 - Other types of items
