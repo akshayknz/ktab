@@ -29,6 +29,8 @@ import {
 } from "firebase/firestore";
 import { db } from "../data/firebaseConfig";
 import { AuthContext } from "../data/contexts/AuthContext";
+import { useDispatch } from "react-redux";
+import { toggleOrganizationModal } from "../data/contexts/redux/states";
 
 const HEADER_HEIGHT = 28;
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
@@ -58,6 +60,7 @@ function Home() {
   const { classes, cx } = useStyles();
   const [organizations, setOrganizations] = useState<OrganizationProps[]>();
   const [activeTab, setActiveTab] = useState<string | null>("skeleton");
+  const dispatch = useDispatch()
   useEffect(() => {
     //organizations live updates
     const unsub = onSnapshot(
@@ -215,7 +218,7 @@ function Home() {
                 </>
               )}
               <Button
-                onClick={handleNewOrganization}
+                onClick={()=>dispatch(toggleOrganizationModal('organization'))}
                 variant="subtle"
                 compact
                 sx={{

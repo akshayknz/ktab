@@ -14,13 +14,14 @@ import {
 import { useForm } from "@mantine/form";
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { useContext, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { AuthContext } from "../data/contexts/AuthContext";
+import { RootState } from "../data/contexts/redux/configureStore";
+import { toggleOrganizationModal } from "../data/contexts/redux/states";
 import { db } from "../data/firebaseConfig";
 
 interface OrganizationModalProps {
   open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  organizationOrCollection: string;
 }
 
 interface OrganizationProps {
@@ -48,12 +49,12 @@ interface ItemProps {
 
 export default function OrganizationModal({
   open,
-  setOpen,
-  organizationOrCollection,
 }: OrganizationModalProps) {
   const user = useContext(AuthContext);
   const [organizations, setOrganizations] = useState<OrganizationProps[]>([]);
   const [collections, setCollections] = useState<CollectionProps[]>([]);
+  const {organizationOrCollection} = useSelector((state: RootState )=>state.states)
+  const dispatch = useDispatch()
   const [loading, setLoading] = useState<string>("");
   const organizationForm = useForm({
     initialValues: {
@@ -239,7 +240,7 @@ export default function OrganizationModal({
   return (
     <Modal
       opened={open}
-      onClose={() => setOpen(false)}
+      onClose={() => dispatch(toggleOrganizationModal('organization'))}
       title={`Manage ${
         organizationOrCollection.charAt(0).toUpperCase() +
         organizationOrCollection.slice(1)

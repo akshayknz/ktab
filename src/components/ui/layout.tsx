@@ -28,19 +28,24 @@ import React from "react";
 import OrganizationModal from "./OrganizationModal";
 import AboutModal from "./AboutModal";
 import SettingsModal from "./SettingsModal";
-
+import { useSelector } from "react-redux";
+import { RootState } from "../data/contexts/redux/configureStore";
+import { useDispatch } from "react-redux";
+import { toggleOrganizationModal } from "../data/contexts/redux/states";
 export function Layout({ children }: DoubleHeaderProps) {
   const user = useContext(AuthContext);
   const { classes, cx } = useStyles();
   const inputRef = useRef<any>(null);
   const [loginModal, setLoginModal] = useState(false);
-  const [organizationModal, setOrganizationModal] = useState(false);
+  // const [organizationModal, setOrganizationModal] = useState(false);
   const [organizationOrCollection, setOrganizationOrCollection] = useState("");
   const [aboutModal, setAboutModal] = useState(false);
   const [settingsModal, setSettingsModal] = useState(false);
   const [personalizeModal, setPersonalizeModal] = useState(false);
   const [itemModal, setItemModal] = useState(false);
-
+  const {showOrganizationModal} = useSelector((state: RootState )=>state.states)
+  const dispatch = useDispatch()
+  
   function closeMenu() {
     inputRef.current!.click();
   }
@@ -117,7 +122,8 @@ export function Layout({ children }: DoubleHeaderProps) {
                       className={classes.submenuItem}
                       onClick={() => {
                         closeMenu();
-                        setOrganizationModal((prevState) => !prevState);
+                        dispatch(toggleOrganizationModal('organization'))
+                        // setOrganizationModal((prevState) => !prevState);
                         setOrganizationOrCollection("organization");
                       }}
                     >
@@ -127,7 +133,8 @@ export function Layout({ children }: DoubleHeaderProps) {
                       className={classes.submenuItem}
                       onClick={() => {
                         closeMenu();
-                        setOrganizationModal((prevState) => !prevState);
+                        dispatch(toggleOrganizationModal('organization'))
+                        // setOrganizationModal((prevState) => !prevState);
                         setOrganizationOrCollection("collection");
                       }}
                     >
@@ -366,9 +373,7 @@ export function Layout({ children }: DoubleHeaderProps) {
         </Suspense>
       )} */}
       <OrganizationModal
-        open={organizationModal}
-        setOpen={setOrganizationModal}
-        organizationOrCollection={organizationOrCollection}
+        open={showOrganizationModal}
       />
       <AboutModal open={aboutModal} setOpen={setAboutModal} />
       <SettingsModal
