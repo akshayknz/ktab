@@ -39,6 +39,7 @@ import {
   Chip,
   Badge,
   Tooltip,
+  Skeleton,
 } from "@mantine/core";
 import {
   SetStateAction,
@@ -52,6 +53,7 @@ import {
 import { MdDragIndicator, MdOutlineAdd } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 import { BiMessageAltAdd } from "react-icons/bi";
+import { IoColorFilterOutline } from "react-icons/io5";
 import { FiEdit3, FiMaximize2, FiMinimize2 } from "react-icons/fi";
 import ItemModal from "./ItemModal";
 import {
@@ -97,40 +99,14 @@ const useStyles = createStyles((theme) => ({
     transform: "translatex(100px)",
   },
 }));
-const defaultInitializer = (index: number) => index;
-export function createRange<T = number>(
-  length: number,
-  initializer: (index: number) => any = defaultInitializer
-): T[] {
-  return [...new Array(length)].map((_, index) => initializer(index));
-}
-interface OrganizationComponentProps {
-  organization: OrganizationProps;
-}
-interface OrganizationProps {
-  id?: string;
-  name: string;
-  icon: string;
-  color: string;
-  accent: string;
-}
-interface CollectionProps {
-  id: UniqueIdentifier;
-  parent: string;
-  name: string;
-  color: string;
-}
-interface ItemProps {
-  id: UniqueIdentifier;
-  orgparent: string;
-  parent: string;
-  name: string;
-  color: string;
-  content?: string;
-}
-interface ItemCollection {
-  [key: UniqueIdentifier]: ItemProps[];
-}
+// const defaultInitializer = (index: number) => index;
+// export function createRange<T = number>(
+//   length: number,
+//   initializer: (index: number) => any = defaultInitializer
+// ): T[] {
+//   return [...new Array(length)].map((_, index) => initializer(index));
+// }
+
 function Organization({ organization }: OrganizationComponentProps) {
   const user = useContext(AuthContext);
   const [cursor, setCursor] = useState("auto");
@@ -471,6 +447,17 @@ function Organization({ organization }: OrganizationComponentProps) {
             >
               Add New Collection
             </Button>
+            <Button variant="light" compact mx={4} leftIcon={<FiMinimize2 />}>
+              Min/Max
+            </Button>
+            <Button
+              variant="light"
+              compact
+              mx={4}
+              leftIcon={<IoColorFilterOutline />}
+            >
+              Color
+            </Button>
             <Button
               variant="light"
               compact
@@ -490,7 +477,6 @@ function Organization({ organization }: OrganizationComponentProps) {
             </Button>
           </Grid.Col>
         </Grid>
-
         <DndContext
           sensors={sensors}
           collisionDetection={collisionDetectionStrategy}
@@ -502,6 +488,14 @@ function Organization({ organization }: OrganizationComponentProps) {
             items={containers}
             strategy={verticalListSortingStrategy}
           >
+            {containers.length > 0 ? null : (
+              <Skeleton
+                height={110}
+                mt={10}
+                style={{ borderRadius: "10px" }}
+                mb="xl"
+              />
+            )}
             {containers.map((containerId, index) => (
               <ContainerItem
                 name={containerId}

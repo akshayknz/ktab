@@ -58,7 +58,7 @@ export default function OrganizationModal({
   const [loading, setLoading] = useState<string>("");
   const organizationForm = useForm({
     initialValues: {
-      name: "",
+      name: "aaaa",
       icon: "",
       color: "",
       accent: "",

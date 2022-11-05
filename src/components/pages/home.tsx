@@ -203,7 +203,7 @@ function Home() {
                     sx={{
                       height: 28,
                       fontSize: "12px",
-                      borderBottomColor: organization.color,
+                      background: `linear-gradient(transparent,${organization.color} 170%)`,
                     }}
                   >
                     {organization.name}

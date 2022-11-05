@@ -12,6 +12,8 @@ import {
   Card,
   Group,
   Transition,
+  Anchor,
+  Switch,
 } from "@mantine/core";
 import { Suspense, useContext, useRef, useState } from "react";
 import { RiTableFill } from "react-icons/ri";
@@ -43,9 +45,11 @@ export function Layout({ children }: DoubleHeaderProps) {
   const [settingsModal, setSettingsModal] = useState(false);
   const [personalizeModal, setPersonalizeModal] = useState(false);
   const [itemModal, setItemModal] = useState(false);
-  const {showOrganizationModal} = useSelector((state: RootState )=>state.states)
-  const dispatch = useDispatch()
-  
+  const { showOrganizationModal } = useSelector(
+    (state: RootState) => state.states
+  );
+  const dispatch = useDispatch();
+
   function closeMenu() {
     inputRef.current!.click();
   }
@@ -122,7 +126,7 @@ export function Layout({ children }: DoubleHeaderProps) {
                       className={classes.submenuItem}
                       onClick={() => {
                         closeMenu();
-                        dispatch(toggleOrganizationModal('organization'))
+                        dispatch(toggleOrganizationModal("organization"));
                         // setOrganizationModal((prevState) => !prevState);
                         setOrganizationOrCollection("organization");
                       }}
@@ -133,7 +137,7 @@ export function Layout({ children }: DoubleHeaderProps) {
                       className={classes.submenuItem}
                       onClick={() => {
                         closeMenu();
-                        dispatch(toggleOrganizationModal('organization'))
+                        dispatch(toggleOrganizationModal("organization"));
                         // setOrganizationModal((prevState) => !prevState);
                         setOrganizationOrCollection("collection");
                       }}
@@ -372,9 +376,7 @@ export function Layout({ children }: DoubleHeaderProps) {
           />
         </Suspense>
       )} */}
-      <OrganizationModal
-        open={showOrganizationModal}
-      />
+      <OrganizationModal open={showOrganizationModal} />
       <AboutModal open={aboutModal} setOpen={setAboutModal} />
       <SettingsModal
         open={settingsModal}
@@ -391,10 +393,15 @@ export function Layout({ children }: DoubleHeaderProps) {
             style={{ textAlign: "center" }}
             className={cx(classes.vmiddle, classes.lineHeightFix)}
           >
-            Created by{" "}
-            <a href="https://akshaykn.vercel.app/" target={"_blank"}>
+            Created by&nbsp;
+            <Anchor href="https://akshaykn.vercel.app/" target="_blank">
               Akshay K Nair
-            </a>
+            </Anchor>
+            ⚽, help me at&nbsp;
+            <Anchor href="https://github.com/akshayknz/ktab" target="_blank">
+              GitHub
+            </Anchor>
+            ✏
           </Text>
         </Box>
       </Footer>
