@@ -35,6 +35,7 @@ import { RootState } from "../data/contexts/redux/configureStore";
 import { useDispatch } from "react-redux";
 import { toggleOrganizationModal } from "../data/contexts/redux/states";
 import TrashModal from "./TrashModal";
+import ArchiveModal from "./ArchiveModal";
 export function Layout({ children }: DoubleHeaderProps) {
   const user = useContext(AuthContext);
   const { classes, cx } = useStyles();
@@ -43,6 +44,7 @@ export function Layout({ children }: DoubleHeaderProps) {
   const [aboutModal, setAboutModal] = useState(false);
   const [settingsModal, setSettingsModal] = useState(false);
   const [trashModal, setTrashModal] = useState(false);
+  const [archiveModal, setArchiveModal] = useState(false);
   const [personalizeModal, setPersonalizeModal] = useState(false);
   const { showOrganizationModal } = useSelector(
     (state: RootState) => state.states
@@ -216,7 +218,15 @@ export function Layout({ children }: DoubleHeaderProps) {
               >
                 About
               </Menu.Item>
-              <Menu.Item className={classes.submenuItem}>Archive</Menu.Item>
+              <Menu.Item
+                className={classes.submenuItem}
+                onClick={() => {
+                  closeMenu();
+                  setArchiveModal((prevState) => !prevState);
+                }}
+              >
+                Archive
+              </Menu.Item>
               <Menu.Item
                 className={classes.submenuItem}
                 onClick={() => {
@@ -390,6 +400,9 @@ export function Layout({ children }: DoubleHeaderProps) {
       />
 
       {trashModal && <TrashModal open={trashModal} setOpen={setTrashModal} />}
+      {archiveModal && (
+        <ArchiveModal open={archiveModal} setOpen={setArchiveModal} />
+      )}
 
       <div ref={inputRef}></div>
       {children}
