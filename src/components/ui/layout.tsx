@@ -40,13 +40,10 @@ export function Layout({ children }: DoubleHeaderProps) {
   const { classes, cx } = useStyles();
   const inputRef = useRef<any>(null);
   const [loginModal, setLoginModal] = useState(false);
-  // const [organizationModal, setOrganizationModal] = useState(false);
-  const [organizationOrCollection, setOrganizationOrCollection] = useState("");
   const [aboutModal, setAboutModal] = useState(false);
   const [settingsModal, setSettingsModal] = useState(false);
   const [trashModal, setTrashModal] = useState(false);
   const [personalizeModal, setPersonalizeModal] = useState(false);
-  const [itemModal, setItemModal] = useState(false);
   const { showOrganizationModal } = useSelector(
     (state: RootState) => state.states
   );
@@ -129,8 +126,6 @@ export function Layout({ children }: DoubleHeaderProps) {
                       onClick={() => {
                         closeMenu();
                         dispatch(toggleOrganizationModal("organization"));
-                        // setOrganizationModal((prevState) => !prevState);
-                        setOrganizationOrCollection("organization");
                       }}
                     >
                       Organization
@@ -139,9 +134,7 @@ export function Layout({ children }: DoubleHeaderProps) {
                       className={classes.submenuItem}
                       onClick={() => {
                         closeMenu();
-                        dispatch(toggleOrganizationModal("organization"));
-                        // setOrganizationModal((prevState) => !prevState);
-                        setOrganizationOrCollection("collection");
+                        dispatch(toggleOrganizationModal("collection"));
                       }}
                     >
                       Collection
@@ -395,7 +388,8 @@ export function Layout({ children }: DoubleHeaderProps) {
         setOpen={setSettingsModal}
         personalize={personalizeModal}
       />
-      <TrashModal open={trashModal} setOpen={setTrashModal} />
+
+      {trashModal && <TrashModal open={trashModal} setOpen={setTrashModal} />}
 
       <div ref={inputRef}></div>
       {children}
