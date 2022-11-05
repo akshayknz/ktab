@@ -34,6 +34,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../data/contexts/redux/configureStore";
 import { useDispatch } from "react-redux";
 import { toggleOrganizationModal } from "../data/contexts/redux/states";
+import TrashModal from "./TrashModal";
 export function Layout({ children }: DoubleHeaderProps) {
   const user = useContext(AuthContext);
   const { classes, cx } = useStyles();
@@ -43,6 +44,7 @@ export function Layout({ children }: DoubleHeaderProps) {
   const [organizationOrCollection, setOrganizationOrCollection] = useState("");
   const [aboutModal, setAboutModal] = useState(false);
   const [settingsModal, setSettingsModal] = useState(false);
+  const [trashModal, setTrashModal] = useState(false);
   const [personalizeModal, setPersonalizeModal] = useState(false);
   const [itemModal, setItemModal] = useState(false);
   const { showOrganizationModal } = useSelector(
@@ -221,6 +223,16 @@ export function Layout({ children }: DoubleHeaderProps) {
               >
                 About
               </Menu.Item>
+              <Menu.Item className={classes.submenuItem}>Archive</Menu.Item>
+              <Menu.Item
+                className={classes.submenuItem}
+                onClick={() => {
+                  closeMenu();
+                  setTrashModal((prevState) => !prevState);
+                }}
+              >
+                Trash
+              </Menu.Item>
               <Menu.Item className={classes.submenuItem} onClick={signOut}>
                 Log out
               </Menu.Item>
@@ -383,6 +395,7 @@ export function Layout({ children }: DoubleHeaderProps) {
         setOpen={setSettingsModal}
         personalize={personalizeModal}
       />
+      <TrashModal open={trashModal} setOpen={setTrashModal} />
 
       <div ref={inputRef}></div>
       {children}

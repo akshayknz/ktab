@@ -8,6 +8,7 @@ import {
   createStyles,
   Input,
   PasswordInput,
+  Title,
 } from "@mantine/core";
 import { BsGoogle } from "react-icons/bs";
 import { ImFacebook } from "react-icons/im";
@@ -61,17 +62,25 @@ export default function LoginModal({ open, setOpen }: Props) {
   };
   return (
     <>
-      <Modal opened={open} onClose={() => setOpen(false)} title="Login">
+      <Modal
+        opened={open}
+        onClose={() => setOpen(false)}
+        title={
+          <Title weight={300} order={2}>
+            Login
+          </Title>
+        }
+      >
         <SimpleGrid cols={1} mx={10} my={20}>
-        <Input.Wrapper id="input-demo" label="Email">
-          <Input placeholder="Your email" ref={emailRef} />
-        </Input.Wrapper>
-        <PasswordInput
-          ref={passwordRef}
-          placeholder="Password"
-          label="Password"
-          description="Enter your password of existing or new account"
-        />
+          <Input.Wrapper id="input-demo" label="Email">
+            <Input placeholder="Your email" ref={emailRef} />
+          </Input.Wrapper>
+          <PasswordInput
+            ref={passwordRef}
+            placeholder="Password"
+            label="Password"
+            description="Enter your password of existing or new account"
+          />
           <Button
             leftIcon={<MdOutlineMarkEmailUnread size={14} />}
             color="dark"

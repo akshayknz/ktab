@@ -11,6 +11,7 @@ import {
   PasswordInput,
   Avatar,
   Blockquote,
+  Title,
 } from "@mantine/core";
 import { MdOutlineMarkEmailUnread } from "react-icons/md";
 interface Props {
@@ -20,7 +21,7 @@ interface Props {
 export default function AboutModal({ open, setOpen }: Props) {
   return (
     <>
-      <Modal opened={open} onClose={() => setOpen(false)} title="About Me">
+      <Modal opened={open} onClose={() => setOpen(false)} title={<Title weight={300} order={2}>About Me</Title>}>
         <SimpleGrid verticalSpacing="xs" py={20}>
           <Avatar
             variant="outline"

@@ -10,6 +10,7 @@ import {
   ColorInput,
   Tabs,
   Select,
+  Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
@@ -47,14 +48,14 @@ interface ItemProps {
   color: string;
 }
 
-export default function OrganizationModal({
-  open,
-}: OrganizationModalProps) {
+export default function OrganizationModal({ open }: OrganizationModalProps) {
   const user = useContext(AuthContext);
   const [organizations, setOrganizations] = useState<OrganizationProps[]>([]);
   const [collections, setCollections] = useState<CollectionProps[]>([]);
-  const {organizationOrCollection} = useSelector((state: RootState )=>state.states)
-  const dispatch = useDispatch()
+  const { organizationOrCollection } = useSelector(
+    (state: RootState) => state.states
+  );
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState<string>("");
   const organizationForm = useForm({
     initialValues: {
@@ -169,6 +170,9 @@ export default function OrganizationModal({
           parent: values.parent,
           name: values.name,
           color: values.color,
+          type: "text",
+          link: "",
+          icon: "",
           order: 0,
           archive: false,
           isDeleted: 0,
@@ -240,11 +244,15 @@ export default function OrganizationModal({
   return (
     <Modal
       opened={open}
-      onClose={() => dispatch(toggleOrganizationModal('organization'))}
-      title={`Manage ${
-        organizationOrCollection.charAt(0).toUpperCase() +
-        organizationOrCollection.slice(1)
-      }`}
+      onClose={() => dispatch(toggleOrganizationModal("organization"))}
+      title={
+        <Title weight={300} order={2}>
+          {`Manage ${
+            organizationOrCollection.charAt(0).toUpperCase() +
+            organizationOrCollection.slice(1)
+          }`}
+        </Title>
+      }
     >
       <Tabs defaultValue={organizationOrCollection}>
         <Tabs.List grow>
@@ -280,6 +288,7 @@ export default function OrganizationModal({
                 format="rgba"
                 pb={20}
                 {...organizationForm.getInputProps("color")}
+                autocomplete="new-password"
               />
               <Text weight={500} sx={{ fontSize: 14 }} pb={5}>
                 Accent Color
@@ -289,6 +298,7 @@ export default function OrganizationModal({
                 format="rgba"
                 pb={20}
                 {...organizationForm.getInputProps("accent")}
+                autocomplete="new-password"
               />
 
               <Group position="right" mt="md">
@@ -334,6 +344,7 @@ export default function OrganizationModal({
                 format="rgba"
                 pb={20}
                 {...collectionForm.getInputProps("color")}
+                autocomplete="new-password"
               />
 
               <Group position="right" mt="md">
@@ -377,13 +388,14 @@ export default function OrganizationModal({
                 pb={20}
               />
               <Text weight={500} sx={{ fontSize: 14 }} pb={5}>
-                Organization Color
+                Item Color
               </Text>
               <ColorInput
                 defaultValue="rgba(69, 122, 255, 1)"
                 format="rgba"
                 pb={20}
                 {...itemForm.getInputProps("color")}
+                autocomplete="new-password"
               />
 
               <Group position="right" mt="md">

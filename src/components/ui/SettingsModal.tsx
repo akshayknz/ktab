@@ -8,6 +8,7 @@ import {
   FileInput,
   AlphaSlider,
   Slider,
+  Title,
 } from "@mantine/core";
 
 interface Props {
@@ -18,7 +19,15 @@ interface Props {
 export default function LoginModal({ open, setOpen, personalize }: Props) {
   return (
     <>
-      <Modal opened={open} onClose={() => setOpen(false)} title="Settings">
+      <Modal
+        opened={open}
+        onClose={() => setOpen(false)}
+        title={
+          <Title weight={300} order={2}>
+            Settings
+          </Title>
+        }
+      >
         <Tabs defaultValue={personalize ? "personalize" : "profile"}>
           <Tabs.List grow>
             <Tabs.Tab value="profile">Profile</Tabs.Tab>
@@ -31,26 +40,33 @@ export default function LoginModal({ open, setOpen, personalize }: Props) {
 
           <Tabs.Panel value="personalize" pt="xs">
             <Box px={20} pt={10} pb={20} mx="auto">
-              <FileInput placeholder="Pick file" label="Your resume" mb={20}/>
+              <FileInput placeholder="Pick file" label="Your resume" mb={20} />
               <Image
-                width={'100%'}
+                width={"100%"}
                 height={120}
                 src={undefined}
                 alt="With default placeholder"
-                withPlaceholder mb={20}
+                withPlaceholder
+                mb={20}
               />
-              <Text  weight={500} sx={{fontSize:14}} pb={7}>Opacity </Text>
+              <Text weight={500} sx={{ fontSize: 14 }} pb={7}>
+                Opacity{" "}
+              </Text>
               <AlphaSlider
                 color="#1c7ed6"
                 onChange={() => {}}
                 onChangeEnd={() => {}}
-                value={0} mb={20}
+                value={0}
+                mb={20}
               />
-              <Text  weight={500} sx={{fontSize:14}} pb={7}>Blur </Text>
+              <Text weight={500} sx={{ fontSize: 14 }} pb={7}>
+                Blur{" "}
+              </Text>
               <Slider
                 size="lg"
                 radius="xl"
-                showLabelOnHover={false} mb={20}
+                showLabelOnHover={false}
+                mb={20}
                 marks={[
                   { value: 0, label: "0%" },
                   { value: 100, label: "100%" },

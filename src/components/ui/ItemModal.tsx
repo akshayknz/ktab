@@ -13,6 +13,8 @@ import {
   Tooltip,
   Transition,
   Input,
+  Avatar,
+  useMantineTheme,
 } from "@mantine/core";
 import { RichTextEditor } from "@mantine/rte";
 import { doc, updateDoc } from "firebase/firestore";
@@ -21,6 +23,7 @@ import { AuthContext } from "../data/contexts/AuthContext";
 import { FiMaximize2, FiMinimize2 } from "react-icons/fi";
 import { BsGear } from "react-icons/bs";
 import { ItemType } from "../data/constants";
+import { useTheme } from "@emotion/react";
 interface Props {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -28,9 +31,11 @@ interface Props {
 }
 export default function ItemModal({ open, setOpen, data }: Props) {
   const user = useContext(AuthContext);
+  const theme = useMantineTheme();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [minimize, setMinimize] = useState(false);
   const [settings, setSettings] = useState(false);
+  const [itemType, setItemType] = useState<string | ItemType>(ItemType.TEXT);
   const [value, onChange] = useState(data?.content);
   async function handleSubmit() {
     await updateDoc(
@@ -143,7 +148,8 @@ export default function ItemModal({ open, setOpen, data }: Props) {
                 <Select
                   label="Item type"
                   placeholder="Pick one"
-                  defaultValue={ItemType.TEXT}
+                  defaultValue={itemType}
+                  onChange={(value) => setItemType(value || ItemType.TEXT)}
                   data={[
                     { value: ItemType.TEXT, label: "Text" },
                     { value: ItemType.LINK, label: "Link" },
@@ -165,7 +171,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
                 <Text weight={500} sx={{ fontSize: 14 }} pb={3}>
                   UID
                 </Text>
-                <Input placeholder="UID" value={data?.id} disabled/>
+                <Input placeholder="UID" value={data?.id} disabled />
               </Grid.Col>
               <Grid.Col span={4}>
                 <Select
@@ -197,13 +203,32 @@ export default function ItemModal({ open, setOpen, data }: Props) {
               </Grid.Col>
             </Grid>
           )}
-          <RichTextEditor
-            stickyOffset={"-48px"}
-            value={value}
-            onChange={onChange}
-            style={{ minHeight: "40vh" }}
-          />
-
+          {itemType == ItemType.TEXT && (
+            <RichTextEditor
+              stickyOffset={"-48px"}
+              value={value}
+              onChange={onChange}
+              style={{ minHeight: "40vh" }}
+            />
+          )}
+          {itemType == ItemType.LINK && (
+            <Grid align="center" grow>
+              <Grid.Col
+                span={1}
+                style={{ display: "flex", justifyContent: "flex-end" }}
+              >
+                <Avatar
+                  src="https://s2.googleusercontent.com/s2/favicons?domain=http://www.stackoverflow.com"
+                  alt="it's me"
+                />
+              </Grid.Col>
+              <Grid.Col span={11}>
+                <Input placeholder="URL" value={data?.link} />
+              </Grid.Col>
+            </Grid>
+          )}
+          {itemType == ItemType.TODO && <code>under construction</code>}
+          {itemType == ItemType.REMINDER && <code>under construction</code>}
           <Box style={{ display: "flex", justifyContent: "flex-end" }}>
             <SimpleGrid cols={3}>
               <Button variant="outline" color="red" onClick={handleDelete}>
