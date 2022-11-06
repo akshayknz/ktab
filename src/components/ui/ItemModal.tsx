@@ -24,12 +24,15 @@ import { FiMaximize2, FiMinimize2 } from "react-icons/fi";
 import { BsGear } from "react-icons/bs";
 import { ItemType } from "../data/constants";
 import { useTheme } from "@emotion/react";
+import { useDispatch } from "react-redux";
+import { deleteDocument, softDeleteDocument } from "../data/contexts/redux/actions";
 interface Props {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   data: any;
 }
 export default function ItemModal({ open, setOpen, data }: Props) {
+  const dispatch = useDispatch();
   const user = useContext(AuthContext);
   const theme = useMantineTheme();
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -37,6 +40,8 @@ export default function ItemModal({ open, setOpen, data }: Props) {
   const [settings, setSettings] = useState(false);
   const [itemType, setItemType] = useState<string | ItemType>(ItemType.TEXT);
   const [value, onChange] = useState(data?.content);
+  useEffect(()=>{
+  },[])
   async function handleSubmit() {
     await updateDoc(
       doc(
@@ -54,18 +59,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
     setOpen(false);
   }
   async function handleDelete() {
-    await updateDoc(
-      doc(
-        db,
-        "ktab-manager",
-        user?.uid ? user.uid : "guest",
-        "items",
-        data?.id
-      ),
-      {
-        isDeleted: 1,
-      }
-    );
+    dispatch(softDeleteDocument({type:"items",docId:data?.id}))
     setOpen(false);
   }
   function handleClose() {
@@ -229,15 +223,15 @@ export default function ItemModal({ open, setOpen, data }: Props) {
           )}
           {itemType == ItemType.TODO && <code>under construction</code>}
           {itemType == ItemType.REMINDER && <code>under construction</code>}
-          <Box style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Box style={{ display: "flex", justifyContent: "flex-end" }} mt={20}>
             <SimpleGrid cols={3}>
-              <Button variant="outline" color="red" onClick={handleDelete}>
+              <Button variant="subtle" size="xs" color="red" onClick={handleDelete}>
                 Delete
               </Button>
-              <Button variant="outline" onClick={handleClose}>
+              <Button variant="subtle" size="xs" onClick={handleClose}>
                 Close
               </Button>
-              <Button onClick={handleSubmit}>Save</Button>
+              <Button onClick={handleSubmit} size="xs" >Save</Button>
             </SimpleGrid>
           </Box>
         </SimpleGrid>

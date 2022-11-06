@@ -110,11 +110,12 @@ export default function ArchiveModal({ open, setOpen }: Props) {
       doc(db, "ktab-manager", user?.uid ? user.uid : "guest", type, id)
     );
   };
-  const rows = [
+  const temp = [
+    ...(organizations || []),
     ...(items || []),
     ...(collections || []),
-    ...(organizations || []),
-  ]
+  ];
+  const rows = temp
     ?.filter(
       (element: { name: string; id: string; type: string }) =>
         element.name.toLowerCase().indexOf(search.toLowerCase()) > -1 ||
@@ -171,7 +172,7 @@ export default function ArchiveModal({ open, setOpen }: Props) {
           style={{ maxWidth: "100%", minWidth: "280px" }}
         />
       </Box>
-      {items?.length != 0 && (
+      {temp?.length != 0 && (
         <Table highlightOnHover striped>
           <thead>
             <tr>
@@ -184,7 +185,7 @@ export default function ArchiveModal({ open, setOpen }: Props) {
           <tbody>{rows}</tbody>
         </Table>
       )}
-      {items?.length == 0 && (
+      {temp?.length == 0 && (
         <>
           <Text style={{ textAlign: "center" }} my={40}>
             Nothing here!

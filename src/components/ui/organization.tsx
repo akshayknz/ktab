@@ -40,6 +40,8 @@ import {
   Badge,
   Tooltip,
   Skeleton,
+  Popover,
+  SimpleGrid,
 } from "@mantine/core";
 import {
   SetStateAction,
@@ -69,6 +71,8 @@ import { db } from "../data/firebaseConfig";
 import { AuthContext } from "../data/contexts/AuthContext";
 import { useDispatch } from "react-redux";
 import { toggleOrganizationModal } from "../data/contexts/redux/states";
+import { useClickOutside } from "@mantine/hooks";
+import { softDeleteDocument } from "../data/contexts/redux/actions";
 
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
 const useStyles = createStyles((theme) => ({
@@ -111,6 +115,8 @@ function Organization({ organization }: OrganizationComponentProps) {
   const user = useContext(AuthContext);
   const [cursor, setCursor] = useState("auto");
   const [currentlyContainer, setCurrentlyContainer] = useState(false);
+  const [trashPopover, setTrashPopover] = useState(false);
+  const trashboxRef = useClickOutside(() => setTrashPopover(false));
   const dispatch = useDispatch();
   const [globalMinifyContainers, setGlobalMinifyContainers] = useState(false);
   /**
@@ -391,17 +397,18 @@ function Organization({ organization }: OrganizationComponentProps) {
         },
       ];
     },
+    easing: "cubic-bezier(.84,.57,.05,.94)",
     duration: 300,
     sideEffects({ active, dragOverlay, draggableNodes, droppableContainers }) {
       // active.node.style.opacity = ".5";
       dragOverlay.node.animate([{ opacity: "1" }, { opacity: "0.7" }], {
         duration: 50,
-        easing: "ease",
+        easing: "cubic-bezier(.84,.57,.05,.94)",
         fill: "forwards",
       });
       active.node.animate([{ opacity: ".3" }, { opacity: "1" }], {
         duration: 50,
-        easing: "ease",
+        easing: "cubic-bezier(.84,.57,.05,.94)",
         fill: "forwards",
       });
 
@@ -467,14 +474,63 @@ function Organization({ organization }: OrganizationComponentProps) {
             >
               Edit
             </Button>
-            <Button
-              variant="light"
-              compact
-              mx={4}
-              leftIcon={<AiOutlineDelete />}
+            <Popover
+              closeOnClickOutside
+              transition="pop"
+              withArrow
+              withRoles
+              trapFocus
+              position="bottom-end"
+              opened={trashPopover}
             >
-              Delete
-            </Button>
+              <Popover.Target>
+                <Button
+                  variant="light"
+                  compact
+                  mx={4}
+                  leftIcon={<AiOutlineDelete />}
+                  onClick={() => setTrashPopover((prev) => !prev)}
+                >
+                  Delete
+                </Button>
+              </Popover.Target>
+              <Popover.Dropdown>
+                <Box ref={trashboxRef}>
+                  <Text size={"sm"} mb={10}>
+                    Delete this organization?
+                  </Text>
+                  <Box>
+                    <Button
+                      size={"sm"}
+                      compact
+                      mr={8}
+                      variant="light"
+                      color="red"
+                      onClick={() => {
+                        dispatch(
+                          softDeleteDocument({
+                            type: "organizations",
+                            docId: organization.id,
+                          })
+                        );
+                        setTrashPopover((prev) => !prev);
+                      }}
+                    >
+                      Delete
+                    </Button>
+                    <Button
+                      size={"sm"}
+                      compact
+                      mr={8}
+                      variant="subtle"
+                      onClick={() => setTrashPopover((prev) => !prev)}
+                    >
+                      Cancel
+                    </Button>
+                  </Box>
+                </Box>
+              </Popover.Dropdown>
+            </Popover>
           </Grid.Col>
         </Grid>
         <DndContext
@@ -522,7 +578,7 @@ function Organization({ organization }: OrganizationComponentProps) {
               </ContainerItem>
             ))}
           </SortableContext>
-          <DragOverlay adjustScale={true} dropAnimation={dropAnimationConfig}>
+          <DragOverlay dropAnimation={dropAnimationConfig}>
             {activeId ? (
               <>
                 <Overlay
@@ -595,15 +651,18 @@ const ContainerItem = ({
     transform,
     isDragging,
   } = useSortable({ id: name });
+  const dispatch = useDispatch();
   const { classes, cx } = useStyles();
   const [edit, setEdit] = useState(false);
   const [minimize, setMinimize] = useState(false);
+  const [trashPopover, setTrashPopover] = useState(false);
+  const trashboxRef = useClickOutside(() => setTrashPopover(false));
+
   const inputRef = useRef<HTMLInputElement | null>(null);
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     width: "100%",
-    overflow: "hidden",
     marginBlock: "10px",
     border: isDragging
       ? "3px solid rgb(255 255 255 / 20%)"
@@ -694,11 +753,65 @@ const ContainerItem = ({
                     <BiMessageAltAdd />
                   </Button>
                 </Tooltip>
-                <Tooltip label="Delete this collection">
-                  <Button variant="default" radius="md" size="xs">
-                    <AiOutlineDelete />
-                  </Button>
-                </Tooltip>
+                <Popover
+                  closeOnClickOutside
+                  transition="pop"
+                  withArrow
+                  withRoles
+                  trapFocus
+                  position="left"
+                  opened={trashPopover}
+                >
+                  <Popover.Target>
+                    <Tooltip label="Delete this collection">
+                      <Button
+                        variant="default"
+                        radius="md"
+                        size="xs"
+                        onClick={() => setTrashPopover((prev) => !prev)}
+                      >
+                        <AiOutlineDelete />
+                      </Button>
+                    </Tooltip>
+                  </Popover.Target>
+                  <Popover.Dropdown>
+                    <Box ref={trashboxRef}>
+                      <Text size={"sm"} mb={10}>
+                        Delete this collection?
+                      </Text>
+                      <Box>
+                        <Button
+                          size={"sm"}
+                          compact
+                          mr={8}
+                          variant="light"
+                          color="red"
+                          onClick={() => {
+                            dispatch(
+                              softDeleteDocument({
+                                type: "collections",
+                                docId: name,
+                              })
+                            );
+                            setTrashPopover((prev) => !prev);
+                          }}
+                        >
+                          Delete
+                        </Button>
+                        <Button
+                          size={"sm"}
+                          compact
+                          mr={8}
+                          variant="subtle"
+                          onClick={() => setTrashPopover((prev) => !prev)}
+                        >
+                          Cancel
+                        </Button>
+                      </Box>
+                    </Box>
+                  </Popover.Dropdown>
+                </Popover>
+
                 <Tooltip label="Minimize this collection">
                   <Button
                     variant="default"

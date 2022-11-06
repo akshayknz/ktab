@@ -30,12 +30,18 @@ import {
 } from "firebase/firestore";
 import { db } from "../data/firebaseConfig";
 import { AuthContext } from "../data/contexts/AuthContext";
+import {
+  deleteDocument,
+  softDeleteDocument,
+} from "../data/contexts/redux/actions";
+import { useDispatch } from "react-redux";
 interface Props {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 let elements = [{ id: "", name: "", type: "" }];
 export default function TrashModal({ open, setOpen }: Props) {
+  const dispatch = useDispatch();
   const user = useContext(AuthContext);
   const [search, setSearch] = useState("");
   const [items, setItems] = useState<any[]>();
@@ -106,15 +112,14 @@ export default function TrashModal({ open, setOpen }: Props) {
     );
   };
   const deleteDocFun = async (type: string, id: string) => {
-    await deleteDoc(
-      doc(db, "ktab-manager", user?.uid ? user.uid : "guest", type, id)
-    );
+    dispatch(deleteDocument({ type: type, docId: id }));
   };
-  const rows = [
+  const temp = [
+    ...(organizations || []),
     ...(items || []),
     ...(collections || []),
-    ...(organizations || []),
-  ]
+  ];
+  const rows = temp
     ?.filter(
       (element: { name: string; id: string; type: string }) =>
         element.name.toLowerCase().indexOf(search.toLowerCase()) > -1 ||
@@ -171,7 +176,7 @@ export default function TrashModal({ open, setOpen }: Props) {
           style={{ maxWidth: "100%", minWidth: "280px" }}
         />
       </Box>
-      {items?.length != 0 && (
+      {temp?.length != 0 && (
         <Table highlightOnHover striped>
           <thead>
             <tr>
@@ -184,7 +189,7 @@ export default function TrashModal({ open, setOpen }: Props) {
           <tbody>{rows}</tbody>
         </Table>
       )}
-      {items?.length == 0 && (
+      {temp?.length == 0 && (
         <>
           <Text style={{ textAlign: "center" }} my={40}>
             Nothing here!

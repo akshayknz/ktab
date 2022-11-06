@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
 import stateReducer from './states'
+import actionReducer from './actions'
 
 const store = configureStore({
     reducer: {
-        states: stateReducer
+        states: stateReducer,
+        actions: actionReducer
     }
 })
 export default store

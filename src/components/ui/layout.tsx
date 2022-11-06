@@ -15,7 +15,7 @@ import {
   Anchor,
   Switch,
 } from "@mantine/core";
-import { Suspense, useContext, useRef, useState } from "react";
+import { Suspense, useContext, useEffect, useRef, useState } from "react";
 import { RiTableFill } from "react-icons/ri";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { SpotlightProvider, openSpotlight } from "@mantine/spotlight";
@@ -36,6 +36,7 @@ import { useDispatch } from "react-redux";
 import { toggleOrganizationModal } from "../data/contexts/redux/states";
 import TrashModal from "./TrashModal";
 import ArchiveModal from "./ArchiveModal";
+import { setUserId } from "../data/contexts/redux/actions";
 export function Layout({ children }: DoubleHeaderProps) {
   const user = useContext(AuthContext);
   const { classes, cx } = useStyles();
@@ -50,7 +51,9 @@ export function Layout({ children }: DoubleHeaderProps) {
     (state: RootState) => state.states
   );
   const dispatch = useDispatch();
-
+  useEffect(()=>{
+    dispatch(setUserId(user?.uid ? user.uid : "guest"))
+  },[user])
   function closeMenu() {
     inputRef.current!.click();
   }

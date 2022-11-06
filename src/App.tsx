@@ -3,9 +3,12 @@ import Home from "./components/pages/home";
 import { Layout } from "./components/ui/layout";
 import { AuthProvider } from "./components/data/contexts/AuthProvider";
 import configureStore from "./components/data/contexts/redux/configureStore";
-import { Provider } from "react-redux";
-
+import { Provider, useDispatch } from "react-redux";
+import { useContext, useEffect, useState } from "react";
+import { AuthContext } from "./components/data/contexts/AuthContext";
+import { setUserId } from "./components/data/contexts/redux/actions";
 function App() {
+  
   return (
     <Provider store={configureStore}>
       <AuthProvider>
