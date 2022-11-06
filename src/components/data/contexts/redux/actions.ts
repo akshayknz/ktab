@@ -36,10 +36,24 @@ export const actionSlice = createSlice({
         )
       );
     },
+    updateColor: (state, action) => {
+      updateDoc(
+        doc(
+          db,
+          "ktab-manager",
+          state.userId,
+          action.payload.type,
+          action.payload.docId
+        ),
+        {
+          color: action.payload.color,
+        }
+      );
+    },
   },
 });
 
-export const { setUserId, softDeleteDocument, deleteDocument } =
+export const { setUserId, softDeleteDocument, deleteDocument, updateColor } =
   actionSlice.actions;
 
 export default actionSlice.reducer;

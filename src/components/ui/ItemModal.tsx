@@ -40,8 +40,6 @@ export default function ItemModal({ open, setOpen, data }: Props) {
   const [settings, setSettings] = useState(false);
   const [itemType, setItemType] = useState<string | ItemType>(ItemType.TEXT);
   const [value, onChange] = useState(data?.content);
-  useEffect(()=>{
-  },[])
   async function handleSubmit() {
     await updateDoc(
       doc(

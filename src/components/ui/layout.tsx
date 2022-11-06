@@ -146,19 +146,28 @@ export function Layout({ children }: DoubleHeaderProps) {
                     </Menu.Item>
                     <Menu.Item
                       className={classes.submenuItem}
-                      onClick={closeMenu}
+                      onClick={() => {
+                        closeMenu();
+                        dispatch(toggleOrganizationModal("item"));
+                      }}
                     >
                       Tab
                     </Menu.Item>
                     <Menu.Item
                       className={classes.submenuItem}
-                      onClick={closeMenu}
+                      onClick={() => {
+                        closeMenu();
+                        dispatch(toggleOrganizationModal("item"));
+                      }}
                     >
                       Link
                     </Menu.Item>
                     <Menu.Item
                       className={classes.submenuItem}
-                      onClick={closeMenu}
+                      onClick={() => {
+                        closeMenu();
+                        dispatch(toggleOrganizationModal("item"));
+                      }}
                     >
                       Todo
                     </Menu.Item>

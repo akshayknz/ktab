@@ -40,8 +40,10 @@ import {
   Badge,
   Tooltip,
   Skeleton,
+  ColorInput,
   Popover,
   SimpleGrid,
+  ColorPicker,
 } from "@mantine/core";
 import {
   SetStateAction,
@@ -69,10 +71,14 @@ import {
 } from "firebase/firestore";
 import { db } from "../data/firebaseConfig";
 import { AuthContext } from "../data/contexts/AuthContext";
-import { useDispatch } from "react-redux";
-import { toggleOrganizationModal } from "../data/contexts/redux/states";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setOrganizationColor,
+  toggleOrganizationModal,
+} from "../data/contexts/redux/states";
 import { useClickOutside } from "@mantine/hooks";
-import { softDeleteDocument } from "../data/contexts/redux/actions";
+import { softDeleteDocument, updateColor } from "../data/contexts/redux/actions";
+import { RootState } from "../data/contexts/redux/configureStore";
 
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
 const useStyles = createStyles((theme) => ({
@@ -117,7 +123,13 @@ function Organization({ organization }: OrganizationComponentProps) {
   const [currentlyContainer, setCurrentlyContainer] = useState(false);
   const [trashPopover, setTrashPopover] = useState(false);
   const trashboxRef = useClickOutside(() => setTrashPopover(false));
+  const [colorPopover, setColorPopover] = useState(false);
+  const colorboxRef = useClickOutside(() => setColorPopover(false));
   const dispatch = useDispatch();
+  const { organizationColor } = useSelector((state: RootState) => state.states);
+  useEffect(() => {
+    dispatch(setOrganizationColor(organization.color));
+  }, []);
   const [globalMinifyContainers, setGlobalMinifyContainers] = useState(false);
   /**
    * My states: collections,itemss
@@ -420,7 +432,7 @@ function Organization({ organization }: OrganizationComponentProps) {
   return (
     <Box
       style={{
-        background: `linear-gradient(${organization.color} 0px,transparent 400px)`,
+        background: `linear-gradient(${organizationColor} 0px,transparent 400px)`,
         minHeight: "84vh",
       }}
     >
@@ -457,14 +469,70 @@ function Organization({ organization }: OrganizationComponentProps) {
             <Button variant="light" compact mx={4} leftIcon={<FiMinimize2 />}>
               Min/Max
             </Button>
-            <Button
-              variant="light"
-              compact
-              mx={4}
-              leftIcon={<IoColorFilterOutline />}
+
+            <Popover
+              closeOnClickOutside
+              transition="pop"
+              withArrow
+              withRoles
+              trapFocus
+              position="bottom-end"
+              opened={colorPopover}
             >
-              Color
-            </Button>
+              <Popover.Target>
+                <Button
+                  variant="light"
+                  compact
+                  mx={4}
+                  onClick={() => setColorPopover((prev) => !prev)}
+                  leftIcon={<IoColorFilterOutline />}
+                >
+                  Color
+                </Button>
+              </Popover.Target>
+              <Popover.Dropdown>
+                <Box ref={colorboxRef}>
+                  <Text weight={500} sx={{ fontSize: 14 }} pb={5}>
+                    Organization Color
+                  </Text>
+                  <ColorPicker
+                    format="rgba"
+                    defaultValue={organizationColor}
+                    pb={20}
+                    onChange={(color) => dispatch(setOrganizationColor(color))}
+                  />
+                  <Box>
+                    <Button
+                      size={"sm"}
+                      compact
+                      mr={8}
+                      variant="light"
+                      onClick={() => {
+                        dispatch(
+                          updateColor({
+                            type: "organizations",
+                            docId: organization.id,
+                            color: organizationColor
+                          })
+                        );
+                        setColorPopover((prev) => !prev);
+                      }}
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      size={"sm"}
+                      compact
+                      mr={8}
+                      variant="subtle"
+                      onClick={() => setColorPopover((prev) => !prev)}
+                    >
+                      Cancel
+                    </Button>
+                  </Box>
+                </Box>
+              </Popover.Dropdown>
+            </Popover>
             <Button
               variant="light"
               compact

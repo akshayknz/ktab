@@ -29,8 +29,9 @@ import {
 } from "firebase/firestore";
 import { db } from "../data/firebaseConfig";
 import { AuthContext } from "../data/contexts/AuthContext";
-import { useDispatch } from "react-redux";
-import { toggleOrganizationModal } from "../data/contexts/redux/states";
+import { useDispatch, useSelector } from "react-redux";
+import { setActiveOrganization, toggleOrganizationModal } from "../data/contexts/redux/states";
+import { RootState } from "../data/contexts/redux/configureStore";
 
 const HEADER_HEIGHT = 28;
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
@@ -61,6 +62,7 @@ function Home() {
   const [organizations, setOrganizations] = useState<OrganizationProps[]>();
   const [activeTab, setActiveTab] = useState<string | null>("skeleton");
   const dispatch = useDispatch()
+  const { activeOrganization } = useSelector((state: RootState) => state.states);
   useEffect(() => {
     //organizations live updates
     const unsub = onSnapshot(
@@ -103,14 +105,13 @@ function Home() {
 
   useEffect(() => {
     //update active tab on organization change (happens when user logs in from guest mode)
-    if (organizations && organizations[0] && organizations[0].id) {
-      setActiveTab(
-        organizations
+    if (organizations && organizations[0] && organizations[0].id && !activeOrganization) {
+      dispatch(setActiveOrganization(organizations
+        ? organizations[0].id
           ? organizations[0].id
-            ? organizations[0].id
-            : null
-          : "guest"
-      );
+          : null
+        : "guest"))
+      
     }
   }, [organizations]);
 
@@ -181,8 +182,8 @@ function Home() {
     <>
       <Tabs
         radius="xs"
-        value={activeTab}
-        onTabChange={setActiveTab}
+        value={activeOrganization}
+        onTabChange={(value=>dispatch(setActiveOrganization(value)))}
         keepMounted={false}
       >
         <Header

@@ -195,7 +195,8 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
           "ktab-manager",
           user?.uid ? user.uid : "guest",
           "organizations"
-        )
+        ),
+        where("isDeleted", "==", 0)
       );
       getDocs(q)
         .then((r) => {
@@ -224,7 +225,8 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
           user?.uid ? user.uid : "guest",
           "collections"
         ),
-        where("parent", "==", itemForm.values.orgparent)
+        where("parent", "==", itemForm.values.orgparent),
+        where("isDeleted", "==", 0)
       );
       getDocs(q)
         .then((r) => {
