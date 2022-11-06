@@ -129,7 +129,7 @@ function Organization({ organization }: OrganizationComponentProps) {
   const { organizationColor } = useSelector((state: RootState) => state.states);
   useEffect(() => {
     dispatch(setOrganizationColor(organization.color));
-  }, []);
+  }, [organization.color]);
   const [globalMinifyContainers, setGlobalMinifyContainers] = useState(false);
   /**
    * My states: collections,itemss
@@ -793,9 +793,9 @@ const ContainerItem = ({
                 >
                   {data?.name}
                 </Text>
-                <Badge size="xs" radius="md">
+                {/* <Badge size="xs" radius="md">
                   Modern Javascript
-                </Badge>
+                </Badge> */}
               </Group>
             )}
           </Grid.Col>

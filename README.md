@@ -50,3 +50,60 @@ User A (ID)
 - Edit profile
 - Add functional entries to the spotlight
 - Maybe cache orgs, collections, items to localStorage for faster init 
+
+
+Organization Firestore collection
+  Each entry is a new organization
+  Each organization has:
+  ```
+  "Container": [
+    "A1", //array  of objects
+    "A3"
+  ],
+  "Container": [
+    "B3"
+  ]
+  ```
+  Each item within the container is an object:
+  ```
+  {
+    id: UniqueIdentifier,
+    name: "Name of the item",
+    type: link|todo|note|reminder|countdown|calender
+    link: "http://link.com",
+    content: "String content/RTE content",
+    color: Color Code,
+    tags: important|password|etc
+    created_on: timestamp,
+    is_deleted: boolean //Shows up in trash
+  }
+  ```
+  name, content, link is used in Search.
+  Hierarchy is like:
+  ```
+  {
+    Organization: {
+      "Container": [
+          "A1",
+          "A3"
+      ],
+      "Container": [
+          "B3"
+      ]
+    },
+    Organization: {
+      "Container": [
+          "A3"
+      ]
+    }
+  }
+  ```
+  TODO:
+  * Notifications in header
+  * Firestore sync
+  * Trash drag
+  * Login using socials
+  * Settings
+  * Search
+  * Theme color swachtes
+  * Checklists

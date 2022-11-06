@@ -30,8 +30,13 @@ import {
 import { db } from "../data/firebaseConfig";
 import { AuthContext } from "../data/contexts/AuthContext";
 import { useDispatch, useSelector } from "react-redux";
-import { setActiveOrganization, toggleOrganizationModal } from "../data/contexts/redux/states";
+import {
+  setActiveOrganization,
+  toggleOrganizationModal,
+} from "../data/contexts/redux/states";
 import { RootState } from "../data/contexts/redux/configureStore";
+import { useLocalStorage } from "@mantine/hooks";
+import { TimeInput } from "@mantine/dates";
 
 const HEADER_HEIGHT = 28;
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
@@ -59,10 +64,26 @@ interface ItemProps {
 function Home() {
   const user = useContext(AuthContext);
   const { classes, cx } = useStyles();
-  const [organizations, setOrganizations] = useState<OrganizationProps[]>();
+  const { activeOrganization } = useSelector(
+    (state: RootState) => state.states
+  );
+  const [organizations, setOrganizations] = useLocalStorage<
+    OrganizationProps[]
+  >({
+    key: "organizations",
+    defaultValue: [
+      {
+        id: activeOrganization||"",
+        name: "string",
+        icon: "string",
+        color: "string",
+        accent: "string",
+      },
+    ],
+  });
   const [activeTab, setActiveTab] = useState<string | null>("skeleton");
-  const dispatch = useDispatch()
-  const { activeOrganization } = useSelector((state: RootState) => state.states);
+  const dispatch = useDispatch();
+  const { userId } = useSelector((state: RootState) => state.actions);
   useEffect(() => {
     //organizations live updates
     const unsub = onSnapshot(
@@ -104,86 +125,27 @@ function Home() {
   };
 
   useEffect(() => {
-    //update active tab on organization change (happens when user logs in from guest mode)
-    if (organizations && organizations[0] && organizations[0].id && !activeOrganization) {
-      dispatch(setActiveOrganization(organizations
+    let temp = organizations.map(e=>e.id)
+    
+    if(!activeOrganization || !temp.includes(activeOrganization)){
+      dispatch(
+      setActiveOrganization(
+        organizations
         ? organizations[0].id
-          ? organizations[0].id
-          : null
-        : "guest"))
-      
+              ? organizations[0].id
+              : null
+            : "guest"
+        )
+      );
     }
-  }, [organizations]);
+  }, [organizations?.length]);
 
-  function handleNewOrganization(event: SyntheticEvent) {
-    console.log(event);
-    //TODO: open organization modal with organization/collection preselected, ready to add.
-  }
-
-  /*
-  Organization Firestore collection
-  Each entry is a new organization
-  Each organization has:
-  ```
-  "Container": [
-    "A1", //array  of objects
-    "A3"
-  ],
-  "Container": [
-    "B3"
-  ]
-  ```
-  Each item within the container is an object:
-  ```
-  {
-    id: UniqueIdentifier,
-    name: "Name of the item",
-    type: link|todo|note|reminder|countdown|calender
-    link: "http://link.com",
-    content: "String content/RTE content",
-    color: Color Code,
-    tags: important|password|etc
-    created_on: timestamp,
-    is_deleted: boolean //Shows up in trash
-  }
-  ```
-  name, content, link is used in Search.
-  Hierarchy is like:
-  ```
-  {
-    Organization: {
-      "Container": [
-          "A1",
-          "A3"
-      ],
-      "Container": [
-          "B3"
-      ]
-    },
-    Organization: {
-      "Container": [
-          "A3"
-      ]
-    }
-  }
-  ```
-  TODO:
-  * Notifications in header
-  * Firestore sync
-  * Trash drag
-  * Login using socials
-  * Settings
-  * Search
-  * Theme color swachtes
-  * Checklists
-  * 
-  */
   return (
     <>
       <Tabs
         radius="xs"
         value={activeOrganization}
-        onTabChange={(value=>dispatch(setActiveOrganization(value)))}
+        onTabChange={(value) => dispatch(setActiveOrganization(value))}
         keepMounted={false}
       >
         <Header
@@ -195,31 +157,26 @@ function Home() {
               className={cx(classes.vmiddle, classes.lineHeightFix)}
               sx={{ paddingInline: 53 }}
             >
-              {organizations ? (
-                organizations?.map((organization) => (
-                  <Tabs.Tab
-                    key={organization.id ? organization.id : ""}
-                    value={organization.id ? organization.id : ""}
-                    icon={organization.icon}
-                    sx={{
-                      height: 28,
-                      fontSize: "12px",
-                      background: `linear-gradient(transparent,${organization.color} 170%)`,
-                    }}
-                  >
-                    {organization.name}
-                  </Tabs.Tab>
-                ))
-              ) : (
-                <>
-                  <Tabs.Tab value="skeleton">
-                    <Skeleton height={8} mt={6} radius="xl" />
-                  </Tabs.Tab>
-                  <Skeleton height={8} mt={6} radius="xl" />
-                </>
-              )}
+              {organizations
+                ? organizations?.map((organization) => (
+                    <Tabs.Tab
+                      key={organization.id ? organization.id : ""}
+                      value={organization.id ? organization.id : ""}
+                      icon={organization.icon}
+                      sx={{
+                        height: 28,
+                        fontSize: "12px",
+                        background: `linear-gradient(transparent,${organization.color} 170%)`,
+                      }}
+                    >
+                      {organization.name}
+                    </Tabs.Tab>
+                  ))
+                : null}
               <Button
-                onClick={()=>dispatch(toggleOrganizationModal('organization'))}
+                onClick={() =>
+                  dispatch(toggleOrganizationModal("organization"))
+                }
                 variant="subtle"
                 compact
                 sx={{
@@ -232,24 +189,18 @@ function Home() {
             </Tabs.List>
           </Box>
         </Header>
-        {organizations ? (
-          organizations?.map((organization) => (
-            <Tabs.Panel
-              key={organization.id ? organization.id : ""}
-              value={organization.id ? organization.id : ""}
-            >
-              <Organization organization={organization} />
-            </Tabs.Panel>
-          ))
-        ) : (
-          <Tabs.Panel value="skeleton">
-            <Skeleton height={50} circle mb="xl" />
-            <Skeleton height={8} radius="xl" />
-            <Skeleton height={8} mt={6} radius="xl" />
-            <Skeleton height={8} mt={6} width="70%" radius="xl" />
-          </Tabs.Panel>
-        )}
+        {organizations
+          ? organizations?.map((organization) => (
+              <Tabs.Panel
+                key={organization.id ? organization.id : ""}
+                value={organization.id ? organization.id : ""}
+              >
+                <Organization organization={organization} />
+              </Tabs.Panel>
+            ))
+          : null}
       </Tabs>
+      {organizations === undefined && <Skeleton height={100}></Skeleton>}
     </>
   );
 }
