@@ -9,7 +9,14 @@ import {
   AlphaSlider,
   Slider,
   Title,
+  Button,
+  TextInput,
+  Avatar,
 } from "@mantine/core";
+import { AuthContext } from "../data/contexts/AuthContext";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "../data/contexts/redux/configureStore";
+import { toggleLoginModal } from "../data/contexts/redux/states";
 
 interface Props {
   open: boolean;
@@ -17,6 +24,9 @@ interface Props {
   personalize?: boolean;
 }
 export default function LoginModal({ open, setOpen, personalize }: Props) {
+  const user = useContext(AuthContext);
+  const {} = useSelector((state: RootState) => state.states);
+  const dispatch = useDispatch();
   return (
     <>
       <Modal
@@ -35,7 +45,45 @@ export default function LoginModal({ open, setOpen, personalize }: Props) {
           </Tabs.List>
 
           <Tabs.Panel value="profile" pt="xs">
-            <Box px={20} pt={10} mb={20} mx="auto"></Box>
+            {user ? (
+              <Box px={20} pt={10} mb={20} mx="auto">
+                <Avatar
+                  variant="outline"
+                  size="xl"
+                  color="green"
+                  src={user.photoURL}
+                  mb={20}
+                />
+                <TextInput label="Name" placeholder="Name" pb={20} value={user.displayName||""} />
+                <TextInput label="Email" placeholder="Email" pb={20} disabled value={user.email||""} />
+                <Button
+                  component="a"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={"https://akshaykn.vercel.app/contact"}
+                >
+                  Save
+                </Button>
+              </Box>
+            ) : (
+              <Box
+                px={20}
+                pt={30}
+                mb={30}
+                mx="auto"
+                style={{ textAlign: "center" }}
+              >
+                <Text mb={10} size="xs">
+                  Login to use this section
+                </Text>
+                <Button
+                  onClick={() => dispatch(toggleLoginModal())}
+                  size={"xs"}
+                >
+                  Login
+                </Button>
+              </Box>
+            )}
           </Tabs.Panel>
 
           <Tabs.Panel value="personalize" pt="xs">

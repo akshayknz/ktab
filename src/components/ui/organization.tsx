@@ -53,6 +53,7 @@ import {
   useEffect,
   useContext,
   MutableRefObject,
+  useMemo,
 } from "react";
 import { MdDragIndicator, MdOutlineAdd } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
@@ -78,7 +79,11 @@ import {
   toggleOrganizationModal,
 } from "../data/contexts/redux/states";
 import { useClickOutside } from "@mantine/hooks";
-import { softDeleteDocument, updateColor } from "../data/contexts/redux/actions";
+import {
+  minimizeCollections,
+  softDeleteDocument,
+  updateColor,
+} from "../data/contexts/redux/actions";
 import { RootState } from "../data/contexts/redux/configureStore";
 
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
@@ -137,8 +142,8 @@ function Organization({ organization }: OrganizationComponentProps) {
    * States from DnD kit: containers, items
    */
   const [collections, setCollections] = useState<CollectionProps[]>([
-    { id: "", name: "", color: "", parent: "" },
-  ]);
+    {},
+  ] as CollectionProps[]);
   const [itemss, setItemss] = useState<ItemProps[]>();
   const [allItems, setAllItems] = useState<any>();
   const [items, setItems] = useState<Items>({
@@ -146,6 +151,10 @@ function Organization({ organization }: OrganizationComponentProps) {
   });
   const [containers, setContainers] = useState(
     Object.keys(items) as UniqueIdentifier[]
+  );
+  const minimized = useMemo(
+    () => collections.filter((e) => e.minimized === true),
+    [collections]
   );
 
   useEffect(() => {
@@ -211,6 +220,7 @@ function Organization({ organization }: OrganizationComponentProps) {
       name: doc.data().name,
       color: doc.data().color,
       parent: doc.data().parent,
+      minimized: doc.data().minimized,
     };
   };
   const docsToItems = (doc: DocumentData) => {
@@ -221,6 +231,9 @@ function Organization({ organization }: OrganizationComponentProps) {
       parent: doc.data().parent,
       orgparent: doc.data().orgparent,
       content: doc.data().content,
+      type: doc.data().type,
+      link: doc.data().link,
+      icon: doc.data().icon,
     };
   };
   const findContainer = (id: UniqueIdentifier) => {
@@ -467,10 +480,41 @@ function Organization({ organization }: OrganizationComponentProps) {
             >
               Add New Collection
             </Button>
-            <Button variant="light" compact mx={4} leftIcon={<FiMinimize2 />}>
-              Min/Max
-            </Button>
-
+            {minimized.length === collections.length ? (
+              <Button
+                variant="light"
+                compact
+                mx={4}
+                leftIcon={<FiMaximize2 />}
+                onClick={() => {
+                  dispatch(
+                    minimizeCollections({
+                      ids: collections.map((e) => e.id),
+                      state: false,
+                    })
+                  );
+                }}
+              >
+                Maximize
+              </Button>
+            ) : (
+              <Button
+                variant="light"
+                compact
+                mx={4}
+                leftIcon={<FiMinimize2 />}
+                onClick={() => {
+                  dispatch(
+                    minimizeCollections({
+                      ids: collections.map((e) => e.id),
+                      state: true,
+                    })
+                  );
+                }}
+              >
+                Minimize
+              </Button>
+            )}
             <Popover
               closeOnClickOutside
               transition="pop"
@@ -513,7 +557,7 @@ function Organization({ organization }: OrganizationComponentProps) {
                           updateColor({
                             type: "organizations",
                             docId: organization.id,
-                            color: organizationColor
+                            color: organizationColor,
                           })
                         );
                         setColorPopover((prev) => !prev);
@@ -539,7 +583,14 @@ function Organization({ organization }: OrganizationComponentProps) {
               compact
               mx={4}
               leftIcon={<FiEdit3 />}
-              onClick={() => dispatch(toggleEditOrganizationModal({type:"organization", data:organization}))}
+              onClick={() =>
+                dispatch(
+                  toggleEditOrganizationModal({
+                    type: "organization",
+                    data: organization,
+                  })
+                )
+              }
             >
               Edit
             </Button>
@@ -702,14 +753,20 @@ const Overlay = ({ currentlyContainer, data }: OverlayProps) => {
     </>
   );
 };
-
+interface ContainerComponentProps {
+  name: UniqueIdentifier;
+  data: CollectionProps;
+  globalMinifyContainers: boolean;
+  setGlobalMinifyContainers: React.Dispatch<SetStateAction<boolean>>;
+  children: React.ReactNode;
+}
 const ContainerItem = ({
   name,
   data,
   globalMinifyContainers,
   setGlobalMinifyContainers,
   children,
-}: any) => {
+}: ContainerComponentProps) => {
   const {
     setNodeRef,
     attributes,
@@ -723,7 +780,7 @@ const ContainerItem = ({
   const dispatch = useDispatch();
   const { classes, cx } = useStyles();
   const [edit, setEdit] = useState(false);
-  const [minimize, setMinimize] = useState(false);
+  const [minimize, setMinimize] = useState(data.minimized);
   const [trashPopover, setTrashPopover] = useState(false);
   const trashboxRef = useClickOutside(() => setTrashPopover(false));
 
@@ -746,6 +803,13 @@ const ContainerItem = ({
   useEffect(() => {
     if (edit) inputRef.current?.select();
   }, [edit]);
+  useEffect(()=>{
+    setMinimize(data.minimized)
+  },[data.minimized])
+  const handleMinimize = () => {
+    dispatch(minimizeCollections({ ids: [data.id], state: !minimize }));
+    setMinimize((prev) => !prev);
+  };
   return (
     <Box
       ref={setNodeRef}
@@ -828,7 +892,7 @@ const ContainerItem = ({
                   withArrow
                   withRoles
                   trapFocus
-                  position="left"
+                  position="left-start"
                   opened={trashPopover}
                 >
                   <Popover.Target>
@@ -881,14 +945,14 @@ const ContainerItem = ({
                   </Popover.Dropdown>
                 </Popover>
 
-                <Tooltip label="Minimize this collection">
+                <Tooltip label="Minimize/Maximize this collection">
                   <Button
                     variant="default"
                     radius="md"
                     size="xs"
-                    onClick={() => setMinimize((prev) => !prev)}
+                    onClick={handleMinimize}
                   >
-                    {minimize ? <FiMaximize2 /> : <FiMinimize2 />}
+                    {data.minimized ? <FiMaximize2 /> : <FiMinimize2 />}
                   </Button>
                 </Tooltip>
               </Group>
@@ -908,7 +972,7 @@ const ContainerItem = ({
           </Grid.Col>
         </Grid>
       </Container>
-      {!minimize && !globalMinifyContainers && (
+      {!data.minimized && !globalMinifyContainers && (
         <div
           style={{
             maxHeight: isDragging ? "0px" : "500px",

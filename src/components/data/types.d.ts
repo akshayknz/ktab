@@ -15,6 +15,7 @@ interface CollectionProps {
   parent: string;
   name: string;
   color: string;
+  minimized: boolean;
 }
 
 interface ItemProps {
@@ -23,7 +24,10 @@ interface ItemProps {
   parent: string;
   name: string;
   color: string;
+  type: string;
   content?: string;
+  link?: string;
+  icon?: string;
 }
 
 interface ItemCollection {

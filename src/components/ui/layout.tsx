@@ -33,7 +33,7 @@ import SettingsModal from "./SettingsModal";
 import { useSelector } from "react-redux";
 import { RootState } from "../data/contexts/redux/configureStore";
 import { useDispatch } from "react-redux";
-import { toggleOrganizationModal } from "../data/contexts/redux/states";
+import { toggleLoginModal, toggleOrganizationModal } from "../data/contexts/redux/states";
 import TrashModal from "./TrashModal";
 import ArchiveModal from "./ArchiveModal";
 import { setUserId } from "../data/contexts/redux/actions";
@@ -41,13 +41,13 @@ export function Layout({ children }: DoubleHeaderProps) {
   const user = useContext(AuthContext);
   const { classes, cx } = useStyles();
   const inputRef = useRef<any>(null);
-  const [loginModal, setLoginModal] = useState(false);
+  // const [loginModal, setLoginModal] = useState(false);
   const [aboutModal, setAboutModal] = useState(false);
   const [settingsModal, setSettingsModal] = useState(false);
   const [trashModal, setTrashModal] = useState(false);
   const [archiveModal, setArchiveModal] = useState(false);
   const [personalizeModal, setPersonalizeModal] = useState(false);
-  const { showOrganizationModal } = useSelector(
+  const { showOrganizationModal, showLoginModal } = useSelector(
     (state: RootState) => state.states
   );
   const dispatch = useDispatch();
@@ -371,13 +371,15 @@ export function Layout({ children }: DoubleHeaderProps) {
                 size="xs"
                 compact
                 className={cx(classes.vmiddle, classes.menuitem)}
-                onClick={() => setLoginModal((prevState) => !prevState)}
+                onClick={() =>{
+                  dispatch(toggleLoginModal())
+                }}
               >
                 Login
               </Button>
             </>
           )}
-          <LoginModal open={loginModal} setOpen={setLoginModal} />
+          <LoginModal open={showLoginModal} />
         </Box>
       </Header>
       {/* {organizationModal && (

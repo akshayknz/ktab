@@ -18,12 +18,14 @@ import { auth } from "../data/firebaseConfig";
 import { GoogleAuthProvider } from "firebase/auth";
 import { AccordionControl } from "@mantine/core/lib/Accordion/AccordionControl/AccordionControl";
 import { MdOutlineMarkEmailUnread } from "react-icons/md";
+import { toggleLoginModal } from "../data/contexts/redux/states";
+import { useDispatch } from "react-redux";
 interface Props {
   open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
-export default function LoginModal({ open, setOpen }: Props) {
+export default function LoginModal({ open }: Props) {
   const user = useContext(AuthContext);
+  const dispatch = useDispatch();
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const createAccount = async () => {
@@ -32,7 +34,7 @@ export default function LoginModal({ open, setOpen }: Props) {
         emailRef.current!.value,
         passwordRef.current!.value
       );
-      setOpen(false);
+      dispatch(toggleLoginModal());
     } catch (error) {
       console.log(error);
     }
@@ -43,7 +45,7 @@ export default function LoginModal({ open, setOpen }: Props) {
         emailRef.current!.value,
         passwordRef.current!.value
       );
-      setOpen(false);
+      dispatch(toggleLoginModal());
     } catch (error) {
       console.log(error);
     }
@@ -56,7 +58,7 @@ export default function LoginModal({ open, setOpen }: Props) {
     try {
       auth.signInWithPopup(provider).then((result) => {
         console.log(result);
-        setOpen(false);
+        dispatch(toggleLoginModal());
       });
     } catch (error) {}
   };
@@ -64,7 +66,7 @@ export default function LoginModal({ open, setOpen }: Props) {
     <>
       <Modal
         opened={open}
-        onClose={() => setOpen(false)}
+        onClose={() => dispatch(toggleLoginModal())}
         title={
           <Title weight={300} order={2}>
             Login

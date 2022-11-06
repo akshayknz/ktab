@@ -210,6 +210,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
           name: values.name,
           color: values.color,
           order: 0,
+          minimized:false,
           archive: false,
           isDeleted: 0,
           updatedAt: +new Date(),

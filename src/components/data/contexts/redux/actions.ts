@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { deleteDoc, doc, updateDoc, writeBatch } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 
 export const actionSlice = createSlice({
@@ -50,10 +50,30 @@ export const actionSlice = createSlice({
         }
       );
     },
+    minimizeCollections: (state, action) => {
+      const arr = action.payload.ids;
+      const run = async () => {
+        const batch = writeBatch(db); //writeBranch for multiple updates through loops
+        arr.forEach((docId: string) => {
+          batch.update(
+            doc(db, "ktab-manager", state.userId, "collections", docId),
+            { minimized: action.payload.state }
+          );
+        });
+        await batch.commit();
+        console.log("commited");
+      };
+      run();
+    },
   },
 });
 
-export const { setUserId, softDeleteDocument, deleteDocument, updateColor } =
-  actionSlice.actions;
+export const {
+  setUserId,
+  softDeleteDocument,
+  deleteDocument,
+  updateColor,
+  minimizeCollections,
+} = actionSlice.actions;
 
 export default actionSlice.reducer;
