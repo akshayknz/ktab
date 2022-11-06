@@ -13,12 +13,24 @@ import {
   Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { useContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AuthContext } from "../data/contexts/AuthContext";
 import { RootState } from "../data/contexts/redux/configureStore";
-import { toggleOrganizationModal } from "../data/contexts/redux/states";
+import {
+  resetEditOrganizationData,
+  setOrganizationOrCollection,
+  toggleOrganizationModal,
+} from "../data/contexts/redux/states";
 import { db } from "../data/firebaseConfig";
 
 interface OrganizationModalProps {
@@ -52,9 +64,12 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
   const user = useContext(AuthContext);
   const [organizations, setOrganizations] = useState<OrganizationProps[]>([]);
   const [collections, setCollections] = useState<CollectionProps[]>([]);
-  const { organizationOrCollection } = useSelector(
-    (state: RootState) => state.states
-  );
+  const {
+    organizationOrCollection,
+    editOrganizationData,
+    editCollectionData,
+    editItemData,
+  } = useSelector((state: RootState) => state.states);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState<string>("");
   const organizationForm = useForm({
@@ -70,6 +85,27 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
       icon: (value) => (value.length < 3 ? null : "Please enter an icon/emoji"),
     },
   });
+  useEffect(() => {
+    switch (organizationOrCollection) {
+      case "organization":
+        organizationForm.setFieldValue("name", editOrganizationData.name);
+        organizationForm.setFieldValue("icon", editOrganizationData.icon);
+        organizationForm.setFieldValue("color", editOrganizationData.color);
+        organizationForm.setFieldValue("accent", editOrganizationData.accent);
+        break;
+      case "collection":
+        collectionForm.setFieldValue("name", editCollectionData.name);
+        collectionForm.setFieldValue("parent", editCollectionData.parent);
+        collectionForm.setFieldValue("color", editCollectionData.color);
+        break;
+      case "item":
+        itemForm.setFieldValue("orgparent", editItemData.orgparent);
+        itemForm.setFieldValue("parent", editItemData.parent);
+        itemForm.setFieldValue("name", editItemData.name);
+        itemForm.setFieldValue("color", editItemData.color);
+        break;
+    }
+  }, [open]);
 
   const collectionForm = useForm({
     initialValues: {
@@ -123,6 +159,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
     };
     upload().then(() => {
       setLoading("");
+      dispatch(toggleOrganizationModal(organizationOrCollection));
       organizationForm.reset();
       // showNotification({
       //   title: 'Entry added',
@@ -131,7 +168,33 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
       // })
     });
   }
-
+  function handleUpdateOrganization(values: OrganizationProps) {
+    setLoading("organization");
+    const update = async () => {
+      await updateDoc(
+        doc(
+          db,
+          "ktab-manager",
+          user?.uid ? user.uid : "guest",
+          "organizations",
+          editOrganizationData.id ? editOrganizationData.id : ""
+        ),
+        {
+          name: values.name,
+          icon: values.icon,
+          color: values.color,
+          accent: values.accent,
+          updatedAt: +new Date(),
+        }
+      );
+    };
+    update().then(() => {
+      setLoading("");
+      organizationForm.reset();
+      dispatch(toggleOrganizationModal(organizationOrCollection));
+      dispatch(resetEditOrganizationData());
+    });
+  }
   function handleSubmitCollection(values: CollectionProps) {
     setLoading("collection");
     const upload = async () => {
@@ -156,6 +219,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
     };
     upload().then(() => {
       setLoading("");
+      dispatch(toggleOrganizationModal(organizationOrCollection));
       collectionForm.reset();
     });
   }
@@ -183,6 +247,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
     };
     upload().then(() => {
       setLoading("");
+      dispatch(toggleOrganizationModal(organizationOrCollection));
       itemForm.reset();
     });
   }
@@ -246,7 +311,10 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
   return (
     <Modal
       opened={open}
-      onClose={() => dispatch(toggleOrganizationModal("organization"))}
+      onClose={() => {
+        dispatch(toggleOrganizationModal(organizationOrCollection));
+        dispatch(resetEditOrganizationData());
+      }}
       title={
         <Title weight={300} order={2}>
           {`Manage ${
@@ -258,17 +326,38 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
     >
       <Tabs defaultValue={organizationOrCollection}>
         <Tabs.List grow>
-          <Tabs.Tab value="organization">Organization</Tabs.Tab>
-          <Tabs.Tab value="collection">Collection</Tabs.Tab>
-          <Tabs.Tab value="item">Item</Tabs.Tab>
+          <Tabs.Tab
+            value="organization"
+            onClick={() =>
+              dispatch(setOrganizationOrCollection("organization"))
+            }
+          >
+            Organization
+          </Tabs.Tab>
+          <Tabs.Tab
+            value="collection"
+            onClick={() => dispatch(setOrganizationOrCollection("collection"))}
+          >
+            Collection
+          </Tabs.Tab>
+          <Tabs.Tab
+            value="item"
+            onClick={() => dispatch(setOrganizationOrCollection("item"))}
+          >
+            Item
+          </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="organization" pt="xs">
           <Box px={20} pt={10} pb={20} mx="auto">
             <form
-              onSubmit={organizationForm.onSubmit((values) =>
-                handleSubmitOrganization(values)
-              )}
+              onSubmit={organizationForm.onSubmit((values) => {
+                if (editOrganizationData?.id != undefined) {
+                  handleUpdateOrganization(values);
+                } else {
+                  handleSubmitOrganization(values);
+                }
+              })}
             >
               <TextInput
                 label="Name"
@@ -290,7 +379,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
                 format="rgba"
                 pb={20}
                 {...organizationForm.getInputProps("color")}
-                autocomplete="new-password"
+                autoComplete="new-password"
               />
               <Text weight={500} sx={{ fontSize: 14 }} pb={5}>
                 Accent Color
@@ -300,7 +389,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
                 format="rgba"
                 pb={20}
                 {...organizationForm.getInputProps("accent")}
-                autocomplete="new-password"
+                autoComplete="new-password"
               />
 
               <Group position="right" mt="md">
@@ -346,7 +435,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
                 format="rgba"
                 pb={20}
                 {...collectionForm.getInputProps("color")}
-                autocomplete="new-password"
+                autoComplete="new-password"
               />
 
               <Group position="right" mt="md">
@@ -397,7 +486,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
                 format="rgba"
                 pb={20}
                 {...itemForm.getInputProps("color")}
-                autocomplete="new-password"
+                autoComplete="new-password"
               />
 
               <Group position="right" mt="md">

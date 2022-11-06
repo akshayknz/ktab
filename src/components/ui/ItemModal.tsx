@@ -22,6 +22,7 @@ import { db } from "../data/firebaseConfig";
 import { AuthContext } from "../data/contexts/AuthContext";
 import { FiMaximize2, FiMinimize2 } from "react-icons/fi";
 import { BsGear } from "react-icons/bs";
+import { VscChromeClose } from "react-icons/vsc";
 import { ItemType } from "../data/constants";
 import { useTheme } from "@emotion/react";
 import { useDispatch } from "react-redux";
@@ -129,7 +130,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
                   size="xs"
                   onClick={handleClose}
                 >
-                  <CloseButton title="Close popover" />
+                  <VscChromeClose size={13} />
                 </Button>
               </Box>
             </Grid.Col>

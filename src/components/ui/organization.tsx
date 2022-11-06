@@ -74,6 +74,7 @@ import { AuthContext } from "../data/contexts/AuthContext";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setOrganizationColor,
+  toggleEditOrganizationModal,
   toggleOrganizationModal,
 } from "../data/contexts/redux/states";
 import { useClickOutside } from "@mantine/hooks";
@@ -538,7 +539,7 @@ function Organization({ organization }: OrganizationComponentProps) {
               compact
               mx={4}
               leftIcon={<FiEdit3 />}
-              onClick={() => dispatch(toggleOrganizationModal("organization"))}
+              onClick={() => dispatch(toggleEditOrganizationModal({type:"organization", data:organization}))}
             >
               Edit
             </Button>
