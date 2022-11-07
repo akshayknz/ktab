@@ -11,13 +11,14 @@ import {
   ActionIcon,
   Card,
   Group,
+  Avatar,
   Transition,
   Anchor,
   Switch,
 } from "@mantine/core";
 import { Suspense, useContext, useEffect, useRef, useState } from "react";
 import { RiTableFill } from "react-icons/ri";
-import { MdKeyboardArrowRight } from "react-icons/md";
+import { MdKeyboardArrowRight, MdPersonOutline } from "react-icons/md";
 import { SpotlightProvider, openSpotlight } from "@mantine/spotlight";
 import type { SpotlightAction } from "@mantine/spotlight";
 import LoginModal from "./LoginModal";
@@ -33,7 +34,10 @@ import SettingsModal from "./SettingsModal";
 import { useSelector } from "react-redux";
 import { RootState } from "../data/contexts/redux/configureStore";
 import { useDispatch } from "react-redux";
-import { toggleLoginModal, toggleOrganizationModal } from "../data/contexts/redux/states";
+import {
+  toggleLoginModal,
+  toggleOrganizationModal,
+} from "../data/contexts/redux/states";
 import TrashModal from "./TrashModal";
 import ArchiveModal from "./ArchiveModal";
 import { setUserId } from "../data/contexts/redux/actions";
@@ -51,9 +55,9 @@ export function Layout({ children }: DoubleHeaderProps) {
     (state: RootState) => state.states
   );
   const dispatch = useDispatch();
-  useEffect(()=>{
-    dispatch(setUserId(user?.uid ? user.uid : "guest"))
-  },[user])
+  useEffect(() => {
+    dispatch(setUserId(user?.uid ? user.uid : "guest"));
+  }, [user]);
   function closeMenu() {
     inputRef.current!.click();
   }
@@ -287,6 +291,32 @@ export function Layout({ children }: DoubleHeaderProps) {
           </SpotlightProvider>
         </Box>
         <Box className={classes.vmiddle} style={{ float: "right" }}>
+          <Button
+            variant="default"
+            radius="xs"
+            size="xs"
+            compact
+            className={cx(classes.vmiddle, classes.menuitem)}
+            onClick={() => {
+              if (user) {
+                setSettingsModal((prevState) => !prevState);
+                setPersonalizeModal(false);
+              } else {
+                dispatch(toggleLoginModal());
+              }
+            }}
+          >
+            <Avatar
+              size="sm"
+              color="green"
+              radius="md"
+              src={user?.photoURL}
+              mr={user ? 10 : 0}
+            >
+              <MdPersonOutline size={15} />
+            </Avatar>
+            {user ? <>Welcome, {user?.displayName}</> : null}
+          </Button>
           <Popover
             transition="pop"
             width={400}
@@ -371,8 +401,8 @@ export function Layout({ children }: DoubleHeaderProps) {
                 size="xs"
                 compact
                 className={cx(classes.vmiddle, classes.menuitem)}
-                onClick={() =>{
-                  dispatch(toggleLoginModal())
+                onClick={() => {
+                  dispatch(toggleLoginModal());
                 }}
               >
                 Login

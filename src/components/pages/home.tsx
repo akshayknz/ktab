@@ -73,7 +73,7 @@ function Home() {
     key: "organizations",
     defaultValue: [
       {
-        id: activeOrganization||"",
+        id: activeOrganization || "",
         name: "string",
         icon: "string",
         color: "string",
@@ -125,13 +125,15 @@ function Home() {
   };
 
   useEffect(() => {
-    let temp = organizations.map(e=>e.id)
-    
-    if(!activeOrganization || !temp.includes(activeOrganization)){
+    let temp = organizations.map((e) => e.id);
+    if (
+      (!activeOrganization || !temp.includes(activeOrganization)) &&
+      organizations.length > 0
+    ) {
       dispatch(
-      setActiveOrganization(
-        organizations
-        ? organizations[0].id
+        setActiveOrganization(
+          organizations
+            ? organizations[0].id
               ? organizations[0].id
               : null
             : "guest"
@@ -160,8 +162,8 @@ function Home() {
               {organizations
                 ? organizations?.map((organization) => (
                     <Tabs.Tab
-                      key={organization.id ? organization.id : ""}
-                      value={organization.id ? organization.id : ""}
+                      key={organization.id ? organization.id : "undefined"}
+                      value={organization.id ? organization.id : "undefined"}
                       icon={organization.icon}
                       sx={{
                         height: 28,
@@ -192,8 +194,8 @@ function Home() {
         {organizations
           ? organizations?.map((organization) => (
               <Tabs.Panel
-                key={organization.id ? organization.id : ""}
-                value={organization.id ? organization.id : ""}
+                key={organization.id ? organization.id : "undefined"}
+                value={organization.id ? organization.id : "undefined"}
               >
                 <Organization organization={organization} />
               </Tabs.Panel>

@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import {
   Modal,
   Text,
@@ -17,6 +17,7 @@ import { AuthContext } from "../data/contexts/AuthContext";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../data/contexts/redux/configureStore";
 import { toggleLoginModal } from "../data/contexts/redux/states";
+import { useForm } from "@mantine/form";
 
 interface Props {
   open: boolean;
@@ -27,6 +28,37 @@ export default function LoginModal({ open, setOpen, personalize }: Props) {
   const user = useContext(AuthContext);
   const {} = useSelector((state: RootState) => state.states);
   const dispatch = useDispatch();
+  const profileForm = useForm({
+    initialValues: {
+      displayName: "",
+      email: "",
+    },
+    validate: {
+      displayName: (value) => (value ? null : "Please enter a username"),
+    },
+  });
+  useEffect(() => {
+    profileForm.setFieldValue("displayName", user?.displayName || "");
+    profileForm.setFieldValue("email", user?.email || "");
+  }, [open]);
+  const handleProfileSubmit = async (values: {
+    displayName: string;
+    email: string;
+  }) => {
+    user
+      ?.updateProfile({
+        displayName: values.displayName,
+        // photoURL: "https://example.com/jane-q-user/profile.jpg",
+      })
+      .then(
+        function () {
+          setOpen(false)
+        },
+        function (error) {
+          console.log(error);
+        }
+      );
+  };
   return (
     <>
       <Modal
@@ -47,23 +79,33 @@ export default function LoginModal({ open, setOpen, personalize }: Props) {
           <Tabs.Panel value="profile" pt="xs">
             {user ? (
               <Box px={20} pt={10} mb={20} mx="auto">
-                <Avatar
-                  variant="outline"
-                  size="xl"
-                  color="green"
-                  src={user.photoURL}
-                  mb={20}
-                />
-                <TextInput label="Name" placeholder="Name" pb={20} value={user.displayName||""} />
-                <TextInput label="Email" placeholder="Email" pb={20} disabled value={user.email||""} />
-                <Button
-                  component="a"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={"https://akshaykn.vercel.app/contact"}
+                <form
+                  onSubmit={profileForm.onSubmit((values) =>
+                    handleProfileSubmit(values)
+                  )}
                 >
-                  Save
-                </Button>
+                  <Avatar
+                    variant="outline"
+                    size="xl"
+                    color="green"
+                    src={user.photoURL}
+                    mb={20}
+                  />
+                  <TextInput
+                    label="Name"
+                    placeholder="Name"
+                    pb={20}
+                    {...profileForm.getInputProps("displayName")}
+                  />
+                  <TextInput
+                    label="Email"
+                    placeholder="Email"
+                    pb={20}
+                    disabled
+                    {...profileForm.getInputProps("email")}
+                  />
+                  <Button type="submit">Save</Button>
+                </form>
               </Box>
             ) : (
               <Box

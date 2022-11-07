@@ -376,7 +376,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
                 Organization Color
               </Text>
               <ColorInput
-                defaultValue="rgba(69, 122, 255, 1)"
+                defaultValue=""
                 format="rgba"
                 pb={20}
                 {...organizationForm.getInputProps("color")}
@@ -386,7 +386,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
                 Accent Color
               </Text>
               <ColorInput
-                defaultValue="rgba(69, 122, 255, 1)"
+                defaultValue=""
                 format="rgba"
                 pb={20}
                 {...organizationForm.getInputProps("accent")}
@@ -432,7 +432,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
                 Organization Color
               </Text>
               <ColorInput
-                defaultValue="rgba(69, 122, 255, 1)"
+                defaultValue=""
                 format="rgba"
                 pb={20}
                 {...collectionForm.getInputProps("color")}
@@ -483,7 +483,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
                 Item Color
               </Text>
               <ColorInput
-                defaultValue="rgba(69, 122, 255, 1)"
+                defaultValue=""
                 format="rgba"
                 pb={20}
                 {...itemForm.getInputProps("color")}
