@@ -28,6 +28,7 @@ interface ItemProps {
   content?: string;
   link?: string;
   icon?: string;
+  order: string;
 }
 
 interface ItemCollection {

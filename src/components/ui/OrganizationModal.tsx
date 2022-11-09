@@ -25,6 +25,7 @@ import {
 import { useContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AuthContext } from "../data/contexts/AuthContext";
+import { ItemType } from "../data/constants";
 import { RootState } from "../data/contexts/redux/configureStore";
 import {
   resetEditOrganizationData,
@@ -235,7 +236,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
           parent: values.parent,
           name: values.name,
           color: values.color,
-          type: "text",
+          type: ItemType.TEXT,
           link: "",
           icon: "",
           order: 0,

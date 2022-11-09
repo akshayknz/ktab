@@ -30,10 +30,12 @@ import {
   deleteDocument,
   softDeleteDocument,
 } from "../data/contexts/redux/actions";
+import { useForm } from "@mantine/form";
+import { useDebouncedValue } from "@mantine/hooks";
 interface Props {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  data: any;
+  data: ItemProps;
 }
 export default function ItemModal({ open, setOpen, data }: Props) {
   const dispatch = useDispatch();
@@ -42,8 +44,35 @@ export default function ItemModal({ open, setOpen, data }: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [minimize, setMinimize] = useState(false);
   const [settings, setSettings] = useState(false);
-  const [itemType, setItemType] = useState<string | ItemType>(ItemType.TEXT);
+  const [link, setLink] = useState("");
+  const [debouncedLink] = useDebouncedValue(link, 500);
   const [value, onChange] = useState(data?.content);
+  const settingsForm = useForm({
+    initialValues: {
+      type: ItemType.TEXT as ItemType,
+      color: "",
+      isDeleted: "0",
+      archive: "false",
+      order: "",
+    },
+    validate: {
+      type: (value: ItemType) => (value ? null : "Please select a item type"),
+      order: (value) => (value ? null : "Please enter an order"),
+    },
+  });
+  useEffect(()=>{
+    console.log(settingsForm.values);
+    settingsForm.setFieldValue("type", data.type as ItemType)
+    settingsForm.setFieldValue("color", data.color)
+    settingsForm.setFieldValue("order", data.order)
+    setLink(data.link||"")
+  },[open])
+  useEffect(()=>{
+    console.log(settingsForm.values);
+  },[settingsForm.values.type])
+  function handleLinkChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setLink(event.currentTarget.value)
+  }
   async function handleSubmit() {
     await updateDoc(
       doc(
@@ -56,6 +85,12 @@ export default function ItemModal({ open, setOpen, data }: Props) {
       {
         content: value ? value : "",
         name: inputRef.current?.value,
+        order: settingsForm.values.order,
+        type: settingsForm.values.type,
+        archive: settingsForm.values.archive,
+        isDeleted: +settingsForm.values.isDeleted,
+        color: settingsForm.values.color,
+        link: link,
       }
     );
     setOpen(false);
@@ -138,64 +173,71 @@ export default function ItemModal({ open, setOpen, data }: Props) {
           </Grid.Col>
         </Grid>
         {settings && (
-          <Grid align="center">
-            <Grid.Col span={4}>
-              <Select
-                label="Item type"
-                placeholder="Pick one"
-                defaultValue={itemType}
-                onChange={(value) => setItemType(value || ItemType.TEXT)}
-                data={[
-                  { value: ItemType.TEXT, label: "Text" },
-                  { value: ItemType.LINK, label: "Link" },
-                  { value: ItemType.TODO, label: "Todo" },
-                  { value: ItemType.REMINDER, label: "Reminder" },
-                ]}
-              />
-            </Grid.Col>
-            <Grid.Col span={4}>
-              <Text weight={500} sx={{ fontSize: 14 }} pb={3}>
-                Accent Color
-              </Text>
-              <ColorInput defaultValue="rgba(69, 122, 255, 1)" format="rgba" />
-            </Grid.Col>
-            <Grid.Col span={4}>
-              <Text weight={500} sx={{ fontSize: 14 }} pb={3}>
-                UID
-              </Text>
-              <Input placeholder="UID" value={data?.id} disabled />
-            </Grid.Col>
-            <Grid.Col span={4}>
-              <Select
-                label="Deleted"
-                placeholder="Pick one"
-                defaultValue={"0"}
-                data={[
-                  { value: "0", label: "False" },
-                  { value: "1", label: "True" },
-                ]}
-              />
-            </Grid.Col>
-            <Grid.Col span={4}>
-              <Text weight={500} sx={{ fontSize: 14 }} pb={3}>
-                Order
-              </Text>
-              <Input placeholder="Order" value={data?.order} />
-            </Grid.Col>
-            <Grid.Col span={4}>
-              <Select
-                label="Archived"
-                placeholder="Pick one"
-                defaultValue={"0"}
-                data={[
-                  { value: "0", label: "False" },
-                  { value: "1", label: "True" },
-                ]}
-              />
-            </Grid.Col>
-          </Grid>
+          <form>
+            <Grid align="center">
+              <Grid.Col span={4}>
+                <Select
+                  label="Item type"
+                  placeholder="Pick one"
+                  {...settingsForm.getInputProps("type")}
+                  data={[
+                    { value: ItemType.TEXT, label: "Text" },
+                    { value: ItemType.LINK, label: "Link" },
+                    { value: ItemType.TODO, label: "Todo" },
+                    { value: ItemType.REMINDER, label: "Reminder" },
+                  ]}
+                />
+              </Grid.Col>
+              <Grid.Col span={4}>
+                <Text weight={500} sx={{ fontSize: 14 }} pb={3}>
+                  Accent Color
+                </Text>
+                <ColorInput
+                {...settingsForm.getInputProps("color")}
+                  defaultValue="rgba(69, 122, 255, 1)"
+                  format="rgba"
+                />
+              </Grid.Col>
+              <Grid.Col span={4}>
+                <Text weight={500} sx={{ fontSize: 14 }} pb={3}>
+                  UID
+                </Text>
+                <Input placeholder="UID" value={data?.id} disabled />
+              </Grid.Col>
+              <Grid.Col span={4}>
+                <Select
+                {...settingsForm.getInputProps("isDeleted")}
+                  label="Deleted"
+                  placeholder="Pick one"
+                  defaultValue={"0"}
+                  data={[
+                    { value: "0", label: "False" },
+                    { value: "1", label: "True" },
+                  ]}
+                />
+              </Grid.Col>
+              <Grid.Col span={4}>
+                <Text weight={500} sx={{ fontSize: 14 }} pb={3}>
+                  Order
+                </Text>
+                <Input placeholder="Order" value={data?.order} {...settingsForm.getInputProps("order")} />
+              </Grid.Col>
+              <Grid.Col span={4}>
+                <Select
+                {...settingsForm.getInputProps("archive")}
+                  label="Archived"
+                  placeholder="Pick one"
+                  defaultValue={"0"}
+                  data={[
+                    { value: "false", label: "False" },
+                    { value: "true", label: "True" },
+                  ]}
+                />
+              </Grid.Col>
+            </Grid>
+          </form>
         )}
-        {itemType == ItemType.TEXT && (
+        {settingsForm.values.type == ItemType.TEXT && (
           <RichTextEditor
             stickyOffset={"-48px"}
             value={value}
@@ -203,24 +245,24 @@ export default function ItemModal({ open, setOpen, data }: Props) {
             style={{ minHeight: "40vh" }}
           />
         )}
-        {itemType == ItemType.LINK && (
+        {settingsForm.values.type == ItemType.LINK && (
           <Grid align="center" grow>
             <Grid.Col
               span={1}
               style={{ display: "flex", justifyContent: "flex-end" }}
             >
               <Avatar
-                src="https://s2.googleusercontent.com/s2/favicons?domain=http://www.stackoverflow.com"
+                src={`https://s2.googleusercontent.com/s2/favicons?domain=${debouncedLink}`}
                 alt="it's me"
               />
             </Grid.Col>
             <Grid.Col span={11}>
-              <Input placeholder="URL" value={data?.link} />
+              <Input placeholder="URL" value={link} onChange={handleLinkChange} />
             </Grid.Col>
           </Grid>
         )}
-        {itemType == ItemType.TODO && <code>under construction</code>}
-        {itemType == ItemType.REMINDER && <code>under construction</code>}
+        {settingsForm.values.type == ItemType.TODO && <code>under construction</code>}
+        {settingsForm.values.type == ItemType.REMINDER && <code>under construction</code>}
         <Box style={{ display: "flex", justifyContent: "flex-end" }} mt={20}>
           <SimpleGrid cols={3}>
             <Button

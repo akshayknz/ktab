@@ -234,6 +234,7 @@ function Organization({ organization }: OrganizationComponentProps) {
       type: doc.data().type,
       link: doc.data().link,
       icon: doc.data().icon,
+      order: doc.data().order,
     };
   };
   const findContainer = (id: UniqueIdentifier) => {
