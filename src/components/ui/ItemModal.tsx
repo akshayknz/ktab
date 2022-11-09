@@ -26,7 +26,10 @@ import { VscChromeClose } from "react-icons/vsc";
 import { ItemType } from "../data/constants";
 import { useTheme } from "@emotion/react";
 import { useDispatch } from "react-redux";
-import { deleteDocument, softDeleteDocument } from "../data/contexts/redux/actions";
+import {
+  deleteDocument,
+  softDeleteDocument,
+} from "../data/contexts/redux/actions";
 interface Props {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -58,7 +61,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
     setOpen(false);
   }
   async function handleDelete() {
-    dispatch(softDeleteDocument({type:"items",docId:data?.id}))
+    dispatch(softDeleteDocument({ type: "items", docId: data?.id }));
     setOpen(false);
   }
   function handleClose() {
@@ -71,56 +74,39 @@ export default function ItemModal({ open, setOpen, data }: Props) {
     transitionProperty: "transform, opacity",
   };
   return (
-    <>
-      <Modal
-        size={minimize ? "100%" : "70%"}
-        opened={open}
-        onClose={handleClose}
-        withCloseButton={false}
-      >
-        <SimpleGrid verticalSpacing={20} pb={20}>
-          <Grid align="center">
-            <Grid.Col span={10}>
-              <TextInput
-                ref={inputRef}
-                placeholder="Name"
-                variant="unstyled"
-                size="xl"
-                defaultValue={data?.name}
-              />
-            </Grid.Col>
-            <Grid.Col span={2}>
-              <Box style={{ display: "flex", justifyContent: "flex-end" }}>
-                <Tooltip label="Settings">
-                  <Button
-                    p={0}
-                    sx={{ width: "30px" }}
-                    mr={7}
-                    variant={settings ? "outline" : "default"}
-                    radius="md"
-                    size="xs"
-                    onClick={() => setSettings((prev) => !prev)}
-                  >
-                    <BsGear size={10} />
-                  </Button>
-                </Tooltip>
-                <Tooltip label="Minimize this collection">
-                  <Button
-                    p={0}
-                    sx={{ width: "30px" }}
-                    mr={7}
-                    variant="default"
-                    radius="md"
-                    size="xs"
-                    onClick={() => setMinimize((prev) => !prev)}
-                  >
-                    {minimize ? (
-                      <FiMinimize2 size={10} />
-                    ) : (
-                      <FiMaximize2 size={10} />
-                    )}
-                  </Button>
-                </Tooltip>
+    <Modal
+      size={minimize ? "100%" : "70%"}
+      opened={open}
+      onClose={handleClose}
+      withCloseButton={false}
+    >
+      <SimpleGrid verticalSpacing={20} pb={20}>
+        <Grid align="center">
+          <Grid.Col span={10}>
+            <TextInput
+              ref={inputRef}
+              placeholder="Name"
+              variant="unstyled"
+              size="xl"
+              defaultValue={data?.name}
+            />
+          </Grid.Col>
+          <Grid.Col span={2}>
+            <Box style={{ display: "flex", justifyContent: "flex-end" }}>
+              <Tooltip label="Settings">
+                <Button
+                  p={0}
+                  sx={{ width: "30px" }}
+                  mr={7}
+                  variant={settings ? "outline" : "default"}
+                  radius="md"
+                  size="xs"
+                  onClick={() => setSettings((prev) => !prev)}
+                >
+                  <BsGear size={10} />
+                </Button>
+              </Tooltip>
+              <Tooltip label="Minimize this collection">
                 <Button
                   p={0}
                   sx={{ width: "30px" }}
@@ -128,113 +114,132 @@ export default function ItemModal({ open, setOpen, data }: Props) {
                   variant="default"
                   radius="md"
                   size="xs"
-                  onClick={handleClose}
+                  onClick={() => setMinimize((prev) => !prev)}
                 >
-                  <VscChromeClose size={13} />
+                  {minimize ? (
+                    <FiMinimize2 size={10} />
+                  ) : (
+                    <FiMaximize2 size={10} />
+                  )}
                 </Button>
-              </Box>
+              </Tooltip>
+              <Button
+                p={0}
+                sx={{ width: "30px" }}
+                mr={7}
+                variant="default"
+                radius="md"
+                size="xs"
+                onClick={handleClose}
+              >
+                <VscChromeClose size={13} />
+              </Button>
+            </Box>
+          </Grid.Col>
+        </Grid>
+        {settings && (
+          <Grid align="center">
+            <Grid.Col span={4}>
+              <Select
+                label="Item type"
+                placeholder="Pick one"
+                defaultValue={itemType}
+                onChange={(value) => setItemType(value || ItemType.TEXT)}
+                data={[
+                  { value: ItemType.TEXT, label: "Text" },
+                  { value: ItemType.LINK, label: "Link" },
+                  { value: ItemType.TODO, label: "Todo" },
+                  { value: ItemType.REMINDER, label: "Reminder" },
+                ]}
+              />
+            </Grid.Col>
+            <Grid.Col span={4}>
+              <Text weight={500} sx={{ fontSize: 14 }} pb={3}>
+                Accent Color
+              </Text>
+              <ColorInput defaultValue="rgba(69, 122, 255, 1)" format="rgba" />
+            </Grid.Col>
+            <Grid.Col span={4}>
+              <Text weight={500} sx={{ fontSize: 14 }} pb={3}>
+                UID
+              </Text>
+              <Input placeholder="UID" value={data?.id} disabled />
+            </Grid.Col>
+            <Grid.Col span={4}>
+              <Select
+                label="Deleted"
+                placeholder="Pick one"
+                defaultValue={"0"}
+                data={[
+                  { value: "0", label: "False" },
+                  { value: "1", label: "True" },
+                ]}
+              />
+            </Grid.Col>
+            <Grid.Col span={4}>
+              <Text weight={500} sx={{ fontSize: 14 }} pb={3}>
+                Order
+              </Text>
+              <Input placeholder="Order" value={data?.order} />
+            </Grid.Col>
+            <Grid.Col span={4}>
+              <Select
+                label="Archived"
+                placeholder="Pick one"
+                defaultValue={"0"}
+                data={[
+                  { value: "0", label: "False" },
+                  { value: "1", label: "True" },
+                ]}
+              />
             </Grid.Col>
           </Grid>
-          {settings && (
-            <Grid align="center">
-              <Grid.Col span={4}>
-                <Select
-                  label="Item type"
-                  placeholder="Pick one"
-                  defaultValue={itemType}
-                  onChange={(value) => setItemType(value || ItemType.TEXT)}
-                  data={[
-                    { value: ItemType.TEXT, label: "Text" },
-                    { value: ItemType.LINK, label: "Link" },
-                    { value: ItemType.TODO, label: "Todo" },
-                    { value: ItemType.REMINDER, label: "Reminder" },
-                  ]}
-                />
-              </Grid.Col>
-              <Grid.Col span={4}>
-                <Text weight={500} sx={{ fontSize: 14 }} pb={3}>
-                  Accent Color
-                </Text>
-                <ColorInput
-                  defaultValue="rgba(69, 122, 255, 1)"
-                  format="rgba"
-                />
-              </Grid.Col>
-              <Grid.Col span={4}>
-                <Text weight={500} sx={{ fontSize: 14 }} pb={3}>
-                  UID
-                </Text>
-                <Input placeholder="UID" value={data?.id} disabled />
-              </Grid.Col>
-              <Grid.Col span={4}>
-                <Select
-                  label="Deleted"
-                  placeholder="Pick one"
-                  defaultValue={"0"}
-                  data={[
-                    { value: "0", label: "False" },
-                    { value: "1", label: "True" },
-                  ]}
-                />
-              </Grid.Col>
-              <Grid.Col span={4}>
-                <Text weight={500} sx={{ fontSize: 14 }} pb={3}>
-                  Order
-                </Text>
-                <Input placeholder="Order" value={data?.order} />
-              </Grid.Col>
-              <Grid.Col span={4}>
-                <Select
-                  label="Archived"
-                  placeholder="Pick one"
-                  defaultValue={"0"}
-                  data={[
-                    { value: "0", label: "False" },
-                    { value: "1", label: "True" },
-                  ]}
-                />
-              </Grid.Col>
-            </Grid>
-          )}
-          {itemType == ItemType.TEXT && (
-            <RichTextEditor
-              stickyOffset={"-48px"}
-              value={value}
-              onChange={onChange}
-              style={{ minHeight: "40vh" }}
-            />
-          )}
-          {itemType == ItemType.LINK && (
-            <Grid align="center" grow>
-              <Grid.Col
-                span={1}
-                style={{ display: "flex", justifyContent: "flex-end" }}
-              >
-                <Avatar
-                  src="https://s2.googleusercontent.com/s2/favicons?domain=http://www.stackoverflow.com"
-                  alt="it's me"
-                />
-              </Grid.Col>
-              <Grid.Col span={11}>
-                <Input placeholder="URL" value={data?.link} />
-              </Grid.Col>
-            </Grid>
-          )}
-          {itemType == ItemType.TODO && <code>under construction</code>}
-          {itemType == ItemType.REMINDER && <code>under construction</code>}
-          <Box style={{ display: "flex", justifyContent: "flex-end" }} mt={20}>
-            <SimpleGrid cols={3}>
-              <Button variant="subtle" size="xs" color="red" onClick={handleDelete}>
-                Delete
-              </Button>
-              <Button variant="subtle" size="xs" onClick={handleClose}>
-                Close
-              </Button>
-              <Button onClick={handleSubmit} size="xs" >Save</Button>
-            </SimpleGrid>
-          </Box>
-        </SimpleGrid>
-      </Modal>
-    </>
+        )}
+        {itemType == ItemType.TEXT && (
+          <RichTextEditor
+            stickyOffset={"-48px"}
+            value={value}
+            onChange={onChange}
+            style={{ minHeight: "40vh" }}
+          />
+        )}
+        {itemType == ItemType.LINK && (
+          <Grid align="center" grow>
+            <Grid.Col
+              span={1}
+              style={{ display: "flex", justifyContent: "flex-end" }}
+            >
+              <Avatar
+                src="https://s2.googleusercontent.com/s2/favicons?domain=http://www.stackoverflow.com"
+                alt="it's me"
+              />
+            </Grid.Col>
+            <Grid.Col span={11}>
+              <Input placeholder="URL" value={data?.link} />
+            </Grid.Col>
+          </Grid>
+        )}
+        {itemType == ItemType.TODO && <code>under construction</code>}
+        {itemType == ItemType.REMINDER && <code>under construction</code>}
+        <Box style={{ display: "flex", justifyContent: "flex-end" }} mt={20}>
+          <SimpleGrid cols={3}>
+            <Button
+              variant="subtle"
+              size="xs"
+              color="red"
+              onClick={handleDelete}
+            >
+              Delete
+            </Button>
+            <Button variant="subtle" size="xs" onClick={handleClose}>
+              Close
+            </Button>
+            <Button onClick={handleSubmit} size="xs">
+              Save
+            </Button>
+          </SimpleGrid>
+        </Box>
+      </SimpleGrid>
+    </Modal>
   );
 }
