@@ -44,6 +44,8 @@ import {
   Popover,
   SimpleGrid,
   ColorPicker,
+  useMantineTheme,
+  ThemeIcon,
 } from "@mantine/core";
 import {
   SetStateAction,
@@ -85,6 +87,7 @@ import {
   updateColor,
 } from "../data/contexts/redux/actions";
 import { RootState } from "../data/contexts/redux/configureStore";
+import { ItemType } from "../data/constants";
 
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
 const useStyles = createStyles((theme) => ({
@@ -685,7 +688,7 @@ function Organization({ organization }: OrganizationComponentProps) {
                   items={items[containerId]}
                   strategy={horizontalListSortingStrategy}
                 >
-                  <div className="items">
+                  <div className="items" style={{ display: "flex" }}>
                     {items[containerId].map((value, index) => (
                       <SortableItem
                         name={value}
@@ -804,9 +807,9 @@ const ContainerItem = ({
   useEffect(() => {
     if (edit) inputRef.current?.select();
   }, [edit]);
-  useEffect(()=>{
-    setMinimize(data.minimized)
-  },[data.minimized])
+  useEffect(() => {
+    setMinimize(data.minimized);
+  }, [data.minimized]);
   const handleMinimize = () => {
     dispatch(minimizeCollections({ ids: [data.id], state: !minimize }));
     setMinimize((prev) => !prev);
@@ -996,46 +999,155 @@ const SortableItem = ({ name, id, data }: any) => {
     transform,
     isDragging,
   } = useSortable({ id: name });
+  const theme = useMantineTheme();
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? "100" : "auto",
     opacity: isDragging ? 0.5 : 1,
+    color: theme.colors.gray[3],
   };
   const [itemOpened, setItemOpened] = useState(false);
-  const openModal = () => {
+  const openModal = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
     setItemOpened((prev) => !prev);
   };
   return (
     <>
-      <Box
-        ref={setNodeRef}
-        onClick={openModal}
-        className={itemOpened ? "sort-item item-opened" : "sort-item"}
-        style={style}
-        {...listeners}
-        {...attributes}
-        sx={(theme) => ({
-          backgroundColor:
-            theme.colorScheme === "dark"
-              ? theme.colors.dark[6]
-              : theme.colors.gray[0],
-          padding: 5,
-          paddingInline: 20,
-        })}
-      >
-        <span
-          style={{
-            height: 10,
-            width: 10,
-            background: data?.color,
-            borderRadius: 10,
-            display: "inline-block",
-            marginRight: 12,
-          }}
-        ></span>
-        <Text style={{ display: "inline-block" }}>{data?.name}</Text>
-      </Box>
+      {data.type == ItemType.LINK && (
+        <Box
+          component="a"
+          href={data.link ? data.link : "#"}
+          target="_blank"
+          ref={setNodeRef}
+          className={itemOpened ? "sort-item item-opened" : "sort-item"}
+          style={style}
+          {...listeners}
+          {...attributes}
+          sx={(theme) => ({
+            backgroundColor:
+              theme.colorScheme === "dark"
+                ? theme.colors.dark[6]
+                : theme.colors.gray[0],
+          })}
+        >
+          <Box
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Box
+              style={{
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <Box
+                style={{
+                  display: "flex",
+                  padding: "10px 0px 0 10px",
+                  paddingBlock: "0px",
+                }}
+              >
+                <span
+                  style={{
+                    height: 15,
+                    width: 15,
+                    backgroundImage: `url(https://s2.googleusercontent.com/s2/favicons?domain=${data.link})`,
+                    borderRadius: 10,
+                    display: "inline-block",
+                    backgroundSize: "cover",
+                  }}
+                ></span>
+              </Box>
+              <Text
+                style={{
+                  display: "inline-block",
+                  padding: 5,
+                  paddingInline: 20,
+                }}
+              >
+                {data?.name}
+              </Text>
+            </Box>
+            <Box
+              style={{
+                display: "flex",
+              }}
+            >
+              <ThemeIcon
+                variant="light"
+                size="lg"
+                radius={0}
+                onClick={openModal}
+                style={{ width: "40px", height: "35px" }}
+              >
+                <FiEdit3 />
+              </ThemeIcon>
+            </Box>
+          </Box>
+        </Box>
+      )}
+      {data.type != ItemType.LINK && (
+        <Box
+          ref={setNodeRef}
+          className={itemOpened ? "sort-item item-opened" : "sort-item"}
+          style={style}
+          {...listeners}
+          {...attributes}
+          onClick={openModal}
+          sx={(theme) => ({
+            backgroundColor:
+              theme.colorScheme === "dark"
+                ? theme.colors.dark[6]
+                : theme.colors.gray[0],
+          })}
+        >
+          <Box
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Box
+              style={{
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <Box
+                style={{
+                  display: "flex",
+                  padding: "10px 0px 0 10px",
+                  paddingBlock: "0px",
+                }}
+              >
+                <span
+                  style={{
+                    height: 10,
+                    width: 10,
+                    background: data?.color,
+                    borderRadius: 10,
+                    display: "inline-block",
+                  }}
+                ></span>
+              </Box>
+              <Text
+                style={{
+                  display: "inline-block",
+                  padding: 5,
+                  paddingInline: 20,
+                }}
+              >
+                {data?.name}
+              </Text>
+            </Box>
+          </Box>
+        </Box>
+      )}
       {itemOpened && (
         <ItemModal open={itemOpened} setOpen={setItemOpened} data={data} />
       )}

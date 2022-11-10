@@ -15,6 +15,8 @@ import {
   Input,
   Avatar,
   useMantineTheme,
+  Skeleton,
+  Loader,
 } from "@mantine/core";
 import { RichTextEditor } from "@mantine/rte";
 import { doc, updateDoc } from "firebase/firestore";
@@ -49,7 +51,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
   const [value, onChange] = useState(data?.content);
   const settingsForm = useForm({
     initialValues: {
-      type: ItemType.TEXT as ItemType,
+      type: "" as ItemType,
       color: "",
       isDeleted: "0",
       archive: "false",
@@ -60,18 +62,18 @@ export default function ItemModal({ open, setOpen, data }: Props) {
       order: (value) => (value ? null : "Please enter an order"),
     },
   });
-  useEffect(()=>{
+  useEffect(() => {
     console.log(settingsForm.values);
-    settingsForm.setFieldValue("type", data.type as ItemType)
-    settingsForm.setFieldValue("color", data.color)
-    settingsForm.setFieldValue("order", data.order)
-    setLink(data.link||"")
-  },[open])
-  useEffect(()=>{
+    settingsForm.setFieldValue("type", data.type as ItemType);
+    settingsForm.setFieldValue("color", data.color);
+    settingsForm.setFieldValue("order", data.order);
+    setLink(data.link || "");
+  }, [open]);
+  useEffect(() => {
     console.log(settingsForm.values);
-  },[settingsForm.values.type])
+  }, [settingsForm.values.type]);
   function handleLinkChange(event: React.ChangeEvent<HTMLInputElement>) {
-    setLink(event.currentTarget.value)
+    setLink(event.currentTarget.value);
   }
   async function handleSubmit() {
     await updateDoc(
@@ -193,7 +195,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
                   Accent Color
                 </Text>
                 <ColorInput
-                {...settingsForm.getInputProps("color")}
+                  {...settingsForm.getInputProps("color")}
                   defaultValue="rgba(69, 122, 255, 1)"
                   format="rgba"
                 />
@@ -206,7 +208,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
               </Grid.Col>
               <Grid.Col span={4}>
                 <Select
-                {...settingsForm.getInputProps("isDeleted")}
+                  {...settingsForm.getInputProps("isDeleted")}
                   label="Deleted"
                   placeholder="Pick one"
                   defaultValue={"0"}
@@ -220,11 +222,15 @@ export default function ItemModal({ open, setOpen, data }: Props) {
                 <Text weight={500} sx={{ fontSize: 14 }} pb={3}>
                   Order
                 </Text>
-                <Input placeholder="Order" value={data?.order} {...settingsForm.getInputProps("order")} />
+                <Input
+                  placeholder="Order"
+                  value={data?.order}
+                  {...settingsForm.getInputProps("order")}
+                />
               </Grid.Col>
               <Grid.Col span={4}>
                 <Select
-                {...settingsForm.getInputProps("archive")}
+                  {...settingsForm.getInputProps("archive")}
                   label="Archived"
                   placeholder="Pick one"
                   defaultValue={"0"}
@@ -237,6 +243,11 @@ export default function ItemModal({ open, setOpen, data }: Props) {
             </Grid>
           </form>
         )}
+        {/* {settingsForm.values.type == ("" as ItemType) && (
+          <Box style={{ textAlign: "center" }}>
+            <Loader size="xl" />
+          </Box>
+        )} */} 
         {settingsForm.values.type == ItemType.TEXT && (
           <RichTextEditor
             stickyOffset={"-48px"}
@@ -257,12 +268,20 @@ export default function ItemModal({ open, setOpen, data }: Props) {
               />
             </Grid.Col>
             <Grid.Col span={11}>
-              <Input placeholder="URL" value={link} onChange={handleLinkChange} />
+              <Input
+                placeholder="URL"
+                value={link}
+                onChange={handleLinkChange}
+              />
             </Grid.Col>
           </Grid>
         )}
-        {settingsForm.values.type == ItemType.TODO && <code>under construction</code>}
-        {settingsForm.values.type == ItemType.REMINDER && <code>under construction</code>}
+        {settingsForm.values.type == ItemType.TODO && (
+          <code>under construction</code>
+        )}
+        {settingsForm.values.type == ItemType.REMINDER && (
+          <code>under construction</code>
+        )}
         <Box style={{ display: "flex", justifyContent: "flex-end" }} mt={20}>
           <SimpleGrid cols={3}>
             <Button
