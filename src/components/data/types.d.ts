@@ -34,3 +34,10 @@ interface ItemProps {
 interface ItemCollection {
   [key: UniqueIdentifier]: ItemProps[];
 }
+
+interface SortableItemProps {
+  name: UniqueIdentifier;
+  id?: number;
+  data: ItemProps;
+  currentlyContainer?: boolean;
+}

@@ -20,6 +20,9 @@ code {
   width: 250px;
   margin: 5px;
   transition: all .1s;
+  overflow: hidden;
+  text-decoration: none;
+  font-size: 15px;
 }
 
 .sort-item:hover{
@@ -33,4 +36,15 @@ code {
 
 .ql-editor p{
   margin-bottom: 0;
+}
+
+.item-edit-button{
+  opacity: 0;
+  transform: translateX(7px);
+  transition: opacity .1s, transform .3s;
+}
+
+.sort-item:hover .item-edit-button{
+  transform: translateX(0px);
+  opacity: 1;
 }

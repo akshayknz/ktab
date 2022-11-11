@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { Ref, useContext, useEffect, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -18,7 +18,7 @@ import {
   Skeleton,
   Loader,
 } from "@mantine/core";
-import { RichTextEditor } from "@mantine/rte";
+import { Editor, RichTextEditor } from "@mantine/rte";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../data/firebaseConfig";
 import { AuthContext } from "../data/contexts/AuthContext";
@@ -49,6 +49,40 @@ export default function ItemModal({ open, setOpen, data }: Props) {
   const [link, setLink] = useState("");
   const [debouncedLink] = useDebouncedValue(link, 500);
   const [value, onChange] = useState(data?.content);
+  const editorRef = useRef<Editor>();
+
+  useEffect(() => {
+    console.log('ttttttttttttttttttttt');
+    console.log(editorRef);
+    
+    editorRef.current?.focus()
+  }, [editorRef.current]);
+  useEffect(() => {
+    const run = async () => {
+      const text = await navigator.clipboard.readText();
+      console.log(text);
+    };
+    run();
+    if (link) {
+      fetch(`http://textance.herokuapp.com/title/${link}`, {
+        mode: "cors",
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Headers": "Content-Type",
+          "Access-Control-Allow-Methods": "GET,PATCH,POST,PUT,DELETE",
+        },
+      })
+        .then((r) => r.text())
+        .then((r) => {
+          if (inputRef.current) {
+            inputRef.current.value = r;
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  }, [link]);
   const settingsForm = useForm({
     initialValues: {
       type: "" as ItemType,
@@ -69,9 +103,6 @@ export default function ItemModal({ open, setOpen, data }: Props) {
     settingsForm.setFieldValue("order", data.order);
     setLink(data.link || "");
   }, [open]);
-  useEffect(() => {
-    console.log(settingsForm.values);
-  }, [settingsForm.values.type]);
   function handleLinkChange(event: React.ChangeEvent<HTMLInputElement>) {
     setLink(event.currentTarget.value);
   }
@@ -102,6 +133,10 @@ export default function ItemModal({ open, setOpen, data }: Props) {
     setOpen(false);
   }
   function handleClose() {
+    handleSubmit();
+    setOpen(false);
+  }
+  function handleCloseWithoutSave() {
     setOpen(false);
   }
   const scaleY = {
@@ -247,12 +282,13 @@ export default function ItemModal({ open, setOpen, data }: Props) {
           <Box style={{ textAlign: "center" }}>
             <Loader size="xl" />
           </Box>
-        )} */} 
+        )} */}
         {settingsForm.values.type == ItemType.TEXT && (
           <RichTextEditor
             stickyOffset={"-48px"}
             value={value}
             onChange={onChange}
+            ref={editorRef as Ref<Editor>}
             style={{ minHeight: "40vh" }}
           />
         )}
@@ -292,7 +328,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
             >
               Delete
             </Button>
-            <Button variant="subtle" size="xs" onClick={handleClose}>
+            <Button variant="subtle" size="xs" onClick={handleCloseWithoutSave}>
               Close
             </Button>
             <Button onClick={handleSubmit} size="xs">

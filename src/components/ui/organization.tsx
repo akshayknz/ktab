@@ -688,7 +688,10 @@ function Organization({ organization }: OrganizationComponentProps) {
                   items={items[containerId]}
                   strategy={horizontalListSortingStrategy}
                 >
-                  <div className="items" style={{ display: "flex" }}>
+                  <div
+                    className="items"
+                    style={{ display: "flex", flexWrap: "wrap" }}
+                  >
                     {items[containerId].map((value, index) => (
                       <SortableItem
                         name={value}
@@ -705,9 +708,10 @@ function Organization({ organization }: OrganizationComponentProps) {
           <DragOverlay dropAnimation={dropAnimationConfig}>
             {activeId ? (
               <>
-                <Overlay
-                  currentlyContainer={currentlyContainer}
+                <SortableItemOverlay
+                  name={activeId}
                   data={allItems[activeId]}
+                  currentlyContainer={currentlyContainer}
                 />
               </>
             ) : null}
@@ -720,43 +724,6 @@ function Organization({ organization }: OrganizationComponentProps) {
 
 export default Organization;
 
-interface OverlayProps {
-  currentlyContainer: boolean;
-  data: ItemProps;
-}
-const Overlay = ({ currentlyContainer, data }: OverlayProps) => {
-  const style = {};
-  return (
-    <>
-      {!currentlyContainer && (
-        <Box
-          className="sort-item"
-          style={style}
-          sx={(theme) => ({
-            backgroundColor:
-              theme.colorScheme === "dark"
-                ? theme.colors.dark[6]
-                : theme.colors.gray[0],
-            padding: 5,
-            paddingInline: 20,
-          })}
-        >
-          <span
-            style={{
-              height: 10,
-              width: 10,
-              background: data.color ? data.color : "rgb(255 255 255 / 60%)",
-              borderRadius: 10,
-              display: "inline-block",
-              marginRight: 12,
-            }}
-          ></span>
-          <Text style={{ display: "inline-block" }}>{data.name}</Text>
-        </Box>
-      )}
-    </>
-  );
-};
 interface ContainerComponentProps {
   name: UniqueIdentifier;
   data: CollectionProps;
@@ -821,8 +788,8 @@ const ContainerItem = ({
       sx={(theme) => ({
         backgroundColor:
           theme.colorScheme === "dark"
-            ? theme.colors.dark[6]
-            : theme.colors.gray[0],
+            ? theme.colors["black-alpha"][3]
+            : theme.colors["white-alpha"][3],
         padding: 4,
         paddingTop: 9,
         paddingInline: 50,
@@ -877,7 +844,7 @@ const ContainerItem = ({
               >
                 <Tooltip label="Edit title">
                   <Button
-                    variant="default"
+                    variant="light" color="dark"
                     radius="md"
                     size="xs"
                     onClick={() => setEdit(true)}
@@ -886,7 +853,7 @@ const ContainerItem = ({
                   </Button>
                 </Tooltip>
                 <Tooltip label="Add new item">
-                  <Button variant="default" radius="md" size="xs">
+                  <Button variant="light" color="dark" radius="md" size="xs">
                     <BiMessageAltAdd />
                   </Button>
                 </Tooltip>
@@ -902,7 +869,7 @@ const ContainerItem = ({
                   <Popover.Target>
                     <Tooltip label="Delete this collection">
                       <Button
-                        variant="default"
+                        variant="light" color="dark"
                         radius="md"
                         size="xs"
                         onClick={() => setTrashPopover((prev) => !prev)}
@@ -951,7 +918,7 @@ const ContainerItem = ({
 
                 <Tooltip label="Minimize/Maximize this collection">
                   <Button
-                    variant="default"
+                    variant="light" color="dark"
                     radius="md"
                     size="xs"
                     onClick={handleMinimize}
@@ -963,7 +930,7 @@ const ContainerItem = ({
               <Tooltip label="Reorder collections">
                 <Button
                   style={{ cursor: "grab" }}
-                  variant="default"
+                  variant="light" color="dark"
                   radius="md"
                   size="xs"
                   {...listeners}
@@ -990,7 +957,7 @@ const ContainerItem = ({
   );
 };
 
-const SortableItem = ({ name, id, data }: any) => {
+const SortableItem = ({ name, id, data }: SortableItemProps) => {
   const {
     setNodeRef,
     attributes,
@@ -1027,8 +994,8 @@ const SortableItem = ({ name, id, data }: any) => {
           sx={(theme) => ({
             backgroundColor:
               theme.colorScheme === "dark"
-                ? theme.colors.dark[6]
-                : theme.colors.gray[0],
+                ? theme.colors["black-alpha"][3]
+                : theme.colors["white-alpha"][3],
           })}
         >
           <Box
@@ -1042,6 +1009,7 @@ const SortableItem = ({ name, id, data }: any) => {
               style={{
                 display: "flex",
                 alignItems: "center",
+                width: "100%",
               }}
             >
               <Box
@@ -1066,23 +1034,33 @@ const SortableItem = ({ name, id, data }: any) => {
                 style={{
                   display: "inline-block",
                   padding: 5,
-                  paddingInline: 20,
+                  paddingLeft: 20,
+                  textOverflow: "ellipsis",
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
                 }}
               >
                 {data?.name}
               </Text>
             </Box>
             <Box
+              className="item-edit-button"
               style={{
                 display: "flex",
               }}
             >
               <ThemeIcon
-                variant="light"
+                color="dark"
                 size="lg"
                 radius={0}
                 onClick={openModal}
-                style={{ width: "40px", height: "35px" }}
+                style={{
+                  width: "40px",
+                  height: "35px",
+                  position: "absolute",
+                  right: "0",
+                  top: "-17px",
+                }}
               >
                 <FiEdit3 />
               </ThemeIcon>
@@ -1101,8 +1079,8 @@ const SortableItem = ({ name, id, data }: any) => {
           sx={(theme) => ({
             backgroundColor:
               theme.colorScheme === "dark"
-                ? theme.colors.dark[6]
-                : theme.colors.gray[0],
+                ? theme.colors["black-alpha"][3]
+                : theme.colors["white-alpha"][3],
           })}
         >
           <Box
@@ -1150,6 +1128,143 @@ const SortableItem = ({ name, id, data }: any) => {
       )}
       {itemOpened && (
         <ItemModal open={itemOpened} setOpen={setItemOpened} data={data} />
+      )}
+    </>
+  );
+};
+
+const SortableItemOverlay = ({
+  name,
+  data,
+  currentlyContainer,
+}: SortableItemProps) => {
+  const theme = useMantineTheme();
+  const style = {
+    color: theme.colors.gray[3],
+  };
+  const [itemOpened, setItemOpened] = useState(false);
+  const openModal = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setItemOpened((prev) => !prev);
+  };
+  return (
+    <>
+      {!currentlyContainer && data.type == ItemType.LINK && (
+        <Box
+          component="a"
+          href={data.link ? data.link : "#"}
+          target="_blank"
+          className={itemOpened ? "sort-item item-opened" : "sort-item"}
+          style={style}
+          sx={(theme) => ({
+            backgroundColor:
+              theme.colorScheme === "dark"
+                ? theme.colors["black-alpha"][3]
+                : theme.colors["white-alpha"][3],
+          })}
+        >
+          <Box
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Box
+              style={{
+                display: "flex",
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
+              <Box
+                style={{
+                  display: "flex",
+                  padding: "10px 0px 0 10px",
+                  paddingBlock: "0px",
+                }}
+              >
+                <span
+                  style={{
+                    height: 15,
+                    width: 15,
+                    backgroundImage: `url(https://s2.googleusercontent.com/s2/favicons?domain=${data.link})`,
+                    borderRadius: 10,
+                    display: "inline-block",
+                    backgroundSize: "cover",
+                  }}
+                ></span>
+              </Box>
+              <Text
+                style={{
+                  display: "inline-block",
+                  padding: 5,
+                  paddingLeft: 20,
+                  textOverflow: "ellipsis",
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {data?.name}
+              </Text>
+            </Box>
+          </Box>
+        </Box>
+      )}
+      {!currentlyContainer && data.type != ItemType.LINK && (
+        <Box
+          className={itemOpened ? "sort-item item-opened" : "sort-item"}
+          style={style}
+          onClick={openModal}
+          sx={(theme) => ({
+            backgroundColor:
+              theme.colorScheme === "dark"
+                ? theme.colors["black-alpha"][3]
+                : theme.colors["white-alpha"][3],
+          })}
+        >
+          <Box
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Box
+              style={{
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <Box
+                style={{
+                  display: "flex",
+                  padding: "10px 0px 0 10px",
+                  paddingBlock: "0px",
+                }}
+              >
+                <span
+                  style={{
+                    height: 10,
+                    width: 10,
+                    background: data?.color,
+                    borderRadius: 10,
+                    display: "inline-block",
+                  }}
+                ></span>
+              </Box>
+              <Text
+                style={{
+                  display: "inline-block",
+                  padding: 5,
+                  paddingInline: 20,
+                }}
+              >
+                {data?.name}
+              </Text>
+            </Box>
+          </Box>
+        </Box>
       )}
     </>
   );
