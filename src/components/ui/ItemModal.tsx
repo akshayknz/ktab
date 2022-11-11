@@ -52,17 +52,9 @@ export default function ItemModal({ open, setOpen, data }: Props) {
   const editorRef = useRef<Editor>();
 
   useEffect(() => {
-    console.log('ttttttttttttttttttttt');
-    console.log(editorRef);
-    
     editorRef.current?.focus()
   }, [editorRef.current]);
   useEffect(() => {
-    const run = async () => {
-      const text = await navigator.clipboard.readText();
-      console.log(text);
-    };
-    run();
     if (link) {
       fetch(`http://textance.herokuapp.com/title/${link}`, {
         mode: "cors",

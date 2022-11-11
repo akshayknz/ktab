@@ -47,7 +47,7 @@ import {
   useMantineTheme,
   ThemeIcon,
 } from "@mantine/core";
-import {
+import React, {
   SetStateAction,
   useCallback,
   useRef,
@@ -71,6 +71,7 @@ import {
   query,
   orderBy,
   limit,
+  addDoc,
 } from "firebase/firestore";
 import { db } from "../data/firebaseConfig";
 import { AuthContext } from "../data/contexts/AuthContext";
@@ -159,7 +160,67 @@ function Organization({ organization }: OrganizationComponentProps) {
     () => collections.filter((e) => e.minimized === true),
     [collections]
   );
+  const onKeyDown = (e: KeyboardEvent) => {
+    const isValidHttpUrl = async (string: string) => {
+      let url;
+      try {
+        url = new URL(string);
+      } catch (_) {
+        return false;
+      }
+      return url.protocol === "http:" || url.protocol === "https:";
+    };
+    const runKeyDown = async () => {
+      let clipboardText = await navigator.clipboard.readText();
+      let isUrl = await isValidHttpUrl(clipboardText);
+      let fetchMeth = await fetch(`http://textance.herokuapp.com/title/${clipboardText}`, {
+        mode: "cors",
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Headers": "Content-Type",
+          "Access-Control-Allow-Methods": "GET,PATCH,POST,PUT,DELETE",
+        },
+      })
+      let response = await fetchMeth.text()
+      
+      console.log(clipboardText, isUrl);
+      const upload = async () => {
+        await addDoc(
+          collection(
+            db,
+            "ktab-manager",
+            user?.uid ? user.uid : "guest",
+            "items"
+          ),
+          {
+            orgparent: organization.id,
+            parent: containers[0],
+            name: response,
+            color: "rgba(255,255,255,1)",
+            type: ItemType.LINK,
+            link: clipboardText,
+            icon: "",
+            order: 0,
+            archive: false,
+            isDeleted: 0,
+            updatedAt: +new Date(),
+            createdAt: +new Date(),
+          }
+        );
+      };
+      if(isUrl) upload();
+    };
+    if (e.ctrlKey && e.key == "v") {
+      runKeyDown();
+    }
+  };
+  useEffect(() => {
+    document?.addEventListener("keydown", onKeyDown);
 
+    return () => {
+      document?.removeEventListener("keydown", onKeyDown);
+    };
+  });
   useEffect(() => {
     const unsub1 = onSnapshot(
       query(
@@ -844,7 +905,8 @@ const ContainerItem = ({
               >
                 <Tooltip label="Edit title">
                   <Button
-                    variant="light" color="dark"
+                    variant="light"
+                    color="dark"
                     radius="md"
                     size="xs"
                     onClick={() => setEdit(true)}
@@ -869,7 +931,8 @@ const ContainerItem = ({
                   <Popover.Target>
                     <Tooltip label="Delete this collection">
                       <Button
-                        variant="light" color="dark"
+                        variant="light"
+                        color="dark"
                         radius="md"
                         size="xs"
                         onClick={() => setTrashPopover((prev) => !prev)}
@@ -918,7 +981,8 @@ const ContainerItem = ({
 
                 <Tooltip label="Minimize/Maximize this collection">
                   <Button
-                    variant="light" color="dark"
+                    variant="light"
+                    color="dark"
                     radius="md"
                     size="xs"
                     onClick={handleMinimize}
@@ -930,7 +994,8 @@ const ContainerItem = ({
               <Tooltip label="Reorder collections">
                 <Button
                   style={{ cursor: "grab" }}
-                  variant="light" color="dark"
+                  variant="light"
+                  color="dark"
                   radius="md"
                   size="xs"
                   {...listeners}
