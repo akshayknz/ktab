@@ -1019,7 +1019,7 @@ const ContainerItem = ({
       {!data.minimized && !globalMinifyContainers && (
         <div
           style={{
-            maxHeight: isDragging ? "0px" : "500px",
+            maxHeight: isDragging ? "0px" : "100%",
             transition: "all .2s",
           }}
         >
