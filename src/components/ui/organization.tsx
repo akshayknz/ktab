@@ -216,7 +216,8 @@ function Organization({ organization }: OrganizationComponentProps) {
     if (
       e.ctrlKey &&
       e.key == "v" &&
-      document.querySelectorAll("input:focus").length === 0 //make sure no input fields are in focus
+      document.querySelectorAll("input:focus").length === 0 && //make sure no input fields are in focus
+      document.querySelectorAll("[contenteditable=true]") //make sure no contenteditable is present (RTE)
     ) {
       runKeyDown();
     }
