@@ -264,17 +264,23 @@ function Organization({ organization }: OrganizationComponentProps) {
   }, []);
   useEffect(() => {
     const getItems = (key: UniqueIdentifier) => {
-      return itemss?.filter((e) => e.parent == key)?.map((e) => e.id);
+      return itemss
+        ?.filter((e) => e.parent == key)
+        ?.sort((a, b) => (a.order > b.order ? 1 : -1))
+        .map((e) => e.id);
     };
     if (collections && itemss) {
-      let cont = collections.map((e) => e.id);
+      let cont = collections
+        ?.sort((a, b) => (a.order > b.order ? 1 : -1))
+        .map((e) => e.id);
       setContainers(cont);
+      console.log(cont);
 
       let ob = collections.reduce((prev, key) => {
         return Object.assign(prev, { [key.id]: getItems(key.id) });
       }, {});
       setItems(ob);
-
+      console.log(ob);
       const itemsi = Object.assign(
         collections.reduce((prev, curr) => {
           return Object.assign(prev, { [curr.id]: curr });
@@ -293,6 +299,7 @@ function Organization({ organization }: OrganizationComponentProps) {
       color: doc.data().color,
       parent: doc.data().parent,
       minimized: doc.data().minimized,
+      order: doc.data().order,
     };
   };
   const docsToItems = (doc: DocumentData) => {
@@ -336,7 +343,6 @@ function Organization({ organization }: OrganizationComponentProps) {
       setContainers((containers) => {
         const activeIndex = containers.indexOf(active.id);
         const overIndex = containers.indexOf(over.id);
-
         return arrayMove(containers, activeIndex, overIndex);
       });
     }
@@ -347,6 +353,12 @@ function Organization({ organization }: OrganizationComponentProps) {
         const activeIndex = items[activeContainer].indexOf(active.id);
         const overIndex = items[overContainer].indexOf(over?.id);
         if (activeIndex !== overIndex) {
+          console.log("active.id",active.id);
+          console.log("activeContainer",activeContainer);
+        console.log("activeIndex",activeIndex);
+        console.log("over?.id",over?.id);
+        console.log("overContainer",overContainer);
+        console.log("overIndex",overIndex);
           setItems((items) => ({
             ...items,
             [overContainer]: arrayMove(

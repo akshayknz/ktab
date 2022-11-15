@@ -15,6 +15,7 @@ interface CollectionProps {
   parent: string;
   name: string;
   color: string;
+  order: string;
   minimized: boolean;
 }
 
