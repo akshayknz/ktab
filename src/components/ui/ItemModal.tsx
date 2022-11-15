@@ -56,7 +56,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
   }, [editorRef.current]);
   useEffect(() => {
     if (link) {
-      fetch(`http://textance.herokuapp.com/title/${link}`, {
+      fetch(`https://textance.herokuapp.com/title/${link}`, {
         mode: "cors",
         headers: {
           "Access-Control-Allow-Origin": "*",
@@ -89,7 +89,6 @@ export default function ItemModal({ open, setOpen, data }: Props) {
     },
   });
   useEffect(() => {
-    console.log(settingsForm.values);
     settingsForm.setFieldValue("type", data.type as ItemType);
     settingsForm.setFieldValue("color", data.color);
     settingsForm.setFieldValue("order", data.order);

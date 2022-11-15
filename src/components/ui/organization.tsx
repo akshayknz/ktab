@@ -113,6 +113,7 @@ const useStyles = createStyles((theme) => ({
   buttonGroup: {
     transition: "all .5s",
     transform: "translatex(0px)",
+    zIndex: 5,
   },
   buttonGroupDragging: {
     opacity: 0,
@@ -171,19 +172,21 @@ function Organization({ organization }: OrganizationComponentProps) {
       return url.protocol === "http:" || url.protocol === "https:";
     };
     const runKeyDown = async () => {
-      let clipboardText = await navigator.clipboard.readText();
-      let isUrl = await isValidHttpUrl(clipboardText);
-      let fetchMeth = await fetch(`http://textance.herokuapp.com/title/${clipboardText}`, {
-        mode: "cors",
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Headers": "Content-Type",
-          "Access-Control-Allow-Methods": "GET,PATCH,POST,PUT,DELETE",
-        },
-      })
-      let response = await fetchMeth.text()
-      
-      console.log(clipboardText, isUrl);
+      const clipboardText = await navigator.clipboard.readText();
+      const isUrl = await isValidHttpUrl(clipboardText);
+      const fetchMeth = await fetch(
+        `https://textance.herokuapp.com/title/${clipboardText}`,
+        {
+          mode: "cors",
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Allow-Methods": "GET,PATCH,POST,PUT,DELETE",
+          },
+        }
+      );
+      const response = await fetchMeth.text();
+      console.log("Creating new document from clipboard", clipboardText);
       const upload = async () => {
         await addDoc(
           collection(
@@ -208,9 +211,13 @@ function Organization({ organization }: OrganizationComponentProps) {
           }
         );
       };
-      if(isUrl) upload();
+      if (isUrl) upload();
     };
-    if (e.ctrlKey && e.key == "v") {
+    if (
+      e.ctrlKey &&
+      e.key == "v" &&
+      document.querySelectorAll("input:focus").length === 0 //make sure no input fields are in focus
+    ) {
       runKeyDown();
     }
   };

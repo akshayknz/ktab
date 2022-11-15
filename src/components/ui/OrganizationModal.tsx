@@ -275,7 +275,6 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
             accent: doc.data().accent,
             //...doc.data(),
           }));
-          console.log("load organizaiton parents");
           setOrganizations(re);
         })
         .catch((err) => console.log(err));

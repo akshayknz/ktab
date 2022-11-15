@@ -42,6 +42,7 @@ code {
   opacity: 0;
   transform: translateX(7px);
   transition: opacity .1s, transform .3s;
+  z-index: 0;
 }
 
 .sort-item:hover .item-edit-button{
