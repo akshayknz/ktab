@@ -341,6 +341,7 @@ function Organization({ organization }: OrganizationComponentProps) {
     if (active.id in items && over?.id) {
       setCurrentlyContainer(false);
       setContainers((containers) => {
+        // console.log("over conatiner");
         const activeIndex = containers.indexOf(active.id);
         const overIndex = containers.indexOf(over.id);
         return arrayMove(containers, activeIndex, overIndex);
@@ -352,13 +353,14 @@ function Organization({ organization }: OrganizationComponentProps) {
       if (overContainer && activeContainer) {
         const activeIndex = items[activeContainer].indexOf(active.id);
         const overIndex = items[overContainer].indexOf(over?.id);
+        // console.log("drag end", activeIndex, overIndex, activeIndex !== overIndex);
         if (activeIndex !== overIndex) {
-          console.log("active.id",active.id);
-          console.log("activeContainer",activeContainer);
-        console.log("activeIndex",activeIndex);
-        console.log("over?.id",over?.id);
-        console.log("overContainer",overContainer);
-        console.log("overIndex",overIndex);
+          // console.log("active.id",active.id);
+          // console.log("activeContainer",activeContainer);
+          // console.log("activeIndex",activeIndex);
+          // console.log("over?.id",over?.id);
+          // console.log("overContainer",overContainer);
+          // console.log("overIndex",overIndex);
           setItems((items) => ({
             ...items,
             [overContainer]: arrayMove(
@@ -373,7 +375,6 @@ function Organization({ organization }: OrganizationComponentProps) {
   };
   const handleDragOver = ({ active, over }: DragOverEvent) => {
     const overId = over?.id;
-
     if (overId == null || active.id in items) {
       //overId === TRASH_ID ||
       return;
@@ -385,6 +386,7 @@ function Organization({ organization }: OrganizationComponentProps) {
     if (!overContainer || !activeContainer) {
       return;
     }
+    console.log("handleDragOver", activeContainer, overContainer);
 
     if (activeContainer !== overContainer) {
       setItems((items) => {
