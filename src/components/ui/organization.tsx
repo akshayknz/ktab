@@ -46,6 +46,7 @@ import {
   ColorPicker,
   useMantineTheme,
   ThemeIcon,
+  SegmentedControl,
 } from "@mantine/core";
 import React, {
   SetStateAction,
@@ -60,8 +61,12 @@ import React, {
 import { MdDragIndicator, MdOutlineAdd } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 import { BiMessageAltAdd } from "react-icons/bi";
-import { IoColorFilterOutline } from "react-icons/io5";
-import { FiEdit3, FiMaximize2, FiMinimize2 } from "react-icons/fi";
+import {
+  IoColorFilterOutline,
+  IoFilterOutline,
+  IoFilterSharp,
+} from "react-icons/io5";
+import { FiEdit3, FiFilter, FiMaximize2, FiMinimize2 } from "react-icons/fi";
 import ItemModal from "./ItemModal";
 import {
   onSnapshot,
@@ -93,6 +98,7 @@ import {
 } from "../data/contexts/redux/actions";
 import { RootState } from "../data/contexts/redux/configureStore";
 import { ItemType } from "../data/constants";
+import { BsFilterCircle } from "react-icons/bs";
 
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
 const useStyles = createStyles((theme) => ({
@@ -140,7 +146,13 @@ function Organization({ organization }: OrganizationComponentProps) {
   const [trashPopover, setTrashPopover] = useState(false);
   const trashboxRef = useClickOutside(() => setTrashPopover(false));
   const [colorPopover, setColorPopover] = useState(false);
-  const colorboxRef = useClickOutside(() => setColorPopover(false));
+  const [filterPopover, setFilterPopover] = useState(false);
+  const [filterText, setFilterText] = useState("");
+  const [filterType, setFilterType] = useState("");
+  const colorboxRef = useClickOutside(() => {
+    setColorPopover(false);
+    setFilterPopover(false);
+  });
   const dispatch = useDispatch();
   const { organizationColor } = useSelector((state: RootState) => state.states);
   useEffect(() => {
@@ -179,7 +191,7 @@ function Organization({ organization }: OrganizationComponentProps) {
     const runKeyDown = async () => {
       const clipboardText = await navigator.clipboard.readText();
       const isUrl = await isValidHttpUrl(clipboardText);
-      const fetchMeth = await fetch(
+      const response = await fetch(
         `https://textance.herokuapp.com/title/${clipboardText}`,
         {
           mode: "cors",
@@ -189,8 +201,9 @@ function Organization({ organization }: OrganizationComponentProps) {
             "Access-Control-Allow-Methods": "GET,PATCH,POST,PUT,DELETE",
           },
         }
-      );
-      const response = await fetchMeth.text();
+      )
+        .then((r) => r.text())
+        .catch(() => {});
       console.log("Creating new document from clipboard", clipboardText);
       const upload = async () => {
         await addDoc(
@@ -203,7 +216,7 @@ function Organization({ organization }: OrganizationComponentProps) {
           {
             orgparent: organization.id,
             parent: containers[0],
-            name: response,
+            name: response ? response : clipboardText,
             color: "rgba(255,255,255,1)",
             type: ItemType.LINK,
             link: clipboardText,
@@ -586,6 +599,52 @@ function Organization({ organization }: OrganizationComponentProps) {
             >
               Add New Collection
             </Button>
+            <Popover
+              closeOnClickOutside
+              transition="pop"
+              withArrow
+              withRoles
+              trapFocus
+              position="right"
+              opened={filterPopover}
+            >
+              <Popover.Target>
+                <Button
+                  variant="light"
+                  compact
+                  mx={4}
+                  onClick={() => setFilterPopover((prev) => !prev)}
+                  leftIcon={<IoFilterSharp />}
+                >
+                  Filter
+                </Button>
+              </Popover.Target>
+              <Popover.Dropdown>
+                <Box ref={colorboxRef}>
+                  <SegmentedControl
+                    size="xs"
+                    fullWidth
+                    mb={10}
+                    data={[
+                      { label: "All", value: "all" },
+                      { label: "Links", value: "links" },
+                      { label: "Notes", value: "notes" },
+                    ]}
+                    value={filterType}
+                    onChange={(value) => setFilterType(value)}
+                  />
+                  <Input
+                    variant="filled"
+                    placeholder="Search items"
+                    size="xs"
+                    value={filterText}
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                      setFilterText(event.currentTarget.value)
+                    }
+                  />
+                </Box>
+              </Popover.Dropdown>
+            </Popover>
             {minimized.length === collections.length ? (
               <Button
                 variant="light"
@@ -893,8 +952,8 @@ const ContainerItem = ({
     setMinimize((prev) => !prev);
   };
   const addNewItemFun = () => {
-    dispatch(addNewItem({orgparent: data.parent, parent: data.id}))
-  }
+    dispatch(addNewItem({ orgparent: data.parent, parent: data.id }));
+  };
   return (
     <Box
       ref={setNodeRef}
