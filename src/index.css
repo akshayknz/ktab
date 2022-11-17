@@ -66,3 +66,17 @@ code {
 .syncing-popup.syncing-true {
   transform: translateY(0px);
 }
+
+.filter-block {content: "";}
+
+.filter-active::before {
+    height: 9px;
+    width: 9px;
+    background: rgb(0 0 0 / 70%);
+    display: block;
+    content: "";
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    border-radius: 10px;
+}

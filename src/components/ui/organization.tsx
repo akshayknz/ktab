@@ -58,7 +58,7 @@ import React, {
   MutableRefObject,
   useMemo,
 } from "react";
-import { MdDragIndicator, MdOutlineAdd } from "react-icons/md";
+import { MdContentPaste, MdDragIndicator, MdOutlineAdd } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 import { BiMessageAltAdd } from "react-icons/bi";
 import {
@@ -86,7 +86,7 @@ import {
   toggleEditOrganizationModal,
   toggleOrganizationModal,
 } from "../data/contexts/redux/states";
-import { useClickOutside } from "@mantine/hooks";
+import { useClickOutside, useDebouncedValue } from "@mantine/hooks";
 import {
   minimizeCollections,
   softDeleteDocument,
@@ -95,6 +95,7 @@ import {
   setSyncing,
   updateContainerName,
   addNewItem,
+  runKeyDown,
 } from "../data/contexts/redux/actions";
 import { RootState } from "../data/contexts/redux/configureStore";
 import { ItemType } from "../data/constants";
@@ -148,7 +149,9 @@ function Organization({ organization }: OrganizationComponentProps) {
   const [colorPopover, setColorPopover] = useState(false);
   const [filterPopover, setFilterPopover] = useState(false);
   const [filterText, setFilterText] = useState("");
-  const [filterType, setFilterType] = useState("");
+  const [filterType, setFilterType] = useState("all");
+  // const [debouncedFilterText] = useDebouncedValue(filterText, 59);
+  // const [debouncedFilterType] = useDebouncedValue(filterType, 59);
   const colorboxRef = useClickOutside(() => {
     setColorPopover(false);
     setFilterPopover(false);
@@ -179,65 +182,16 @@ function Organization({ organization }: OrganizationComponentProps) {
     [collections]
   );
   const onKeyDown = (e: KeyboardEvent) => {
-    const isValidHttpUrl = async (string: string) => {
-      let url;
-      try {
-        url = new URL(string);
-      } catch (_) {
-        return false;
-      }
-      return url.protocol === "http:" || url.protocol === "https:";
-    };
-    const runKeyDown = async () => {
-      const clipboardText = await navigator.clipboard.readText();
-      const isUrl = await isValidHttpUrl(clipboardText);
-      const response = await fetch(
-        `https://textance.herokuapp.com/title/${clipboardText}`,
-        {
-          mode: "cors",
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Headers": "Content-Type",
-            "Access-Control-Allow-Methods": "GET,PATCH,POST,PUT,DELETE",
-          },
-        }
-      )
-        .then((r) => r.text())
-        .catch(() => {});
-      console.log("Creating new document from clipboard", clipboardText);
-      const upload = async () => {
-        await addDoc(
-          collection(
-            db,
-            "ktab-manager",
-            user?.uid ? user.uid : "guest",
-            "items"
-          ),
-          {
-            orgparent: organization.id,
-            parent: containers[0],
-            name: response ? response : clipboardText,
-            color: "rgba(255,255,255,1)",
-            type: ItemType.LINK,
-            link: clipboardText,
-            icon: "",
-            order: 0,
-            archive: false,
-            isDeleted: 0,
-            updatedAt: +new Date(),
-            createdAt: +new Date(),
-          }
-        );
-      };
-      if (isUrl) upload();
-    };
     if (
       e.ctrlKey &&
       e.key == "v" &&
       document.querySelectorAll("input:focus").length === 0 && //make sure no input fields are in focus
       document.querySelectorAll("[contenteditable=true]") //make sure no contenteditable is present (RTE)
     ) {
-      runKeyDown();
+      dispatch(runKeyDown({
+        orgparent: organization.id,
+        parent: containers[0],
+      }))
     }
   };
   useEffect(() => {
@@ -305,10 +259,18 @@ function Organization({ organization }: OrganizationComponentProps) {
   useEffect(() => {
     //set collecitons and items for render
     const getItems = (key: UniqueIdentifier) => {
-      return itemss
-        ?.filter((e) => e.parent == key)
+      let result = itemss?.filter((e) => e.parent == key);
+      if (filterText) {
+        let re = new RegExp(filterText.toLowerCase(), "g");
+        result = result?.filter((s) => s.name.toLowerCase().match(re));
+      }
+      if (filterType != "all") {
+        result = result?.filter((s) => s.type.toLowerCase() == filterType);
+      }
+      result = result
         ?.sort((a, b) => (a.order > b.order ? 1 : -1))
         .map((e) => e.id);
+      return result;
     };
     if (collections && itemss) {
       let cont = collections
@@ -330,7 +292,7 @@ function Organization({ organization }: OrganizationComponentProps) {
       );
       setAllItems(itemsi);
     }
-  }, [collections, itemss]);
+  }, [collections, itemss, filterText, filterType]);
   const docsToCollections = (doc: DocumentData) => {
     return {
       id: doc.id,
@@ -601,7 +563,7 @@ function Organization({ organization }: OrganizationComponentProps) {
             </Button>
             <Popover
               closeOnClickOutside
-              transition="pop"
+              transition="skew-up"
               withArrow
               withRoles
               trapFocus
@@ -615,32 +577,37 @@ function Organization({ organization }: OrganizationComponentProps) {
                   mx={4}
                   onClick={() => setFilterPopover((prev) => !prev)}
                   leftIcon={<IoFilterSharp />}
+                  className={
+                    filterText.length > 0 || filterType != "all"
+                      ? "filter-active"
+                      : ""
+                  }
                 >
                   Filter
                 </Button>
               </Popover.Target>
               <Popover.Dropdown>
                 <Box ref={colorboxRef}>
-                  <SegmentedControl
-                    size="xs"
-                    fullWidth
-                    mb={10}
-                    data={[
-                      { label: "All", value: "all" },
-                      { label: "Links", value: "links" },
-                      { label: "Notes", value: "notes" },
-                    ]}
-                    value={filterType}
-                    onChange={(value) => setFilterType(value)}
-                  />
                   <Input
                     variant="filled"
                     placeholder="Search items"
+                    mb={10}
                     size="xs"
                     value={filterText}
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                       setFilterText(event.currentTarget.value)
                     }
+                  />
+                  <SegmentedControl
+                    size="xs"
+                    fullWidth
+                    data={[
+                      { label: "All", value: "all" },
+                      { label: "Links", value: "link" },
+                      { label: "Notes", value: "text" },
+                    ]}
+                    value={filterType}
+                    onChange={(value) => setFilterType(value)}
                   />
                 </Box>
               </Popover.Dropdown>
@@ -1035,6 +1002,22 @@ const ContainerItem = ({
                     onClick={() => addNewItemFun()}
                   >
                     <BiMessageAltAdd />
+                  </Button>
+                </Tooltip>
+                <Tooltip label="Paste a link">
+                  <Button
+                    variant="light"
+                    color="dark"
+                    radius="md"
+                    size="xs"
+                    onClick = {()=>{
+                      dispatch(runKeyDown({
+                        orgparent: data.parent,
+                        parent: data.id,
+                      }))
+                    }}
+                  >
+                    <MdContentPaste />
                   </Button>
                 </Tooltip>
                 <Popover

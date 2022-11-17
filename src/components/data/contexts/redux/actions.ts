@@ -135,10 +135,10 @@ export const actionSlice = createSlice({
         {
           orgparent: action.payload.orgparent,
           parent: action.payload.parent,
-          name: "New Item",
+          name: action.payload.name || "New Item",
           color: "rgba(255,255,255,1)",
-          type: ItemType.TEXT,
-          link: "",
+          type: action.payload.type || ItemType.TEXT,
+          link: action.payload.link || "",
           icon: "",
           order: 0,
           archive: false,
@@ -147,6 +147,62 @@ export const actionSlice = createSlice({
           createdAt: +new Date(),
         }
       );
+    },
+    runKeyDown: (state, action) => {
+      let stateUserId = state.userId
+      const isValidHttpUrl = async (string: string) => {
+        let url;
+        try {
+          url = new URL(string);
+        } catch (_) {
+          return false;
+        }
+        return url.protocol === "http:" || url.protocol === "https:";
+      };
+      const runKeyDownFun = async () => {
+        const clipboardText = await navigator.clipboard.readText();
+        const isUrl = await isValidHttpUrl(clipboardText);
+        const response = await fetch(
+          `https://textance.herokuapp.com/title/${clipboardText}`,
+          {
+            mode: "cors",
+            headers: {
+              "Access-Control-Allow-Origin": "*",
+              "Access-Control-Allow-Headers": "Content-Type",
+              "Access-Control-Allow-Methods": "GET,PATCH,POST,PUT,DELETE",
+            },
+          }
+        )
+          .then((r) => r.text())
+          .catch(() => {});
+        console.log("Creating new document from clipboard", clipboardText);
+        const upload = async () => {
+          addDoc(
+            collection(
+              db,
+              "ktab-manager",
+              stateUserId,
+              "items"
+            ),
+            {
+              orgparent: action.payload.orgparent,
+              parent: action.payload.parent,
+              name: response ? response : clipboardText,
+              type: ItemType.LINK,
+              link: clipboardText,
+              color: "rgba(255,255,255,1)",
+              icon: "",
+              order: 0,
+              archive: false,
+              isDeleted: 0,
+              updatedAt: +new Date(),
+              createdAt: +new Date(),
+            }
+          );
+        };
+        if (isUrl) upload();
+      };
+      runKeyDownFun()
     }
   },
 });
@@ -160,7 +216,8 @@ export const {
   updateOrder,
   setSyncing,
   updateContainerName,
-  addNewItem
+  addNewItem,
+  runKeyDown
 } = actionSlice.actions;
 
 export default actionSlice.reducer;
