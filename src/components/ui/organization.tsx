@@ -232,9 +232,7 @@ function Organization({ organization }: OrganizationComponentProps) {
     };
   });
   useEffect(() => {
-    console.log("outside dragStarted",dragStarted);
     if (!dragStarted) {
-      console.log("dragStarted",dragStarted);
       dispatch(
         updateOrder({
           containers: containers,
@@ -353,7 +351,6 @@ function Organization({ organization }: OrganizationComponentProps) {
     if (active.id in items && over?.id) {
       setCurrentlyContainer(false);
       setContainers((containers) => {
-        // console.log("over conatiner");
         const activeIndex = containers.indexOf(active.id);
         const overIndex = containers.indexOf(over.id);
         return arrayMove(containers, activeIndex, overIndex);
@@ -365,20 +362,6 @@ function Organization({ organization }: OrganizationComponentProps) {
       if (overContainer && activeContainer) {
         const activeIndex = items[activeContainer].indexOf(active.id);
         const overIndex = items[overContainer].indexOf(over?.id);
-        // console.log(`activeIndex ${activeIndex}, overIndex ${overIndex}`);
-        // console.log(`active.id ${active.id}, over.id ${over.id}`);
-        // console.log(
-        //   `activeContainer ${activeContainer}, overContainer ${overContainer}`
-        // );
-        // dispatch(
-        //   updateOrder({
-        //     type: "items",
-        //     docId: active.id, //item whose order should be changed
-        //     order: overIndex, //current order
-        //     parent: activeContainer, //current parent,
-        //   })
-        // );
-
         if (activeIndex !== overIndex) {
           setItems((items) => ({
             ...items,

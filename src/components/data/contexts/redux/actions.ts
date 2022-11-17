@@ -68,46 +68,30 @@ export const actionSlice = createSlice({
       run();
     },
     updateOrder: (state, action) => {
-      console.log("running updateorder");
-      
-       const run = async () => {
+      const run = async () => {
         const batch = writeBatch(db); //writeBranch for multiple updates through loops
-        action.payload.containers.forEach((containerId: string, index: number) => {
-          //update orders of containers
-          batch.update(
-            doc(db, "ktab-manager", state.userId, "collections", containerId),
-            { order: index }
-          );
-          action.payload.items[containerId].forEach((itemId: string, index2: number) => {
-            //update orders of items
+        action.payload.containers.forEach(
+          (containerId: string, cindex: number) => {
+            //update orders of containers
             batch.update(
-              doc(db, "ktab-manager", state.userId, "items", itemId),
-              { order: index2 }
+              doc(db, "ktab-manager", state.userId, "collections", containerId),
+              { order: cindex }
             );
-          });
-          console.log(`containerId ${containerId}, index ${index}`);
-          console.log(action.payload.items[containerId]);
-        });
+            action.payload.items[containerId].forEach(
+              (itemId: string, iindex: number) => {
+                //update orders of items
+                batch.update(
+                  doc(db, "ktab-manager", state.userId, "items", itemId),
+                  { order: iindex }
+                );
+              }
+            );
+          }
+        );
         await batch.commit();
-        // console.log("commited");
+        console.log("commited");
       };
       run();
-      // updateDoc(
-      //   doc(
-      //     db,
-      //     "ktab-manager",
-      //     state.userId,
-      //     action.payload.type,
-      //     action.payload.docId
-      //   ),
-      //   {
-      //     parent: action.payload.parent,
-      //     order: action.payload.order,
-      //     updatedAt: +new Date(),
-      //   }
-      // ).then(()=>{
-      //   console.log('commited')
-      // });
     },
   },
 });
