@@ -87,6 +87,7 @@ import {
   softDeleteDocument,
   updateColor,
   updateOrder,
+  setSyncing
 } from "../data/contexts/redux/actions";
 import { RootState } from "../data/contexts/redux/configureStore";
 import { ItemType } from "../data/constants";
@@ -239,6 +240,11 @@ function Organization({ organization }: OrganizationComponentProps) {
           items: items,
         })
       );
+      setTimeout(() => {
+        dispatch(
+          setSyncing()
+        )
+      }, 1000);
     }
   }, [dragStarted]);
   useEffect(() => {

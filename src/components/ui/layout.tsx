@@ -15,6 +15,8 @@ import {
   Transition,
   Anchor,
   Switch,
+  Loader,
+  useMantineTheme
 } from "@mantine/core";
 import { Suspense, useContext, useEffect, useRef, useState } from "react";
 import { RiTableFill } from "react-icons/ri";
@@ -43,6 +45,7 @@ import ArchiveModal from "./ArchiveModal";
 import { setUserId } from "../data/contexts/redux/actions";
 export function Layout({ children }: DoubleHeaderProps) {
   const user = useContext(AuthContext);
+  const theme = useMantineTheme();
   const { classes, cx } = useStyles();
   const inputRef = useRef<any>(null);
   // const [loginModal, setLoginModal] = useState(false);
@@ -53,6 +56,9 @@ export function Layout({ children }: DoubleHeaderProps) {
   const [personalizeModal, setPersonalizeModal] = useState(false);
   const { showOrganizationModal, showLoginModal } = useSelector(
     (state: RootState) => state.states
+  );
+  const { syncing } = useSelector(
+    (state: RootState) => state.actions
   );
   const dispatch = useDispatch();
   useEffect(() => {
@@ -412,29 +418,12 @@ export function Layout({ children }: DoubleHeaderProps) {
           <LoginModal open={showLoginModal} />
         </Box>
       </Header>
-      {/* {organizationModal && (
-        <Suspense fallback={<div>Loading...</div>}>
-          <OrganizationModal
-            open={organizationModal}
-            setOpen={setOrganizationModal}
-            organizationOrCollection={organizationOrCollection}
-          />
-        </Suspense>
-      )}
-      {aboutModal && (
-        <Suspense fallback={<div>Loading...</div>}>
-          <AboutModal open={aboutModal} setOpen={setAboutModal} />
-        </Suspense>
-      )}
-      {settingsModal && (
-        <Suspense fallback={<div>Loading...</div>}>
-          <SettingsModal
-            open={settingsModal}
-            setOpen={setSettingsModal}
-            personalize={personalizeModal}
-          />
-        </Suspense>
-      )} */}
+      <Box className={`syncing-popup ${syncing && "syncing-true"}`} sx={{
+        background: theme.colors.dark,
+      }}>
+        <Loader color="white" size="xs" />
+        <Text pl={9} size="xs">Syncing {syncing}</Text>
+      </Box>
       <OrganizationModal open={showOrganizationModal} />
       <AboutModal open={aboutModal} setOpen={setAboutModal} />
       <SettingsModal

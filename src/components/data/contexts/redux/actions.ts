@@ -6,6 +6,7 @@ export const actionSlice = createSlice({
   name: "actions",
   initialState: {
     userId: "guest",
+    syncing: false,
   },
   reducers: {
     setUserId: (state, action) => {
@@ -67,8 +68,12 @@ export const actionSlice = createSlice({
       };
       run();
     },
+    setSyncing: (state) => {
+      state.syncing = !state.syncing
+    },
     updateOrder: (state, action) => {
-      const run = async () => {
+      actionSlice.caseReducers.setSyncing(state)
+      const run = () => {
         const batch = writeBatch(db); //writeBranch for multiple updates through loops
         action.payload.containers.forEach(
           (containerId: string, cindex: number) => {
@@ -88,8 +93,9 @@ export const actionSlice = createSlice({
             );
           }
         );
-        await batch.commit();
-        console.log("commited");
+        batch.commit().then(()=>{
+          console.log("commited");
+        });
       };
       run();
     },
@@ -103,6 +109,7 @@ export const {
   updateColor,
   minimizeCollections,
   updateOrder,
+  setSyncing
 } = actionSlice.actions;
 
 export default actionSlice.reducer;
