@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { deleteDoc, doc, updateDoc, writeBatch } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, updateDoc, writeBatch } from "firebase/firestore";
+import { ItemType } from "../../constants";
 import { db } from "../../firebaseConfig";
 
 const fetchUserById = createAsyncThunk(
@@ -108,6 +109,45 @@ export const actionSlice = createSlice({
       };
       run();
     },
+    updateContainerName: (state, action) => {
+      updateDoc(
+        doc(
+          db,
+          "ktab-manager",
+          state.userId,
+          "collections",
+          action.payload.docId
+        ),
+        {
+          name: action.payload.name,
+          updatedAt: +new Date(),
+        }
+      );
+    },
+    addNewItem: (state, action) => {
+      addDoc(
+        collection(
+          db,
+          "ktab-manager",
+          state.userId,
+          "items"
+        ),
+        {
+          orgparent: action.payload.orgparent,
+          parent: action.payload.parent,
+          name: "New Item",
+          color: "rgba(255,255,255,1)",
+          type: ItemType.TEXT,
+          link: "",
+          icon: "",
+          order: 0,
+          archive: false,
+          isDeleted: 0,
+          updatedAt: +new Date(),
+          createdAt: +new Date(),
+        }
+      );
+    }
   },
 });
 
@@ -119,6 +159,8 @@ export const {
   minimizeCollections,
   updateOrder,
   setSyncing,
+  updateContainerName,
+  addNewItem
 } = actionSlice.actions;
 
 export default actionSlice.reducer;

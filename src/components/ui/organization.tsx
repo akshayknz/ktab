@@ -88,6 +88,8 @@ import {
   updateColor,
   updateOrder,
   setSyncing,
+  updateContainerName,
+  addNewItem,
 } from "../data/contexts/redux/actions";
 import { RootState } from "../data/contexts/redux/configureStore";
 import { ItemType } from "../data/constants";
@@ -874,6 +876,15 @@ const ContainerItem = ({
   useEffect(() => {
     if (edit) inputRef.current?.select();
   }, [edit]);
+  const updateContainerNameFun = () => {
+    setEdit(false);
+    dispatch(
+      updateContainerName({
+        docId: data.id,
+        name: inputRef.current?.value,
+      })
+    );
+  };
   useEffect(() => {
     setMinimize(data.minimized);
   }, [data.minimized]);
@@ -881,6 +892,9 @@ const ContainerItem = ({
     dispatch(minimizeCollections({ ids: [data.id], state: !minimize }));
     setMinimize((prev) => !prev);
   };
+  const addNewItemFun = () => {
+    dispatch(addNewItem({orgparent: data.parent, parent: data.id}))
+  }
   return (
     <Box
       ref={setNodeRef}
@@ -903,7 +917,7 @@ const ContainerItem = ({
                 <Input
                   ref={inputRef}
                   onKeyDown={(e: React.KeyboardEvent) => {
-                    if (e.key == "Enter") setEdit(false);
+                    if (e.key == "Enter") updateContainerNameFun();
                   }}
                   variant={edit ? "unstyled" : "unstyled"}
                   radius="xs"
@@ -916,7 +930,7 @@ const ContainerItem = ({
                 <Button
                   variant="light"
                   size="xs"
-                  onClick={() => setEdit(false)}
+                  onClick={() => updateContainerNameFun()}
                 >
                   Save
                 </Button>
@@ -927,7 +941,7 @@ const ContainerItem = ({
                   onClick={() => setEdit(true)}
                   className={classes.titleInput}
                 >
-                  {data?.name} {data.id}
+                  {data?.name}
                 </Text>
                 {/* <Badge size="xs" radius="md">
                   Modern Javascript
@@ -954,7 +968,13 @@ const ContainerItem = ({
                   </Button>
                 </Tooltip>
                 <Tooltip label="Add new item">
-                  <Button variant="light" color="dark" radius="md" size="xs">
+                  <Button
+                    variant="light"
+                    color="dark"
+                    radius="md"
+                    size="xs"
+                    onClick={() => addNewItemFun()}
+                  >
                     <BiMessageAltAdd />
                   </Button>
                 </Tooltip>
@@ -1144,7 +1164,7 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
                   whiteSpace: "nowrap",
                 }}
               >
-                {data?.name} {data.id}
+                {data?.name}
               </Text>
             </Box>
             <Box
@@ -1224,7 +1244,7 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
                   paddingInline: 20,
                 }}
               >
-                {data?.name} {data.order} {data.id}
+                {data?.name}
               </Text>
             </Box>
           </Box>
