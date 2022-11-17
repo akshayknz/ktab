@@ -133,6 +133,7 @@ function Organization({ organization }: OrganizationComponentProps) {
   const user = useContext(AuthContext);
   const [cursor, setCursor] = useState("auto");
   const [currentlyContainer, setCurrentlyContainer] = useState(false);
+  const [dragStarted, setDragStarted] = useState(true);
   const [trashPopover, setTrashPopover] = useState(false);
   const trashboxRef = useClickOutside(() => setTrashPopover(false));
   const [colorPopover, setColorPopover] = useState(false);
@@ -231,6 +232,18 @@ function Organization({ organization }: OrganizationComponentProps) {
     };
   });
   useEffect(() => {
+    console.log("outside dragStarted",dragStarted);
+    if (!dragStarted) {
+      console.log("dragStarted",dragStarted);
+      dispatch(
+        updateOrder({
+          containers: containers,
+          items: items,
+        })
+      );
+    }
+  }, [dragStarted]);
+  useEffect(() => {
     const unsub1 = onSnapshot(
       query(
         collection(
@@ -275,13 +288,11 @@ function Organization({ organization }: OrganizationComponentProps) {
         ?.sort((a, b) => (a.order > b.order ? 1 : -1))
         .map((e) => e.id);
       setContainers(cont);
-      console.log(cont);
 
       let ob = collections.reduce((prev, key) => {
         return Object.assign(prev, { [key.id]: getItems(key.id) });
       }, {});
       setItems(ob);
-      console.log(ob);
       const itemsi = Object.assign(
         collections.reduce((prev, curr) => {
           return Object.assign(prev, { [curr.id]: curr });
@@ -354,19 +365,20 @@ function Organization({ organization }: OrganizationComponentProps) {
       if (overContainer && activeContainer) {
         const activeIndex = items[activeContainer].indexOf(active.id);
         const overIndex = items[overContainer].indexOf(over?.id);
-        console.log(`activeIndex ${activeIndex}, overIndex ${overIndex}`);
-        console.log(`active.id ${active.id}, over.id ${over.id}`);
-        console.log(
-          `activeContainer ${activeContainer}, overContainer ${overContainer}`
-        );
-        dispatch(
-          updateOrder({
-            type: "items",
-            docId: active.id, //item whose order should be changed
-            order: overIndex, //current order
-            parent: activeContainer, //current parent,
-          })
-        );
+        // console.log(`activeIndex ${activeIndex}, overIndex ${overIndex}`);
+        // console.log(`active.id ${active.id}, over.id ${over.id}`);
+        // console.log(
+        //   `activeContainer ${activeContainer}, overContainer ${overContainer}`
+        // );
+        // dispatch(
+        //   updateOrder({
+        //     type: "items",
+        //     docId: active.id, //item whose order should be changed
+        //     order: overIndex, //current order
+        //     parent: activeContainer, //current parent,
+        //   })
+        // );
+
         if (activeIndex !== overIndex) {
           setItems((items) => ({
             ...items,
@@ -379,8 +391,10 @@ function Organization({ organization }: OrganizationComponentProps) {
         }
       }
     }
+    setDragStarted(false);
   };
   const handleDragOver = ({ active, over }: DragOverEvent) => {
+    setDragStarted(true);
     const overId = over?.id;
     if (overId == null || active.id in items) {
       //overId === TRASH_ID ||
@@ -916,7 +930,7 @@ const ContainerItem = ({
                   onClick={() => setEdit(true)}
                   className={classes.titleInput}
                 >
-                  {data?.name}
+                  {data?.name} {data.id}
                 </Text>
                 {/* <Badge size="xs" radius="md">
                   Modern Javascript
@@ -1133,7 +1147,7 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
                   whiteSpace: "nowrap",
                 }}
               >
-                {data?.name}
+                {data?.name} {data.id}
               </Text>
             </Box>
             <Box
@@ -1213,7 +1227,7 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
                   paddingInline: 20,
                 }}
               >
-                {data?.name} {data.order}
+                {data?.name} {data.order} {data.id}
               </Text>
             </Box>
           </Box>
