@@ -87,7 +87,7 @@ import {
   softDeleteDocument,
   updateColor,
   updateOrder,
-  setSyncing
+  setSyncing,
 } from "../data/contexts/redux/actions";
 import { RootState } from "../data/contexts/redux/configureStore";
 import { ItemType } from "../data/constants";
@@ -234,17 +234,21 @@ function Organization({ organization }: OrganizationComponentProps) {
   });
   useEffect(() => {
     if (!dragStarted) {
+      dispatch(setSyncing({ state: true }));
       dispatch(
         updateOrder({
           containers: containers,
           items: items,
         })
       );
-      setTimeout(() => {
-        dispatch(
-          setSyncing()
-        )
-      }, 1000);
+      document.addEventListener(
+        "commit",
+        (e) => dispatch(setSyncing({ state: false })),
+        false
+      );
+      return () => {
+        document?.removeEventListener("commit", ()=>{});
+      };
     }
   }, [dragStarted]);
   useEffect(() => {

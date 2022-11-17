@@ -1,6 +1,14 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { deleteDoc, doc, updateDoc, writeBatch } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
+
+const fetchUserById = createAsyncThunk(
+  'users/fetchByIdStatus',
+  async (userId: number, thunkAPI) => {
+    const response = await 3
+    return response
+  }
+)
 
 export const actionSlice = createSlice({
   name: "actions",
@@ -68,11 +76,10 @@ export const actionSlice = createSlice({
       };
       run();
     },
-    setSyncing: (state) => {
-      state.syncing = !state.syncing
+    setSyncing: (state, action) => {
+      state.syncing = action.payload.state
     },
     updateOrder: (state, action) => {
-      actionSlice.caseReducers.setSyncing(state)
       const run = () => {
         const batch = writeBatch(db); //writeBranch for multiple updates through loops
         action.payload.containers.forEach(
@@ -95,6 +102,8 @@ export const actionSlice = createSlice({
         );
         batch.commit().then(()=>{
           console.log("commited");
+          const event = new Event('commit');
+          document.dispatchEvent(event);
         });
       };
       run();
@@ -109,7 +118,7 @@ export const {
   updateColor,
   minimizeCollections,
   updateOrder,
-  setSyncing
+  setSyncing,
 } = actionSlice.actions;
 
 export default actionSlice.reducer;
