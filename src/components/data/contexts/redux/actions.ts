@@ -22,6 +22,7 @@ export const actionSlice = createSlice({
         ),
         {
           isDeleted: 1,
+          updatedAt: +new Date(),
         }
       );
     },
@@ -47,6 +48,7 @@ export const actionSlice = createSlice({
         ),
         {
           color: action.payload.color,
+          updatedAt: +new Date(),
         }
       );
     },
@@ -76,19 +78,22 @@ export const actionSlice = createSlice({
        * over item index = order of active item
        * over container = active item's parent
        */
-      const arr = action.payload.ids;
-      const run = async () => {
-        const batch = writeBatch(db); //writeBranch for multiple updates through loops
-        arr.forEach((docId: string) => {
-          batch.update(
-            doc(db, "ktab-manager", state.userId, "collections", docId),
-            { minimized: action.payload.state }
-          );
-        });
-        await batch.commit();
-        console.log("commited");
-      };
-      run();
+      updateDoc(
+        doc(
+          db,
+          "ktab-manager",
+          state.userId,
+          action.payload.type,
+          action.payload.docId
+        ),
+        {
+          parent: action.payload.parent,
+          order: action.payload.order,
+          updatedAt: +new Date(),
+        }
+      ).then(()=>{
+        console.log('commited')
+      });
     },
   },
 });
@@ -99,7 +104,7 @@ export const {
   deleteDocument,
   updateColor,
   minimizeCollections,
-  updateOrder
+  updateOrder,
 } = actionSlice.actions;
 
 export default actionSlice.reducer;

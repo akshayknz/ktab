@@ -86,6 +86,7 @@ import {
   minimizeCollections,
   softDeleteDocument,
   updateColor,
+  updateOrder,
 } from "../data/contexts/redux/actions";
 import { RootState } from "../data/contexts/redux/configureStore";
 import { ItemType } from "../data/constants";
@@ -353,14 +354,20 @@ function Organization({ organization }: OrganizationComponentProps) {
       if (overContainer && activeContainer) {
         const activeIndex = items[activeContainer].indexOf(active.id);
         const overIndex = items[overContainer].indexOf(over?.id);
-        // console.log("drag end", activeIndex, overIndex, activeIndex !== overIndex);
+        console.log(`activeIndex ${activeIndex}, overIndex ${overIndex}`);
+        console.log(`active.id ${active.id}, over.id ${over.id}`);
+        console.log(
+          `activeContainer ${activeContainer}, overContainer ${overContainer}`
+        );
+        dispatch(
+          updateOrder({
+            type: "items",
+            docId: active.id, //item whose order should be changed
+            order: overIndex, //current order
+            parent: activeContainer, //current parent,
+          })
+        );
         if (activeIndex !== overIndex) {
-          // console.log("active.id",active.id);
-          // console.log("activeContainer",activeContainer);
-          // console.log("activeIndex",activeIndex);
-          // console.log("over?.id",over?.id);
-          // console.log("overContainer",overContainer);
-          // console.log("overIndex",overIndex);
           setItems((items) => ({
             ...items,
             [overContainer]: arrayMove(
@@ -386,7 +393,6 @@ function Organization({ organization }: OrganizationComponentProps) {
     if (!overContainer || !activeContainer) {
       return;
     }
-    console.log("handleDragOver", activeContainer, overContainer);
 
     if (activeContainer !== overContainer) {
       setItems((items) => {
@@ -1207,7 +1213,7 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
                   paddingInline: 20,
                 }}
               >
-                {data?.name}
+                {data?.name} {data.order}
               </Text>
             </Box>
           </Box>
