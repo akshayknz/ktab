@@ -3,12 +3,12 @@ import { deleteDoc, doc, updateDoc, writeBatch } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 
 const fetchUserById = createAsyncThunk(
-  'users/fetchByIdStatus',
+  "users/fetchByIdStatus",
   async (userId: number, thunkAPI) => {
-    const response = await 3
-    return response
+    const response = await 3;
+    return response;
   }
-)
+);
 
 export const actionSlice = createSlice({
   name: "actions",
@@ -77,7 +77,7 @@ export const actionSlice = createSlice({
       run();
     },
     setSyncing: (state, action) => {
-      state.syncing = action.payload.state
+      state.syncing = action.payload.state;
     },
     updateOrder: (state, action) => {
       const run = () => {
@@ -94,15 +94,15 @@ export const actionSlice = createSlice({
                 //update orders of items
                 batch.update(
                   doc(db, "ktab-manager", state.userId, "items", itemId),
-                  { order: iindex }
+                  { order: iindex, parent: containerId }
                 );
               }
             );
           }
         );
-        batch.commit().then(()=>{
+        batch.commit().then(() => {
           console.log("commited");
-          const event = new Event('commit');
+          const event = new Event("commit");
           document.dispatchEvent(event);
         });
       };

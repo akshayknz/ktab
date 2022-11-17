@@ -226,6 +226,7 @@ function Organization({ organization }: OrganizationComponentProps) {
     }
   };
   useEffect(() => {
+    //Listening to keydown for ctrl+V
     document?.addEventListener("keydown", onKeyDown);
 
     return () => {
@@ -233,6 +234,7 @@ function Organization({ organization }: OrganizationComponentProps) {
     };
   });
   useEffect(() => {
+    //Saving collection and item order
     if (!dragStarted) {
       dispatch(setSyncing({ state: true }));
       dispatch(
@@ -247,11 +249,12 @@ function Organization({ organization }: OrganizationComponentProps) {
         false
       );
       return () => {
-        document?.removeEventListener("commit", ()=>{});
+        document?.removeEventListener("commit", () => {});
       };
     }
   }, [dragStarted]);
   useEffect(() => {
+    //Get collections and items of this organization
     const unsub1 = onSnapshot(
       query(
         collection(
@@ -285,6 +288,7 @@ function Organization({ organization }: OrganizationComponentProps) {
     );
   }, []);
   useEffect(() => {
+    //set collecitons and items for render
     const getItems = (key: UniqueIdentifier) => {
       return itemss
         ?.filter((e) => e.parent == key)
