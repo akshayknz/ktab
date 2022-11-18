@@ -59,7 +59,7 @@ import React, {
   useMemo,
 } from "react";
 import { MdContentPaste, MdDragIndicator, MdOutlineAdd } from "react-icons/md";
-import { AiOutlineDelete } from "react-icons/ai";
+import { AiOutlineDelete, AiOutlineEye } from "react-icons/ai";
 import { BiMessageAltAdd } from "react-icons/bi";
 import {
   IoColorFilterOutline,
@@ -83,6 +83,8 @@ import { AuthContext } from "../data/contexts/AuthContext";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setOrganizationColor,
+  setViewMargins,
+  setViewWidth,
   toggleEditOrganizationModal,
   toggleOrganizationModal,
 } from "../data/contexts/redux/states";
@@ -98,8 +100,8 @@ import {
   runKeyDown,
 } from "../data/contexts/redux/actions";
 import { RootState } from "../data/contexts/redux/configureStore";
-import { ItemType } from "../data/constants";
-import { BsFilterCircle } from "react-icons/bs";
+import { ItemType, ViewMarginsType, ViewWidthType } from "../data/constants";
+import { BsEye, BsFilterCircle } from "react-icons/bs";
 
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
 const useStyles = createStyles((theme) => ({
@@ -148,6 +150,7 @@ function Organization({ organization }: OrganizationComponentProps) {
   const trashboxRef = useClickOutside(() => setTrashPopover(false));
   const [colorPopover, setColorPopover] = useState(false);
   const [filterPopover, setFilterPopover] = useState(false);
+  const [viewPopover, setViewPopover] = useState(false);
   const [filterText, setFilterText] = useState("");
   const [filterType, setFilterType] = useState("all");
   // const [debouncedFilterText] = useDebouncedValue(filterText, 59);
@@ -155,9 +158,10 @@ function Organization({ organization }: OrganizationComponentProps) {
   const colorboxRef = useClickOutside(() => {
     setColorPopover(false);
     setFilterPopover(false);
+    setViewPopover(false);
   });
   const dispatch = useDispatch();
-  const { organizationColor } = useSelector((state: RootState) => state.states);
+  const { organizationColor, viewWidth, viewMargins } = useSelector((state: RootState) => state.states);
   useEffect(() => {
     dispatch(setOrganizationColor(organization.color));
   }, [organization.color]);
@@ -218,7 +222,7 @@ function Organization({ organization }: OrganizationComponentProps) {
         false
       );
       return () => {
-        document?.removeEventListener("commit", () => {});
+        document?.removeEventListener("commit", () => { });
       };
     }
   }, [dragStarted]);
@@ -398,7 +402,7 @@ function Organization({ organization }: OrganizationComponentProps) {
             over &&
             active.rect.current.translated &&
             active.rect.current.translated.top >
-              over.rect.top + over.rect.height;
+            over.rect.top + over.rect.height;
 
           const modifier = isBelowOverItem ? 1 : 0;
 
@@ -440,7 +444,7 @@ function Organization({ organization }: OrganizationComponentProps) {
       const intersections =
         pointerIntersections.length > 0
           ? // If there are droppables intersecting with the pointer, return those
-            pointerIntersections
+          pointerIntersections
           : rectIntersection(args);
       let overId = getFirstCollision(intersections, "id");
 
@@ -609,6 +613,61 @@ function Organization({ organization }: OrganizationComponentProps) {
                     value={filterType}
                     onChange={(value) => setFilterType(value)}
                   />
+                </Box>
+              </Popover.Dropdown>
+            </Popover>
+            <Popover
+              closeOnClickOutside
+              transition="skew-up"
+              withArrow
+              withRoles
+              trapFocus
+              position="bottom"
+              opened={viewPopover}
+            >
+              <Popover.Target>
+                <Button
+                  variant="light"
+                  compact
+                  mx={4}
+                  onClick={() => setViewPopover((prev) => !prev)}
+                  leftIcon={<AiOutlineEye />}
+                >
+                  View
+                </Button>
+              </Popover.Target>
+              <Popover.Dropdown>
+                <Box ref={colorboxRef}>
+                  <Text weight={500} sx={{ fontSize: 14 }} pb={5}>
+                    Width
+                  </Text>
+                  <SegmentedControl
+                    size="xs"
+                    fullWidth
+                    mb={10}
+                    data={[
+                      { label: "Default", value: ViewWidthType.DEFAULT },
+                      { label: "Compact", value: ViewWidthType.COMPACT },
+                      { label: "Flow", value: ViewWidthType.FLOW },
+                    ]}
+                    value={viewWidth}
+                    onChange={(v) => dispatch(setViewWidth(v))}
+                  />
+                  <Text weight={500} sx={{ fontSize: 14 }} pb={5}>
+                    Margins
+                  </Text>
+                  <SegmentedControl
+                    size="xs"
+                    fullWidth
+                    mb={10}
+                    data={[
+                      { label: "Default", value: ViewMarginsType.DEFAULT },
+                      { label: "Compact", value: ViewMarginsType.COMPACT },
+                    ]}
+                    value={viewMargins}
+                    onChange={(v) => dispatch(setViewMargins(v))}
+                  />
+
                 </Box>
               </Popover.Dropdown>
             </Popover>
@@ -818,7 +877,10 @@ function Organization({ organization }: OrganizationComponentProps) {
                 >
                   <div
                     className="items"
-                    style={{ display: "flex", flexWrap: "wrap" }}
+                    style={{ 
+                      display: "flex", 
+                      flexWrap: "wrap"
+                    }}
                   >
                     {items[containerId].map((value, index) => (
                       <SortableItem
@@ -932,10 +994,10 @@ const ContainerItem = ({
             : theme.colors["white-alpha"][3],
         padding: 4,
         paddingTop: 9,
-        paddingInline: 50,
+        paddingInline: 30,
       })}
     >
-      <Container sx={{ height: "50px" }}>
+      <Box sx={{ height: "50px" }}>
         <Grid>
           <Grid.Col span={6}>
             {edit ? (
@@ -978,9 +1040,8 @@ const ContainerItem = ({
           <Grid.Col span={6}>
             <Group position="right">
               <Group
-                className={`${classes.buttonGroup} ${
-                  isDragging && classes.buttonGroupDragging
-                }`}
+                className={`${classes.buttonGroup} ${isDragging && classes.buttonGroupDragging
+                  }`}
               >
                 <Tooltip label="Edit title">
                   <Button
@@ -1010,7 +1071,7 @@ const ContainerItem = ({
                     color="dark"
                     radius="md"
                     size="xs"
-                    onClick = {()=>{
+                    onClick={() => {
                       dispatch(runKeyDown({
                         orgparent: data.parent,
                         parent: data.id,
@@ -1108,7 +1169,7 @@ const ContainerItem = ({
             </Group>
           </Grid.Col>
         </Grid>
-      </Container>
+      </Box>
       {!data.minimized && !globalMinifyContainers && (
         <div
           style={{
@@ -1133,12 +1194,34 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
     isDragging,
   } = useSortable({ id: name });
   const theme = useMantineTheme();
+  const { organizationColor, viewWidth, viewMargins } = useSelector((state: RootState) => state.states);
+  let width = "24.1%"
+  let margin = "5px"
+  switch(viewWidth){
+    case ViewWidthType.FLOW:
+      width = "auto"
+      break;
+    case ViewWidthType.COMPACT:
+      width = "19%"
+      break;
+    default:
+      break;
+  }
+  switch(viewMargins){
+    case ViewMarginsType.COMPACT:
+      margin = "3px"
+      break;
+    default:
+      break;
+  }
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? "100" : "auto",
     opacity: isDragging ? 0.5 : 1,
     color: theme.colors.gray[3],
+    width: width,
+    margin: margin,
   };
   const [itemOpened, setItemOpened] = useState(false);
   const openModal = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -1197,13 +1280,11 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
                 ></span>
               </Box>
               <Text
+                className="sort-item-link"
                 style={{
                   display: "inline-block",
                   padding: 5,
                   paddingLeft: 20,
-                  textOverflow: "ellipsis",
-                  overflow: "hidden",
-                  whiteSpace: "nowrap",
                 }}
               >
                 {data?.name}
@@ -1260,6 +1341,7 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
               style={{
                 display: "flex",
                 alignItems: "center",
+                width: "100%",
               }}
             >
               <Box
@@ -1280,6 +1362,7 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
                 ></span>
               </Box>
               <Text
+                className="sort-item-text"
                 style={{
                   display: "inline-block",
                   padding: 5,
@@ -1305,8 +1388,31 @@ const SortableItemOverlay = ({
   currentlyContainer,
 }: SortableItemProps) => {
   const theme = useMantineTheme();
+  const { organizationColor, viewWidth, viewMargins } = useSelector((state: RootState) => state.states);
+  let width = "204.1%"
+  let margin = "5px"
+  switch(viewWidth){
+    case ViewWidthType.FLOW:
+      width = "auto"
+      break;
+    case ViewWidthType.COMPACT:
+      width = "19%"
+      break;
+    default:
+      break;
+  }
+  switch(viewMargins){
+    case ViewMarginsType.COMPACT:
+      margin = "3px"
+      break;
+    default:
+      break;
+  }
   const style = {
     color: theme.colors.gray[3],
+    width: width,
+    margin: margin,
+    display: "block"
   };
   const [itemOpened, setItemOpened] = useState(false);
   const openModal = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -1362,13 +1468,11 @@ const SortableItemOverlay = ({
                 ></span>
               </Box>
               <Text
+                className="sort-item-link"
                 style={{
                   display: "inline-block",
                   padding: 5,
                   paddingLeft: 20,
-                  textOverflow: "ellipsis",
-                  overflow: "hidden",
-                  whiteSpace: "nowrap",
                 }}
               >
                 {data?.name}
@@ -1400,6 +1504,7 @@ const SortableItemOverlay = ({
               style={{
                 display: "flex",
                 alignItems: "center",
+                width: "100%",
               }}
             >
               <Box
@@ -1420,6 +1525,7 @@ const SortableItemOverlay = ({
                 ></span>
               </Box>
               <Text
+                className="sort-item-text"
                 style={{
                   display: "inline-block",
                   padding: 5,

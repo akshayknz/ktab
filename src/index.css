@@ -14,11 +14,10 @@ code {
 
 .sort-item {
   cursor: pointer;
-  border: 2px solid rgb(255 255 255 / 10%);
+  border: 2px solid rgb(255 255 255 / 8%);
   border-radius: 8px;
   display: inline-block;
-  width: 250px;
-  margin: 5px;
+  max-width: 24.1%;
   transition: all 0.1s;
   overflow: hidden;
   text-decoration: none;
@@ -48,6 +47,12 @@ code {
 .sort-item:hover .item-edit-button {
   transform: translateX(0px);
   opacity: 1;
+}
+
+.sort-item-text, .sort-item-link {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .syncing-popup {
