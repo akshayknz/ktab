@@ -158,7 +158,7 @@ export default function ArchiveModal({ open, setOpen }: Props) {
           Archive
         </Title>
       }
-      size="xl"
+      size="80%"
     >
       <Box style={{ display: "flex", justifyContent: "flex-end" }}>
         <Input

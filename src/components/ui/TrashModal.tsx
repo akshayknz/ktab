@@ -162,7 +162,7 @@ export default function TrashModal({ open, setOpen }: Props) {
           Trash
         </Title>
       }
-      size="xl"
+      size="80%"
     >
       <Box style={{ display: "flex", justifyContent: "flex-end" }}>
         <Input
