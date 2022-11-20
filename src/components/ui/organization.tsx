@@ -102,6 +102,7 @@ import {
 import { RootState } from "../data/contexts/redux/configureStore";
 import { ItemType, ViewMarginsType, ViewWidthType } from "../data/constants";
 import { BsEye, BsFilterCircle } from "react-icons/bs";
+import useViewport from "../data/useViewport";
 
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
 const useStyles = createStyles((theme) => ({
@@ -143,6 +144,7 @@ const useStyles = createStyles((theme) => ({
 
 function Organization({ organization }: OrganizationComponentProps) {
   const user = useContext(AuthContext);
+  const vp = useViewport();
   const [cursor, setCursor] = useState("auto");
   const [currentlyContainer, setCurrentlyContainer] = useState(false);
   const [dragStarted, setDragStarted] = useState(true);
@@ -544,16 +546,19 @@ function Organization({ organization }: OrganizationComponentProps) {
           cursor: cursor,
         }}
       >
-        <Grid>
-          <Grid.Col span={6}>
+        <Grid sx={{ width: "100%" }}>
+          <Grid.Col md={6} sm={12}>
             <Title weight={100}>{organization.name}</Title>
           </Grid.Col>
           <Grid.Col
-            span={6}
+            md={6}
+            sm={12}
             style={{
               display: "flex",
               justifyContent: "flex-end",
               alignItems: "center",
+              flexWrap: vp.tab ? "wrap" : "nowrap",
+              rowGap: "10px"
             }}
           >
             <Button
@@ -873,13 +878,14 @@ function Organization({ organization }: OrganizationComponentProps) {
               >
                 <SortableContext
                   items={items[containerId]}
-                  strategy={horizontalListSortingStrategy}
+                  strategy={vp.tab ? verticalListSortingStrategy : horizontalListSortingStrategy}
                 >
                   <div
                     className="items"
-                    style={{ 
-                      display: "flex", 
-                      flexWrap: "wrap"
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      flexDirection: vp.tab ? "column" : "row"
                     }}
                   >
                     {items[containerId].map((value, index) => (
@@ -944,7 +950,7 @@ const ContainerItem = ({
   const [minimize, setMinimize] = useState(data.minimized);
   const [trashPopover, setTrashPopover] = useState(false);
   const trashboxRef = useClickOutside(() => setTrashPopover(false));
-
+  const vp = useViewport()
   const inputRef = useRef<HTMLInputElement | null>(null);
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -997,9 +1003,9 @@ const ContainerItem = ({
         paddingInline: 30,
       })}
     >
-      <Box sx={{ height: "50px" }}>
+      <Box sx={{ height: vp.tab ? "auto" : "50px" }}>
         <Grid>
-          <Grid.Col span={6}>
+          <Grid.Col md={6} sm={12}>
             {edit ? (
               <Group>
                 <Input
@@ -1037,7 +1043,7 @@ const ContainerItem = ({
               </Group>
             )}
           </Grid.Col>
-          <Grid.Col span={6}>
+          <Grid.Col md={6} sm={12}>
             <Group position="right">
               <Group
                 className={`${classes.buttonGroup} ${isDragging && classes.buttonGroupDragging
@@ -1195,19 +1201,20 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
   } = useSortable({ id: name });
   const theme = useMantineTheme();
   const { organizationColor, viewWidth, viewMargins } = useSelector((state: RootState) => state.states);
-  let width = "24.1%"
+  const vp = useViewport();
+  let width = vp.tab ? "100%" : "24.1%"
   let margin = "5px"
-  switch(viewWidth){
+  switch (viewWidth) {
     case ViewWidthType.FLOW:
       width = "auto"
       break;
     case ViewWidthType.COMPACT:
-      width = "19%"
+      width = vp.tab ? "100%" : "19%"
       break;
     default:
       break;
   }
-  switch(viewMargins){
+  switch (viewMargins) {
     case ViewMarginsType.COMPACT:
       margin = "3px"
       break;
@@ -1222,6 +1229,7 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
     color: theme.colors.gray[3],
     width: width,
     margin: margin,
+    maxWidth: vp.tab ? "100%" : "24.1%"
   };
   const [itemOpened, setItemOpened] = useState(false);
   const openModal = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -1391,7 +1399,7 @@ const SortableItemOverlay = ({
   const { organizationColor, viewWidth, viewMargins } = useSelector((state: RootState) => state.states);
   let width = "204.1%"
   let margin = "5px"
-  switch(viewWidth){
+  switch (viewWidth) {
     case ViewWidthType.FLOW:
       width = "auto"
       break;
@@ -1401,7 +1409,7 @@ const SortableItemOverlay = ({
     default:
       break;
   }
-  switch(viewMargins){
+  switch (viewMargins) {
     case ViewMarginsType.COMPACT:
       margin = "3px"
       break;

@@ -17,7 +17,6 @@ code {
   border: 2px solid rgb(255 255 255 / 8%);
   border-radius: 8px;
   display: inline-block;
-  max-width: 24.1%;
   transition: all 0.1s;
   overflow: hidden;
   text-decoration: none;

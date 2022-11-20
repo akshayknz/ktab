@@ -37,6 +37,7 @@ import {
 import { RootState } from "../data/contexts/redux/configureStore";
 import { useLocalStorage } from "@mantine/hooks";
 import { TimeInput } from "@mantine/dates";
+import useViewport from "../data/useViewport";
 
 const HEADER_HEIGHT = 28;
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
@@ -63,6 +64,7 @@ interface ItemProps {
 
 function Home() {
   const user = useContext(AuthContext);
+  const vp = useViewport()
   const { classes, cx } = useStyles();
   const { activeOrganization } = useSelector(
     (state: RootState) => state.states
@@ -151,29 +153,29 @@ function Home() {
         keepMounted={false}
       >
         <Header
-          height={HEADER_HEIGHT}
+          height={vp.tab ? "auto" : HEADER_HEIGHT}
           sx={{ overflow: "hidden", border: "none", paddingLeft: 0 }}
         >
           <Box className={classes.vmiddle} sx={{ width: "100%" }}>
             <Tabs.List
               className={cx(classes.vmiddle, classes.lineHeightFix)}
-              sx={{ paddingInline: 53 }}
+              sx={{ paddingInline: vp.tab? 5:53 }}
             >
               {organizations
                 ? organizations?.map((organization) => (
-                    <Tabs.Tab
-                      key={organization.id ? organization.id : "undefined"}
-                      value={organization.id ? organization.id : "undefined"}
-                      icon={organization.icon}
-                      sx={{
-                        height: 28,
-                        fontSize: "12px",
-                        background: `linear-gradient(transparent,${organization.color} 170%)`,
-                      }}
-                    >
-                      {organization.name}
-                    </Tabs.Tab>
-                  ))
+                  <Tabs.Tab
+                    key={organization.id ? organization.id : "undefined"}
+                    value={organization.id ? organization.id : "undefined"}
+                    icon={organization.icon}
+                    sx={{
+                      height: 28,
+                      fontSize: "12px",
+                      background: `linear-gradient(transparent,${organization.color} 170%)`,
+                    }}
+                  >
+                    {organization.name}
+                  </Tabs.Tab>
+                ))
                 : null}
               <Button
                 onClick={() =>
@@ -193,13 +195,13 @@ function Home() {
         </Header>
         {organizations
           ? organizations?.map((organization) => (
-              <Tabs.Panel
-                key={organization.id ? organization.id : "undefined"}
-                value={organization.id ? organization.id : "undefined"}
-              >
-                <Organization organization={organization} />
-              </Tabs.Panel>
-            ))
+            <Tabs.Panel
+              key={organization.id ? organization.id : "undefined"}
+              value={organization.id ? organization.id : "undefined"}
+            >
+              <Organization organization={organization} />
+            </Tabs.Panel>
+          ))
           : null}
       </Tabs>
       {organizations === undefined && <Skeleton height={100}></Skeleton>}
@@ -214,24 +216,6 @@ const useStyles = createStyles((theme) => ({
     display: "inline-block",
     verticalAlign: "middle",
     height: "100%",
-  },
-  menuitem: {
-    lineHeight: HEADER_HEIGHT - 2 + "px",
-    paddingInline: theme.spacing.sm,
-    border: "none",
-  },
-  submenuItem: {
-    height: "28px",
-    fontSize: theme.fontSizes.xs,
-  },
-  submenuParent: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    ".mantine-Text-root": {
-      height: "100%",
-      verticalAlign: "middle",
-    },
   },
   lineHeightFix: {
     lineHeight: HEADER_HEIGHT - 2 + "px",

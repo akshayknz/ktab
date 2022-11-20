@@ -12,13 +12,11 @@ import {
   Card,
   Group,
   Avatar,
-  Transition,
   Anchor,
-  Switch,
   Loader,
   useMantineTheme
 } from "@mantine/core";
-import { Suspense, useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { RiTableFill } from "react-icons/ri";
 import { MdKeyboardArrowRight, MdPersonOutline } from "react-icons/md";
 import { SpotlightProvider, openSpotlight } from "@mantine/spotlight";
@@ -27,9 +25,6 @@ import LoginModal from "./LoginModal";
 import { AuthContext } from "../data/contexts/AuthContext";
 import { auth } from "../data/firebaseConfig";
 import React from "react";
-// const OrganizationModal = React.lazy(() => import("./OrganizationModal"));
-// const AboutModal = React.lazy(() => import("./AboutModal"));
-// const SettingsModal = React.lazy(() => import("./SettingsModal"));
 import OrganizationModal from "./OrganizationModal";
 import AboutModal from "./AboutModal";
 import SettingsModal from "./SettingsModal";
@@ -43,40 +38,41 @@ import {
 import TrashModal from "./TrashModal";
 import ArchiveModal from "./ArchiveModal";
 import { setUserId } from "../data/contexts/redux/actions";
+import useViewport from "../data/useViewport";
 export function Layout({ children }: DoubleHeaderProps) {
-  const user = useContext(AuthContext);
-  const theme = useMantineTheme();
-  const { classes, cx } = useStyles();
-  const inputRef = useRef<any>(null);
-  // const [loginModal, setLoginModal] = useState(false);
-  const [aboutModal, setAboutModal] = useState(false);
-  const [settingsModal, setSettingsModal] = useState(false);
-  const [trashModal, setTrashModal] = useState(false);
-  const [archiveModal, setArchiveModal] = useState(false);
-  const [personalizeModal, setPersonalizeModal] = useState(false);
+  const user = useContext(AuthContext)
+  const theme = useMantineTheme()
+  const vp = useViewport()
+  const { classes, cx } = useStyles()
+  const inputRef = useRef<any>(null)
+  const [aboutModal, setAboutModal] = useState(false)
+  const [settingsModal, setSettingsModal] = useState(false)
+  const [trashModal, setTrashModal] = useState(false)
+  const [archiveModal, setArchiveModal] = useState(false)
+  const [personalizeModal, setPersonalizeModal] = useState(false)
   const { showOrganizationModal, showLoginModal } = useSelector(
     (state: RootState) => state.states
-  );
+  )
   const { syncing } = useSelector(
     (state: RootState) => state.actions
-  );
-  const dispatch = useDispatch();
+  )
+  const dispatch = useDispatch()
   useEffect(() => {
-    dispatch(setUserId(user?.uid ? user.uid : "guest"));
-  }, [user]);
+    dispatch(setUserId(user?.uid ? user.uid : "guest"))
+  }, [user])
   function closeMenu() {
-    inputRef.current!.click();
+    inputRef.current!.click()
   }
 
   const signOut = async () => {
-    await auth.signOut();
-  };
+    await auth.signOut()
+  }
 
   return (
     <>
       <Header
         height={HEADER_HEIGHT}
-        px={57}
+        px={vp.tab ? 10 : 57}
         style={{
           position: "sticky",
           backgroundColor: "#1a1b1eba",
@@ -199,7 +195,7 @@ export function Layout({ children }: DoubleHeaderProps) {
               <Menu.Item className={classes.submenuItem}>Refresh</Menu.Item>
             </Menu.Dropdown>
           </Menu>
-          <Menu
+          {vp.tab ? null : <Menu
             shadow="md"
             width={200}
             offset={0}
@@ -262,8 +258,8 @@ export function Layout({ children }: DoubleHeaderProps) {
                 Log out
               </Menu.Item>
             </Menu.Dropdown>
-          </Menu>
-          <Button
+          </Menu>}
+          {vp.tab ? null : <Button
             variant="default"
             radius="xs"
             size="xs"
@@ -275,8 +271,8 @@ export function Layout({ children }: DoubleHeaderProps) {
             className={cx(classes.vmiddle, classes.menuitem)}
           >
             Personalize
-          </Button>
-          <SpotlightProvider
+          </Button>}
+          {vp.tab ? null : <SpotlightProvider
             actions={actions}
             searchIcon={<MdKeyboardArrowRight size={18} />}
             searchPlaceholder="Search..."
@@ -294,10 +290,10 @@ export function Layout({ children }: DoubleHeaderProps) {
             >
               Spotlight
             </Button>
-          </SpotlightProvider>
+          </SpotlightProvider>}
         </Box>
         <Box className={classes.vmiddle} style={{ float: "right" }}>
-          <Button
+          {vp.tab ? null : <Button
             variant="default"
             radius="xs"
             size="xs"
@@ -322,8 +318,8 @@ export function Layout({ children }: DoubleHeaderProps) {
               <MdPersonOutline size={15} />
             </Avatar>
             {user ? <>Welcome, {user?.displayName}</> : null}
-          </Button>
-          <Popover
+          </Button>}
+          {vp.tab ? null : <Popover
             transition="pop"
             width={400}
             position="bottom-end"
@@ -387,7 +383,7 @@ export function Layout({ children }: DoubleHeaderProps) {
                 ))}
               </ScrollArea>
             </Popover.Dropdown>
-          </Popover>
+          </Popover>}
           {user ? (
             <Button
               variant="default"
