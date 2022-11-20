@@ -35,6 +35,7 @@ import {
   softDeleteDocument,
 } from "../data/contexts/redux/actions";
 import { useDispatch } from "react-redux";
+import useViewport from "../data/useViewport";
 interface Props {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -42,6 +43,7 @@ interface Props {
 let elements = [{ id: "", name: "", type: "" }];
 export default function TrashModal({ open, setOpen }: Props) {
   const dispatch = useDispatch();
+  const vp = useViewport()
   const user = useContext(AuthContext);
   const [search, setSearch] = useState("");
   const [items, setItems] = useState<any[]>();
@@ -100,6 +102,7 @@ export default function TrashModal({ open, setOpen }: Props) {
       id: doc.id as string,
       name: doc.data().name as string,
       content: doc.data().content as string,
+      updatedAt: doc.data().updatedAt as string,
       type: type as string,
     };
   };
@@ -127,11 +130,12 @@ export default function TrashModal({ open, setOpen }: Props) {
         element.type.toLowerCase().indexOf(search.toLowerCase()) > -1 ||
         search.length == 0
     )
-    .map((element: { name: string; id: string; type: string }) => (
+    .map((element: { name: string; id: string; type: string; updatedAt: string }) => (
       <tr key={element.id}>
         <td>{element.id}</td>
         <td>{element.name}</td>
         <td>{element.type}</td>
+        <td>{new Date(element.updatedAt).toDateString()}</td>
         <td>
           <Button
             compact
@@ -162,7 +166,7 @@ export default function TrashModal({ open, setOpen }: Props) {
           Trash
         </Title>
       }
-      size="80%"
+      size={vp.tab ? "100%" : "80%"}
     >
       <Box style={{ display: "flex", justifyContent: "flex-end" }}>
         <Input
@@ -173,22 +177,25 @@ export default function TrashModal({ open, setOpen }: Props) {
           onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
             setSearch(event.currentTarget.value)
           }
-          style={{ maxWidth: "100%", minWidth: "280px" }}
+          style={{ maxWidth: "100%", minWidth: vp.tab ? "100%" : "280px" }}
         />
       </Box>
-      {temp?.length != 0 && (
-        <Table highlightOnHover striped>
-          <thead>
-            <tr>
-              <th>UID</th>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>{rows}</tbody>
-        </Table>
-      )}
+      <Box style={{ overflow: vp.tab? "scroll":"hidden" }}>
+        {temp?.length != 0 && (
+          <Table highlightOnHover striped style={{ minWidth: "900px" }}>
+            <thead>
+              <tr>
+                <th style={{ width: "200px" }}>UID</th>
+                <th>Name</th>
+                <th style={{ width: "120px" }}>Type</th>
+                <th style={{ width: "140px" }}>Deleted At</th>
+                <th style={{ width: "170px" }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>{rows}</tbody>
+          </Table>
+        )}
+      </Box>
       {temp?.length == 0 && (
         <>
           <Text style={{ textAlign: "center" }} my={40}>
