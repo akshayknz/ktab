@@ -14,7 +14,8 @@ import {
   Avatar,
   Anchor,
   Loader,
-  useMantineTheme
+  useMantineTheme,
+  Input,
 } from "@mantine/core";
 import { useContext, useEffect, useRef, useState } from "react";
 import { RiTableFill } from "react-icons/ri";
@@ -32,6 +33,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../data/contexts/redux/configureStore";
 import { useDispatch } from "react-redux";
 import {
+  setFilterText,
   toggleLoginModal,
   toggleOrganizationModal,
 } from "../data/contexts/redux/states";
@@ -40,33 +42,31 @@ import ArchiveModal from "./ArchiveModal";
 import { setUserId } from "../data/contexts/redux/actions";
 import useViewport from "../data/useViewport";
 export function Layout({ children }: DoubleHeaderProps) {
-  const user = useContext(AuthContext)
-  const theme = useMantineTheme()
-  const vp = useViewport()
-  const { classes, cx } = useStyles()
-  const inputRef = useRef<any>(null)
-  const [aboutModal, setAboutModal] = useState(false)
-  const [settingsModal, setSettingsModal] = useState(false)
-  const [trashModal, setTrashModal] = useState(false)
-  const [archiveModal, setArchiveModal] = useState(false)
-  const [personalizeModal, setPersonalizeModal] = useState(false)
+  const user = useContext(AuthContext);
+  const theme = useMantineTheme();
+  const vp = useViewport();
+  const { classes, cx } = useStyles();
+  const inputRef = useRef<any>(null);
+  const [aboutModal, setAboutModal] = useState(false);
+  const [settingsModal, setSettingsModal] = useState(false);
+  const [trashModal, setTrashModal] = useState(false);
+  const [archiveModal, setArchiveModal] = useState(false);
+  const [personalizeModal, setPersonalizeModal] = useState(false);
   const { showOrganizationModal, showLoginModal } = useSelector(
     (state: RootState) => state.states
-  )
-  const { syncing } = useSelector(
-    (state: RootState) => state.actions
-  )
-  const dispatch = useDispatch()
+  );
+  const { syncing } = useSelector((state: RootState) => state.actions);
+  const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(setUserId(user?.uid ? user.uid : "guest"))
-  }, [user])
+    dispatch(setUserId(user?.uid ? user.uid : "guest"));
+  }, [user]);
   function closeMenu() {
-    inputRef.current!.click()
+    inputRef.current!.click();
   }
 
   const signOut = async () => {
-    await auth.signOut()
-  }
+    await auth.signOut();
+  };
 
   return (
     <>
@@ -195,195 +195,218 @@ export function Layout({ children }: DoubleHeaderProps) {
               <Menu.Item className={classes.submenuItem}>Refresh</Menu.Item>
             </Menu.Dropdown>
           </Menu>
-          {vp.tab ? null : <Menu
-            shadow="md"
-            width={200}
-            offset={0}
-            position="bottom-start"
-            closeOnClickOutside={true}
-            clickOutsideEvents={["click"]}
-            transitionDuration={65}
-            transition={"rotate-right"}
-          >
-            <Menu.Target>
+          {vp.tab ? null : (
+            <Menu
+              shadow="md"
+              width={200}
+              offset={0}
+              position="bottom-start"
+              closeOnClickOutside={true}
+              clickOutsideEvents={["click"]}
+              transitionDuration={65}
+              transition={"rotate-right"}
+            >
+              <Menu.Target>
+                <Button
+                  variant="default"
+                  radius="xs"
+                  size="xs"
+                  compact
+                  className={cx(classes.vmiddle, classes.menuitem)}
+                >
+                  Preferences
+                </Button>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Item
+                  className={classes.submenuItem}
+                  onClick={() => {
+                    closeMenu();
+                    setSettingsModal((prevState) => !prevState);
+                    setPersonalizeModal(false);
+                  }}
+                >
+                  Settings
+                </Menu.Item>
+                <Menu.Item
+                  className={classes.submenuItem}
+                  onClick={() => {
+                    closeMenu();
+                    setAboutModal((prevState) => !prevState);
+                  }}
+                >
+                  About
+                </Menu.Item>
+                <Menu.Item
+                  className={classes.submenuItem}
+                  onClick={() => {
+                    closeMenu();
+                    setArchiveModal((prevState) => !prevState);
+                  }}
+                >
+                  Archive
+                </Menu.Item>
+                <Menu.Item
+                  className={classes.submenuItem}
+                  onClick={() => {
+                    closeMenu();
+                    setTrashModal((prevState) => !prevState);
+                  }}
+                >
+                  Trash
+                </Menu.Item>
+                <Menu.Item className={classes.submenuItem} onClick={signOut}>
+                  Log out
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          )}
+          {vp.tab ? null : (
+            <Button
+              variant="default"
+              radius="xs"
+              size="xs"
+              compact
+              onClick={() => {
+                setSettingsModal((prevState) => !prevState);
+                setPersonalizeModal(true);
+              }}
+              className={cx(classes.vmiddle, classes.menuitem)}
+            >
+              Personalize
+            </Button>
+          )}
+          {vp.tab ? null : (
+            <SpotlightProvider
+              actions={actions}
+              searchIcon={<MdKeyboardArrowRight size={18} />}
+              searchPlaceholder="Search..."
+              shortcut="mod + shift + 1"
+              nothingFoundMessage="Nothing found..."
+              limit={5}
+            >
               <Button
                 variant="default"
                 radius="xs"
                 size="xs"
                 compact
                 className={cx(classes.vmiddle, classes.menuitem)}
+                onClick={() => openSpotlight()}
               >
-                Preferences
+                Spotlight
               </Button>
-            </Menu.Target>
-            <Menu.Dropdown>
-              <Menu.Item
-                className={classes.submenuItem}
-                onClick={() => {
-                  closeMenu();
-                  setSettingsModal((prevState) => !prevState);
-                  setPersonalizeModal(false);
-                }}
-              >
-                Settings
-              </Menu.Item>
-              <Menu.Item
-                className={classes.submenuItem}
-                onClick={() => {
-                  closeMenu();
-                  setAboutModal((prevState) => !prevState);
-                }}
-              >
-                About
-              </Menu.Item>
-              <Menu.Item
-                className={classes.submenuItem}
-                onClick={() => {
-                  closeMenu();
-                  setArchiveModal((prevState) => !prevState);
-                }}
-              >
-                Archive
-              </Menu.Item>
-              <Menu.Item
-                className={classes.submenuItem}
-                onClick={() => {
-                  closeMenu();
-                  setTrashModal((prevState) => !prevState);
-                }}
-              >
-                Trash
-              </Menu.Item>
-              <Menu.Item className={classes.submenuItem} onClick={signOut}>
-                Log out
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>}
-          {vp.tab ? null : <Button
-            variant="default"
-            radius="xs"
+            </SpotlightProvider>
+          )}
+          
+        </Box>
+        
+        <Box className={classes.vmiddle} style={{ float: "right",width:"40%" }}>
+        <Input
+            variant="filled"
+            placeholder="Search"
             size="xs"
-            compact
-            onClick={() => {
-              setSettingsModal((prevState) => !prevState);
-              setPersonalizeModal(true);
-            }}
-            className={cx(classes.vmiddle, classes.menuitem)}
-          >
-            Personalize
-          </Button>}
-          {vp.tab ? null : <SpotlightProvider
-            actions={actions}
-            searchIcon={<MdKeyboardArrowRight size={18} />}
-            searchPlaceholder="Search..."
-            shortcut="mod + shift + 1"
-            nothingFoundMessage="Nothing found..."
-            limit={5}
-          >
+            sx={{ display: "inline-block", width: "60%", marginTop:"2px" }}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+              dispatch(setFilterText(event.currentTarget.value))
+            }
+          />
+          {vp.tab ? null : (
             <Button
               variant="default"
               radius="xs"
               size="xs"
               compact
               className={cx(classes.vmiddle, classes.menuitem)}
-              onClick={() => openSpotlight()}
+              onClick={() => {
+                if (user) {
+                  setSettingsModal((prevState) => !prevState);
+                  setPersonalizeModal(false);
+                } else {
+                  dispatch(toggleLoginModal());
+                }
+              }}
             >
-              Spotlight
+              <Avatar
+                size="sm"
+                color="green"
+                radius="md"
+                src={user?.photoURL}
+                mr={user ? 10 : 0}
+              >
+                <MdPersonOutline size={15} />
+              </Avatar>
+              {user ? <>Welcome, {user?.displayName}</> : null}
             </Button>
-          </SpotlightProvider>}
-        </Box>
-        <Box className={classes.vmiddle} style={{ float: "right" }}>
-          {vp.tab ? null : <Button
-            variant="default"
-            radius="xs"
-            size="xs"
-            compact
-            className={cx(classes.vmiddle, classes.menuitem)}
-            onClick={() => {
-              if (user) {
-                setSettingsModal((prevState) => !prevState);
-                setPersonalizeModal(false);
-              } else {
-                dispatch(toggleLoginModal());
-              }
-            }}
-          >
-            <Avatar
-              size="sm"
-              color="green"
-              radius="md"
-              src={user?.photoURL}
-              mr={user ? 10 : 0}
+          )}
+          {vp.tab ? null : (
+            <Popover
+              transition="pop"
+              width={400}
+              position="bottom-end"
+              withArrow
+              shadow="md"
             >
-              <MdPersonOutline size={15} />
-            </Avatar>
-            {user ? <>Welcome, {user?.displayName}</> : null}
-          </Button>}
-          {vp.tab ? null : <Popover
-            transition="pop"
-            width={400}
-            position="bottom-end"
-            withArrow
-            shadow="md"
-          >
-            <Popover.Target>
-              <Button
-                variant="default"
-                radius="xs"
-                size="xs"
-                compact
-                className={cx(classes.vmiddle, classes.menuitem)}
-              >
-                Notifications
-              </Button>
-            </Popover.Target>
-            <Popover.Dropdown pr={6}>
-              <ScrollArea
-                style={{ height: "80vh" }}
-                offsetScrollbars
-                scrollbarSize={12}
-              >
-                {[1, 2].map((e) => (
-                  <Card key={e} my={10} withBorder shadow="sm" radius="md">
-                    <Card.Section withBorder inheritPadding py="xs">
-                      <Group position="apart">
-                        <Text weight={500}>Item reminder for the next day</Text>
-                        <Menu withinPortal position="bottom-end" shadow="sm">
-                          <Menu.Target>
-                            <ActionIcon>
-                              <MdKeyboardArrowRight size={16} />
-                            </ActionIcon>
-                          </Menu.Target>
-                          <Menu.Dropdown>
-                            <Menu.Item
-                              icon={<MdKeyboardArrowRight size={14} />}
-                            >
-                              Show Item
-                            </Menu.Item>
-                            <Menu.Item
-                              icon={<MdKeyboardArrowRight size={14} />}
-                              color="red"
-                            >
-                              Remove
-                            </Menu.Item>
-                          </Menu.Dropdown>
-                        </Menu>
-                      </Group>
-                    </Card.Section>
-                    {e < 2 && (
-                      <Text mt="sm" color="dimmed" size="sm">
-                        <Text component="span" inherit color="blue">
-                          200+ images uploaded
-                        </Text>{" "}
-                        since last visit, review them to select which one should
-                        be added to your gallery
-                      </Text>
-                    )}
-                  </Card>
-                ))}
-              </ScrollArea>
-            </Popover.Dropdown>
-          </Popover>}
+              <Popover.Target>
+                <Button
+                  variant="default"
+                  radius="xs"
+                  size="xs"
+                  compact
+                  className={cx(classes.vmiddle, classes.menuitem)}
+                >
+                  Notifications
+                </Button>
+              </Popover.Target>
+              <Popover.Dropdown pr={6}>
+                <ScrollArea
+                  style={{ height: "80vh" }}
+                  offsetScrollbars
+                  scrollbarSize={12}
+                >
+                  {[1, 2].map((e) => (
+                    <Card key={e} my={10} withBorder shadow="sm" radius="md">
+                      <Card.Section withBorder inheritPadding py="xs">
+                        <Group position="apart">
+                          <Text weight={500}>
+                            Item reminder for the next day
+                          </Text>
+                          <Menu withinPortal position="bottom-end" shadow="sm">
+                            <Menu.Target>
+                              <ActionIcon>
+                                <MdKeyboardArrowRight size={16} />
+                              </ActionIcon>
+                            </Menu.Target>
+                            <Menu.Dropdown>
+                              <Menu.Item
+                                icon={<MdKeyboardArrowRight size={14} />}
+                              >
+                                Show Item
+                              </Menu.Item>
+                              <Menu.Item
+                                icon={<MdKeyboardArrowRight size={14} />}
+                                color="red"
+                              >
+                                Remove
+                              </Menu.Item>
+                            </Menu.Dropdown>
+                          </Menu>
+                        </Group>
+                      </Card.Section>
+                      {e < 2 && (
+                        <Text mt="sm" color="dimmed" size="sm">
+                          <Text component="span" inherit color="blue">
+                            200+ images uploaded
+                          </Text>{" "}
+                          since last visit, review them to select which one
+                          should be added to your gallery
+                        </Text>
+                      )}
+                    </Card>
+                  ))}
+                </ScrollArea>
+              </Popover.Dropdown>
+            </Popover>
+          )}
           {user ? (
             <Button
               variant="default"
@@ -414,11 +437,16 @@ export function Layout({ children }: DoubleHeaderProps) {
           <LoginModal open={showLoginModal} />
         </Box>
       </Header>
-      <Box className={`syncing-popup ${syncing && "syncing-true"}`} sx={{
-        background: theme.colors.dark,
-      }}>
+      <Box
+        className={`syncing-popup ${syncing && "syncing-true"}`}
+        sx={{
+          background: theme.colors.dark,
+        }}
+      >
         <Loader color="white" size="xs" />
-        <Text pl={9} size="xs">Syncing {syncing}</Text>
+        <Text pl={9} size="xs">
+          Syncing {syncing}
+        </Text>
       </Box>
       <OrganizationModal open={showOrganizationModal} />
       <AboutModal open={aboutModal} setOpen={setAboutModal} />

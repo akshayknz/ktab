@@ -58,7 +58,7 @@ import React, {
   MutableRefObject,
   useMemo,
 } from "react";
-import { MdContentPaste, MdDragIndicator, MdOutlineAdd } from "react-icons/md";
+import { MdContentPaste, MdDragIndicator, MdOutlineAdd, MdOutlineStickyNote2 } from "react-icons/md";
 import { AiOutlineDelete, AiOutlineEye } from "react-icons/ai";
 import { BiMessageAltAdd } from "react-icons/bi";
 import {
@@ -82,6 +82,8 @@ import { db } from "../data/firebaseConfig";
 import { AuthContext } from "../data/contexts/AuthContext";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  setFilterText,
+  setFilterType,
   setOrganizationColor,
   setViewMargins,
   setViewWidth,
@@ -153,8 +155,6 @@ function Organization({ organization }: OrganizationComponentProps) {
   const [colorPopover, setColorPopover] = useState(false);
   const [filterPopover, setFilterPopover] = useState(false);
   const [viewPopover, setViewPopover] = useState(false);
-  const [filterText, setFilterText] = useState("");
-  const [filterType, setFilterType] = useState("all");
   // const [debouncedFilterText] = useDebouncedValue(filterText, 59);
   // const [debouncedFilterType] = useDebouncedValue(filterType, 59);
   const colorboxRef = useClickOutside(() => {
@@ -163,7 +163,8 @@ function Organization({ organization }: OrganizationComponentProps) {
     setViewPopover(false);
   });
   const dispatch = useDispatch();
-  const { organizationColor, viewWidth, viewMargins } = useSelector((state: RootState) => state.states);
+  const { organizationColor, viewWidth, viewMargins, filterText, filterType } =
+    useSelector((state: RootState) => state.states);
   useEffect(() => {
     dispatch(setOrganizationColor(organization.color));
   }, [organization.color]);
@@ -194,10 +195,12 @@ function Organization({ organization }: OrganizationComponentProps) {
       document.querySelectorAll("input:focus").length === 0 && //make sure no input fields are in focus
       document.querySelectorAll("[contenteditable=true]") //make sure no contenteditable is present (RTE)
     ) {
-      dispatch(runKeyDown({
-        orgparent: organization.id,
-        parent: containers[0],
-      }))
+      dispatch(
+        runKeyDown({
+          orgparent: organization.id,
+          parent: containers[0],
+        })
+      );
     }
   };
   useEffect(() => {
@@ -224,7 +227,7 @@ function Organization({ organization }: OrganizationComponentProps) {
         false
       );
       return () => {
-        document?.removeEventListener("commit", () => { });
+        document?.removeEventListener("commit", () => {});
       };
     }
   }, [dragStarted]);
@@ -404,7 +407,7 @@ function Organization({ organization }: OrganizationComponentProps) {
             over &&
             active.rect.current.translated &&
             active.rect.current.translated.top >
-            over.rect.top + over.rect.height;
+              over.rect.top + over.rect.height;
 
           const modifier = isBelowOverItem ? 1 : 0;
 
@@ -446,7 +449,7 @@ function Organization({ organization }: OrganizationComponentProps) {
       const intersections =
         pointerIntersections.length > 0
           ? // If there are droppables intersecting with the pointer, return those
-          pointerIntersections
+            pointerIntersections
           : rectIntersection(args);
       let overId = getFirstCollision(intersections, "id");
 
@@ -558,7 +561,7 @@ function Organization({ organization }: OrganizationComponentProps) {
               justifyContent: "flex-end",
               alignItems: "center",
               flexWrap: vp.tab ? "wrap" : "nowrap",
-              rowGap: "10px"
+              rowGap: "10px",
             }}
           >
             <Button
@@ -604,20 +607,36 @@ function Organization({ organization }: OrganizationComponentProps) {
                     size="xs"
                     value={filterText}
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                      setFilterText(event.currentTarget.value)
+                      dispatch(setFilterText(event.currentTarget.value))
                     }
                   />
                   <SegmentedControl
                     size="xs"
                     fullWidth
+                    mb={10}
                     data={[
                       { label: "All", value: "all" },
                       { label: "Links", value: "link" },
                       { label: "Notes", value: "text" },
                     ]}
                     value={filterType}
-                    onChange={(value) => setFilterType(value)}
+                    onChange={(value) => dispatch(setFilterType(value))}
                   />
+                  {(filterType != "all" || filterText) && (
+                    <Button
+                      variant="subtle"
+                      size="xs"
+                      compact
+                      uppercase
+                      fullWidth
+                      onClick={() => {
+                        dispatch(setFilterText(""));
+                        dispatch(setFilterType("all"));
+                      }}
+                    >
+                      Clear filters
+                    </Button>
+                  )}
                 </Box>
               </Popover.Dropdown>
             </Popover>
@@ -672,7 +691,6 @@ function Organization({ organization }: OrganizationComponentProps) {
                     value={viewMargins}
                     onChange={(v) => dispatch(setViewMargins(v))}
                   />
-
                 </Box>
               </Popover.Dropdown>
             </Popover>
@@ -878,14 +896,18 @@ function Organization({ organization }: OrganizationComponentProps) {
               >
                 <SortableContext
                   items={items[containerId]}
-                  strategy={vp.tab ? verticalListSortingStrategy : horizontalListSortingStrategy}
+                  strategy={
+                    vp.tab
+                      ? verticalListSortingStrategy
+                      : horizontalListSortingStrategy
+                  }
                 >
                   <div
                     className="items"
                     style={{
                       display: "flex",
                       flexWrap: "wrap",
-                      flexDirection: vp.tab ? "column" : "row"
+                      flexDirection: vp.tab ? "column" : "row",
                     }}
                   >
                     {items[containerId].map((value, index) => (
@@ -950,7 +972,7 @@ const ContainerItem = ({
   const [minimize, setMinimize] = useState(data.minimized);
   const [trashPopover, setTrashPopover] = useState(false);
   const trashboxRef = useClickOutside(() => setTrashPopover(false));
-  const vp = useViewport()
+  const vp = useViewport();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -1046,8 +1068,9 @@ const ContainerItem = ({
           <Grid.Col md={6} sm={12}>
             <Group position="right">
               <Group
-                className={`${classes.buttonGroup} ${isDragging && classes.buttonGroupDragging
-                  }`}
+                className={`${classes.buttonGroup} ${
+                  isDragging && classes.buttonGroupDragging
+                }`}
               >
                 <Tooltip label="Edit title">
                   <Button
@@ -1078,10 +1101,12 @@ const ContainerItem = ({
                     radius="md"
                     size="xs"
                     onClick={() => {
-                      dispatch(runKeyDown({
-                        orgparent: data.parent,
-                        parent: data.id,
-                      }))
+                      dispatch(
+                        runKeyDown({
+                          orgparent: data.parent,
+                          parent: data.id,
+                        })
+                      );
                     }}
                   >
                     <MdContentPaste />
@@ -1200,23 +1225,25 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
     isDragging,
   } = useSortable({ id: name });
   const theme = useMantineTheme();
-  const { organizationColor, viewWidth, viewMargins } = useSelector((state: RootState) => state.states);
+  const { organizationColor, viewWidth, viewMargins } = useSelector(
+    (state: RootState) => state.states
+  );
   const vp = useViewport();
-  let width = vp.tab ? "100%" : "24.1%"
-  let margin = "5px"
+  let width = vp.tab ? "100%" : "24.1%";
+  let margin = "5px";
   switch (viewWidth) {
     case ViewWidthType.FLOW:
-      width = "auto"
+      width = "auto";
       break;
     case ViewWidthType.COMPACT:
-      width = vp.tab ? "100%" : "19%"
+      width = vp.tab ? "100%" : "19%";
       break;
     default:
       break;
   }
   switch (viewMargins) {
     case ViewMarginsType.COMPACT:
-      margin = "3px"
+      margin = "3px";
       break;
     default:
       break;
@@ -1229,7 +1256,7 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
     color: theme.colors.gray[3],
     width: width,
     margin: margin,
-    maxWidth: vp.tab ? "100%" : "24.1%"
+    maxWidth: vp.tab ? "100%" : "24.1%",
   };
   const [itemOpened, setItemOpened] = useState(false);
   const openModal = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -1333,9 +1360,7 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
           onClick={openModal}
           sx={(theme) => ({
             backgroundColor:
-              theme.colorScheme === "dark"
-                ? theme.colors["black-alpha"][3]
-                : theme.colors["white-alpha"][3],
+            "rgba(255 255 255 / 1%)",
           })}
         >
           <Box
@@ -1361,13 +1386,13 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
               >
                 <span
                   style={{
-                    height: 10,
                     width: 10,
-                    background: data?.color,
                     borderRadius: 10,
                     display: "inline-block",
                   }}
-                ></span>
+                >
+                  <MdOutlineStickyNote2 color={data?.color} height={10} />
+                </span>
               </Box>
               <Text
                 className="sort-item-text"
@@ -1396,22 +1421,24 @@ const SortableItemOverlay = ({
   currentlyContainer,
 }: SortableItemProps) => {
   const theme = useMantineTheme();
-  const { organizationColor, viewWidth, viewMargins } = useSelector((state: RootState) => state.states);
-  let width = "204.1%"
-  let margin = "5px"
+  const { organizationColor, viewWidth, viewMargins } = useSelector(
+    (state: RootState) => state.states
+  );
+  let width = "204.1%";
+  let margin = "5px";
   switch (viewWidth) {
     case ViewWidthType.FLOW:
-      width = "auto"
+      width = "auto";
       break;
     case ViewWidthType.COMPACT:
-      width = "19%"
+      width = "19%";
       break;
     default:
       break;
   }
   switch (viewMargins) {
     case ViewMarginsType.COMPACT:
-      margin = "3px"
+      margin = "3px";
       break;
     default:
       break;
@@ -1420,7 +1447,7 @@ const SortableItemOverlay = ({
     color: theme.colors.gray[3],
     width: width,
     margin: margin,
-    display: "block"
+    display: "block",
   };
   const [itemOpened, setItemOpened] = useState(false);
   const openModal = (event: React.MouseEvent<HTMLDivElement>) => {
