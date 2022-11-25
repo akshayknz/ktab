@@ -34,6 +34,7 @@ import {
 } from "../data/contexts/redux/actions";
 import { useForm } from "@mantine/form";
 import { useDebouncedValue } from "@mantine/hooks";
+import useViewport from "../data/useViewport";
 interface Props {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -43,6 +44,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
   const dispatch = useDispatch();
   const user = useContext(AuthContext);
   const theme = useMantineTheme();
+  const vp = useViewport()
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [minimize, setMinimize] = useState(false);
   const [settings, setSettings] = useState(false);
@@ -130,22 +132,17 @@ export default function ItemModal({ open, setOpen, data }: Props) {
   function handleCloseWithoutSave() {
     setOpen(false);
   }
-  const scaleY = {
-    in: { opacity: 1, transform: "scaleY(1)" },
-    out: { opacity: 0, transform: "scaleY(0)" },
-    common: { transformOrigin: "top" },
-    transitionProperty: "transform, opacity",
-  };
   return (
     <Modal
       size={minimize ? "100%" : "70%"}
+      fullScreen={vp.tab}
       opened={open}
       onClose={handleClose}
       withCloseButton={false}
     >
       <SimpleGrid verticalSpacing={20} pb={20}>
         <Grid align="center">
-          <Grid.Col span={10}>
+          <Grid.Col sm={7} md={10}>
             <TextInput
               ref={inputRef}
               placeholder="Name"
@@ -154,7 +151,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
               defaultValue={data?.name}
             />
           </Grid.Col>
-          <Grid.Col span={2}>
+          <Grid.Col sm={5} md={2}>
             <Box style={{ display: "flex", justifyContent: "flex-end" }}>
               <Tooltip label="Settings">
                 <Button
@@ -169,7 +166,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
                   <BsGear size={10} />
                 </Button>
               </Tooltip>
-              <Tooltip label="Minimize this collection">
+              {!vp.tab &&<Tooltip label="Minimize this collection">
                 <Button
                   p={0}
                   sx={{ width: "30px" }}
@@ -185,7 +182,8 @@ export default function ItemModal({ open, setOpen, data }: Props) {
                     <FiMaximize2 size={10} />
                   )}
                 </Button>
-              </Tooltip>
+              </Tooltip>}
+              
               <Button
                 p={0}
                 sx={{ width: "30px" }}

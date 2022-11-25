@@ -84,3 +84,7 @@ code {
     right: -4px;
     border-radius: 10px;
 }
+
+.empty-container {
+  display: none;
+}

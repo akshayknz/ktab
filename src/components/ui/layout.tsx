@@ -300,12 +300,12 @@ export function Layout({ children }: DoubleHeaderProps) {
           
         </Box>
         
-        <Box className={classes.vmiddle} style={{ float: "right",width:"40%" }}>
+        <Box className={classes.vmiddle} style={{ float: "right"}}>
         <Input
             variant="filled"
             placeholder="Search"
             size="xs"
-            sx={{ display: "inline-block", width: "60%", marginTop:"2px" }}
+            sx={{ display: "inline-block", width: "200px", marginTop:"2px" }}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
               dispatch(setFilterText(event.currentTarget.value))
             }

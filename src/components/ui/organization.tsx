@@ -58,7 +58,12 @@ import React, {
   MutableRefObject,
   useMemo,
 } from "react";
-import { MdContentPaste, MdDragIndicator, MdOutlineAdd, MdOutlineStickyNote2 } from "react-icons/md";
+import {
+  MdContentPaste,
+  MdDragIndicator,
+  MdOutlineAdd,
+  MdOutlineStickyNote2,
+} from "react-icons/md";
 import { AiOutlineDelete, AiOutlineEye } from "react-icons/ai";
 import { BiMessageAltAdd } from "react-icons/bi";
 import {
@@ -193,7 +198,7 @@ function Organization({ organization }: OrganizationComponentProps) {
       e.ctrlKey &&
       e.key == "v" &&
       document.querySelectorAll("input:focus").length === 0 && //make sure no input fields are in focus
-      document.querySelectorAll("[contenteditable=true]") //make sure no contenteditable is present (RTE)
+      document.querySelectorAll("[contenteditable=true]").length === 0 //make sure no contenteditable is present (RTE)
     ) {
       dispatch(
         runKeyDown({
@@ -271,7 +276,10 @@ function Organization({ organization }: OrganizationComponentProps) {
       let result = itemss?.filter((e) => e.parent == key);
       if (filterText) {
         let re = new RegExp(filterText.toLowerCase(), "g");
-        result = result?.filter((s) => s.name.toLowerCase().match(re));
+        result = result?.filter(
+          (s) =>
+            s.name.toLowerCase().match(re) || s.content?.toLowerCase().match(re)
+        );
       }
       if (filterType != "all") {
         result = result?.filter((s) => s.type.toLowerCase() == filterType);
@@ -890,6 +898,12 @@ function Organization({ organization }: OrganizationComponentProps) {
               <ContainerItem
                 name={containerId}
                 data={allItems && allItems[containerId]}
+                classNames={
+                  (filterText || filterType != "all") &&
+                  items[containerId].length === 0
+                    ? "empty-container"
+                    : ""
+                }
                 key={containerId}
                 globalMinifyContainers={globalMinifyContainers}
                 setGlobalMinifyContainers={setGlobalMinifyContainers}
@@ -945,6 +959,7 @@ export default Organization;
 interface ContainerComponentProps {
   name: UniqueIdentifier;
   data: CollectionProps;
+  classNames: string;
   globalMinifyContainers: boolean;
   setGlobalMinifyContainers: React.Dispatch<SetStateAction<boolean>>;
   children: React.ReactNode;
@@ -952,6 +967,7 @@ interface ContainerComponentProps {
 const ContainerItem = ({
   name,
   data,
+  classNames,
   globalMinifyContainers,
   setGlobalMinifyContainers,
   children,
@@ -1014,6 +1030,7 @@ const ContainerItem = ({
   return (
     <Box
       ref={setNodeRef}
+      className={classNames}
       style={style}
       sx={(theme) => ({
         backgroundColor:
@@ -1359,8 +1376,7 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
           {...attributes}
           onClick={openModal}
           sx={(theme) => ({
-            backgroundColor:
-            "rgba(255 255 255 / 1%)",
+            backgroundColor: "rgba(255 255 255 / 1%)",
           })}
         >
           <Box
@@ -1389,6 +1405,7 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
                     width: 10,
                     borderRadius: 10,
                     display: "inline-block",
+                    paddingTop: "6px",
                   }}
                 >
                   <MdOutlineStickyNote2 color={data?.color} height={10} />
