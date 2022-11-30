@@ -1,4 +1,4 @@
-import { Ref, useContext, useEffect, useRef, useState } from "react";
+import { Ref, RefObject, useContext, useEffect, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -17,12 +17,13 @@ import {
   useMantineTheme,
   Skeleton,
   Loader,
+  Badge,
 } from "@mantine/core";
 import { Editor, RichTextEditor } from "@mantine/rte";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../data/firebaseConfig";
 import { AuthContext } from "../data/contexts/AuthContext";
-import { FiMaximize2, FiMinimize2 } from "react-icons/fi";
+import { FiCopy, FiMaximize2, FiMinimize2 } from "react-icons/fi";
 import { BsGear } from "react-icons/bs";
 import { VscChromeClose } from "react-icons/vsc";
 import { ItemType } from "../data/constants";
@@ -44,7 +45,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
   const dispatch = useDispatch();
   const user = useContext(AuthContext);
   const theme = useMantineTheme();
-  const vp = useViewport()
+  const vp = useViewport();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [minimize, setMinimize] = useState(false);
   const [settings, setSettings] = useState(false);
@@ -54,7 +55,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
   const editorRef = useRef<Editor>();
 
   useEffect(() => {
-    editorRef.current?.focus()
+    editorRef.current?.focus();
   }, [editorRef.current]);
   useEffect(() => {
     if (link) {
@@ -132,6 +133,33 @@ export default function ItemModal({ open, setOpen, data }: Props) {
   function handleCloseWithoutSave() {
     setOpen(false);
   }
+  const [copyLink, setCopyLink] = useState("");
+  const copyRef = useRef<HTMLInputElement>(null);
+  async function copyShareLink() {
+    setCopyLink(
+      `https://${window.location.hostname}/${user?.uid ? user.uid : "guest"}/${
+        data.id
+      }`
+    );
+    copyRef?.current?.select();
+    navigator.clipboard.writeText(
+      `https://${window.location.hostname}/${user?.uid ? user.uid : "guest"}/${
+        data.id
+      }`
+    );
+    await updateDoc(
+      doc(
+        db,
+        "ktab-manager",
+        user?.uid ? user.uid : "guest",
+        "items",
+        data?.id
+      ),
+      {
+        isShared: true,
+      }
+    );
+  }
   return (
     <Modal
       size={minimize ? "100%" : "70%"}
@@ -142,7 +170,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
     >
       <SimpleGrid verticalSpacing={20} pb={20}>
         <Grid align="center">
-          <Grid.Col sm={7} md={10}>
+          <Grid.Col sm={7} md={8}>
             <TextInput
               ref={inputRef}
               placeholder="Name"
@@ -151,8 +179,32 @@ export default function ItemModal({ open, setOpen, data }: Props) {
               defaultValue={data?.name}
             />
           </Grid.Col>
-          <Grid.Col sm={5} md={2}>
-            <Box style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Grid.Col sm={5} md={4}>
+            <Box
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+              }}
+            >
+              <Tooltip label="Shared item">
+                <Badge radius="sm" mr={7}>
+                  Shared item
+                </Badge>
+              </Tooltip>
+              <Tooltip label="Share link">
+                <Button
+                  p={0}
+                  sx={{ width: "30px" }}
+                  mr={7}
+                  variant={"default"}
+                  radius="md"
+                  size="xs"
+                  onClick={copyShareLink}
+                >
+                  <FiCopy size={10} />
+                </Button>
+              </Tooltip>
               <Tooltip label="Settings">
                 <Button
                   p={0}
@@ -166,24 +218,26 @@ export default function ItemModal({ open, setOpen, data }: Props) {
                   <BsGear size={10} />
                 </Button>
               </Tooltip>
-              {!vp.tab &&<Tooltip label="Minimize this collection">
-                <Button
-                  p={0}
-                  sx={{ width: "30px" }}
-                  mr={7}
-                  variant="default"
-                  radius="md"
-                  size="xs"
-                  onClick={() => setMinimize((prev) => !prev)}
-                >
-                  {minimize ? (
-                    <FiMinimize2 size={10} />
-                  ) : (
-                    <FiMaximize2 size={10} />
-                  )}
-                </Button>
-              </Tooltip>}
-              
+              {!vp.tab && (
+                <Tooltip label="Minimize this collection">
+                  <Button
+                    p={0}
+                    sx={{ width: "30px" }}
+                    mr={7}
+                    variant="default"
+                    radius="md"
+                    size="xs"
+                    onClick={() => setMinimize((prev) => !prev)}
+                  >
+                    {minimize ? (
+                      <FiMinimize2 size={10} />
+                    ) : (
+                      <FiMaximize2 size={10} />
+                    )}
+                  </Button>
+                </Tooltip>
+              )}
+
               <Button
                 p={0}
                 sx={{ width: "30px" }}
@@ -198,6 +252,11 @@ export default function ItemModal({ open, setOpen, data }: Props) {
             </Box>
           </Grid.Col>
         </Grid>
+        {copyLink && (
+          <>
+            <Input value={copyLink} ref={copyRef} />
+          </>
+        )}
         {settings && (
           <form>
             <Grid align="center">

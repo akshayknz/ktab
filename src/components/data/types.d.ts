@@ -30,6 +30,7 @@ interface ItemProps {
   link?: string;
   icon?: string;
   order: string;
+  isShared: boolean;
 }
 
 interface ItemCollection {

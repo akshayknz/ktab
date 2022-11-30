@@ -7,6 +7,7 @@ import { Provider, useDispatch } from "react-redux";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "./components/data/contexts/AuthContext";
 import { setUserId } from "./components/data/contexts/redux/actions";
+import { BrowserRouter, Route, Routes, useRoutes } from "react-router-dom";
 function App() {
   return (
     <Provider store={configureStore}>
@@ -38,14 +39,16 @@ function App() {
                 "#ffffffc3",
                 "#ffffffd3",
                 "#fffffff3",
-              ]
-            }
+              ],
+            },
           }}
           withGlobalStyles
           withNormalizeCSS
         >
           <Layout>
-            <Home />
+            <BrowserRouter>
+              <Stuff />
+            </BrowserRouter>
           </Layout>
         </MantineProvider>
       </AuthProvider>
@@ -54,3 +57,9 @@ function App() {
 }
 
 export default App;
+
+const element = <Home />;
+const Stuff = () =>
+  useRoutes(
+    ["/", "/:userid/:id", "/widgets"].map((path) => ({ path, element }))
+  );

@@ -332,6 +332,7 @@ function Organization({ organization }: OrganizationComponentProps) {
       link: doc.data().link,
       icon: doc.data().icon,
       order: doc.data().order,
+      isShared: doc.data().isShared,
     };
   };
   const findContainer = (id: UniqueIdentifier) => {

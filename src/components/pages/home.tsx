@@ -12,13 +12,14 @@ import Organization from "../ui/organization";
 import { MdDragIndicator, MdOutlineAdd } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 import { BiMessageAltAdd } from "react-icons/bi";
-import { SyntheticEvent, useContext, useEffect, useState } from "react";
+import { SetStateAction, SyntheticEvent, useContext, useEffect, useState } from "react";
 import { UniqueIdentifier } from "@dnd-kit/core";
 import {
   collection,
   collectionGroup,
   doc,
   DocumentData,
+  getDoc,
   getDocs,
   onSnapshot,
   orderBy,
@@ -38,6 +39,8 @@ import { RootState } from "../data/contexts/redux/configureStore";
 import { useLocalStorage } from "@mantine/hooks";
 import { TimeInput } from "@mantine/dates";
 import useViewport from "../data/useViewport";
+import { useParams } from "react-router-dom";
+import ItemModal from "../ui/ItemModal";
 
 const HEADER_HEIGHT = 28;
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
@@ -143,9 +146,39 @@ function Home() {
       );
     }
   }, [organizations?.length]);
-
+  const {userid, id} = useParams()
+  const [itemOpened, setItemOpened] = useState(false);
+  const [itemData, setItemData] = useState<any>();
+  useEffect(()=>{
+    if(id && userid){
+      console.log(id);
+      const q = doc(db, "ktab-manager", userid, "items", id)
+      const querySnapshot = getDoc(q).then(r=>{
+        console.log(r.data())
+        setItemData(docsToItems(r))
+        setItemOpened(true)
+      })
+    }
+  }, [])
+  const docsToItems = (doc: DocumentData) => {
+    return {
+      id: doc.id,
+      name: doc.data().name,
+      color: doc.data().color,
+      parent: doc.data().parent,
+      orgparent: doc.data().orgparent,
+      content: doc.data().content,
+      type: doc.data().type,
+      link: doc.data().link,
+      icon: doc.data().icon,
+      order: doc.data().order,
+    };
+  };
   return (
     <>
+    {itemOpened && (
+        <ItemModal open={itemOpened} setOpen={setItemOpened} data={itemData} />
+      )}
       <Tabs
         radius="xs"
         value={activeOrganization}
