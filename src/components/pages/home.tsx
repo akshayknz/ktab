@@ -7,12 +7,19 @@ import {
   Skeleton,
   Tabs,
   Text,
+  useMantineTheme,
 } from "@mantine/core";
 import Organization from "../ui/organization";
 import { MdDragIndicator, MdOutlineAdd } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 import { BiMessageAltAdd } from "react-icons/bi";
-import { SetStateAction, SyntheticEvent, useContext, useEffect, useState } from "react";
+import {
+  SetStateAction,
+  SyntheticEvent,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { UniqueIdentifier } from "@dnd-kit/core";
 import {
   collection,
@@ -67,7 +74,8 @@ interface ItemProps {
 
 function Home() {
   const user = useContext(AuthContext);
-  const vp = useViewport()
+  const theme = useMantineTheme();
+  const vp = useViewport();
   const { classes, cx } = useStyles();
   const { activeOrganization } = useSelector(
     (state: RootState) => state.states
@@ -146,20 +154,20 @@ function Home() {
       );
     }
   }, [organizations?.length]);
-  const {userid, id} = useParams()
+  const { userid, id } = useParams();
   const [itemOpened, setItemOpened] = useState(false);
   const [itemData, setItemData] = useState<any>();
-  useEffect(()=>{
-    if(id && userid){
+  useEffect(() => {
+    if (id && userid) {
       console.log(id);
-      const q = doc(db, "ktab-manager", userid, "items", id)
-      const querySnapshot = getDoc(q).then(r=>{
-        console.log(r.data())
-        setItemData(docsToItems(r))
-        setItemOpened(true)
-      })
+      const q = doc(db, "ktab-manager", userid, "items", id);
+      const querySnapshot = getDoc(q).then((r) => {
+        console.log(r.data());
+        setItemData(docsToItems(r));
+        setItemOpened(true);
+      });
     }
-  }, [])
+  }, []);
   const docsToItems = (doc: DocumentData) => {
     return {
       id: doc.id,
@@ -176,7 +184,7 @@ function Home() {
   };
   return (
     <>
-    {itemOpened && (
+      {itemOpened && (
         <ItemModal open={itemOpened} setOpen={setItemOpened} data={itemData} />
       )}
       <Tabs
@@ -192,23 +200,23 @@ function Home() {
           <Box className={classes.vmiddle} sx={{ width: "100%" }}>
             <Tabs.List
               className={cx(classes.vmiddle, classes.lineHeightFix)}
-              sx={{ paddingInline: vp.tab? 5:53 }}
+              sx={{ paddingInline: vp.tab ? 5 : 53 }}
             >
               {organizations
                 ? organizations?.map((organization) => (
-                  <Tabs.Tab
-                    key={organization.id ? organization.id : "undefined"}
-                    value={organization.id ? organization.id : "undefined"}
-                    icon={organization.icon}
-                    sx={{
-                      height: 28,
-                      fontSize: "12px",
-                      background: `linear-gradient(transparent,${organization.color} 170%)`,
-                    }}
-                  >
-                    {organization.name}
-                  </Tabs.Tab>
-                ))
+                    <Tabs.Tab
+                      key={organization.id ? organization.id : "undefined"}
+                      value={organization.id ? organization.id : "undefined"}
+                      icon={organization.icon}
+                      sx={{
+                        height: 28,
+                        fontSize: "12px",
+                        background: `linear-gradient(transparent,${organization.color} 170%)`,
+                      }}
+                    >
+                      {organization.name}
+                    </Tabs.Tab>
+                  ))
                 : null}
               <Button
                 onClick={() =>
@@ -228,16 +236,39 @@ function Home() {
         </Header>
         {organizations
           ? organizations?.map((organization) => (
-            <Tabs.Panel
-              key={organization.id ? organization.id : "undefined"}
-              value={organization.id ? organization.id : "undefined"}
-            >
-              <Organization organization={organization} />
-            </Tabs.Panel>
-          ))
+              <Tabs.Panel
+                key={organization.id ? organization.id : "undefined"}
+                value={organization.id ? organization.id : "undefined"}
+              >
+                <Organization organization={organization} />
+              </Tabs.Panel>
+            ))
           : null}
       </Tabs>
-      {organizations === undefined && <Skeleton height={100}></Skeleton>}
+      {organizations
+        ? organizations?.map((organization) => (
+            <>
+              {organization.id === "" && (
+                <Skeleton height={100}>
+                  <Text
+                    size={"xs"}
+                    style={{
+                      zIndex: "9999",
+                      position: "relative",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: theme.colors.dark[2],
+                    }}
+                  >
+                    Loading organizations
+                  </Text>
+                </Skeleton>
+              )}
+            </>
+          ))
+        : null}
     </>
   );
 }

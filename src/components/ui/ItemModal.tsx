@@ -187,11 +187,13 @@ export default function ItemModal({ open, setOpen, data }: Props) {
                 alignItems: "center",
               }}
             >
-              <Tooltip label="Shared item">
-                <Badge radius="sm" mr={7}>
-                  Shared item
-                </Badge>
-              </Tooltip>
+              {data.isShared && (
+                <Tooltip label="Shared item">
+                  <Badge radius="sm" mr={7}>
+                    Shared item
+                  </Badge>
+                </Tooltip>
+              )}
               <Tooltip label="Share link">
                 <Button
                   p={0}
