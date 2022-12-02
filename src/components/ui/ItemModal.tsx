@@ -28,14 +28,16 @@ import { BsGear } from "react-icons/bs";
 import { VscChromeClose } from "react-icons/vsc";
 import { ItemType } from "../data/constants";
 import { useTheme } from "@emotion/react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   deleteDocument,
+  setSyncing,
   softDeleteDocument,
 } from "../data/contexts/redux/actions";
 import { useForm } from "@mantine/form";
 import { useDebouncedValue } from "@mantine/hooks";
 import useViewport from "../data/useViewport";
+import { RootState } from "../data/contexts/redux/configureStore";
 interface Props {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -53,6 +55,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
   const [debouncedLink] = useDebouncedValue(link, 500);
   const [value, onChange] = useState(data?.content);
   const editorRef = useRef<Editor>();
+  const { syncing } = useSelector((state: RootState) => state.actions);
 
   useEffect(() => {
     editorRef.current?.focus();
@@ -101,6 +104,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
     setLink(event.currentTarget.value);
   }
   async function handleSubmit() {
+    dispatch(setSyncing({ state: true }));
     await updateDoc(
       doc(
         db,
@@ -121,6 +125,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
       }
     );
     setOpen(false);
+    dispatch(setSyncing({ state: false }));
   }
   async function handleDelete() {
     dispatch(softDeleteDocument({ type: "items", docId: data?.id }));
@@ -381,7 +386,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
             <Button variant="subtle" size="xs" onClick={handleCloseWithoutSave}>
               Close
             </Button>
-            <Button onClick={handleSubmit} size="xs">
+            <Button onClick={handleSubmit} size="xs" loading={syncing}>
               Save
             </Button>
           </SimpleGrid>

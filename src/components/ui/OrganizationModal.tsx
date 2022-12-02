@@ -137,6 +137,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
 
   function handleSubmitOrganization(values: OrganizationProps) {
     setLoading("organization");
+    dispatch(toggleOrganizationModal(organizationOrCollection));
     const upload = async () => {
       await addDoc(
         collection(
@@ -160,7 +161,6 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
     };
     upload().then(() => {
       setLoading("");
-      dispatch(toggleOrganizationModal(organizationOrCollection));
       organizationForm.reset();
       // showNotification({
       //   title: 'Entry added',
@@ -171,6 +171,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
   }
   function handleUpdateOrganization(values: OrganizationProps) {
     setLoading("organization");
+    dispatch(toggleOrganizationModal(organizationOrCollection));
     const update = async () => {
       await updateDoc(
         doc(
@@ -192,12 +193,12 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
     update().then(() => {
       setLoading("");
       organizationForm.reset();
-      dispatch(toggleOrganizationModal(organizationOrCollection));
       dispatch(resetEditOrganizationData());
     });
   }
   function handleSubmitCollection(values: CollectionProps) {
     setLoading("collection");
+    dispatch(toggleOrganizationModal(organizationOrCollection));
     const upload = async () => {
       await addDoc(
         collection(
@@ -211,7 +212,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
           name: values.name,
           color: values.color,
           order: 0,
-          minimized:false,
+          minimized: false,
           archive: false,
           isDeleted: 0,
           updatedAt: +new Date(),
@@ -221,13 +222,13 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
     };
     upload().then(() => {
       setLoading("");
-      dispatch(toggleOrganizationModal(organizationOrCollection));
       collectionForm.reset();
     });
   }
 
   function handleSubmitItem(values: ItemProps) {
     setLoading("item");
+    dispatch(toggleOrganizationModal(organizationOrCollection));
     const upload = async () => {
       await addDoc(
         collection(db, "ktab-manager", user?.uid ? user.uid : "guest", "items"),
@@ -249,7 +250,6 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
     };
     upload().then(() => {
       setLoading("");
-      dispatch(toggleOrganizationModal(organizationOrCollection));
       itemForm.reset();
     });
   }

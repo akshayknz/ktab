@@ -189,6 +189,7 @@ function Home() {
       )}
       <Tabs
         radius="xs"
+        color="gray"
         value={activeOrganization}
         onTabChange={(value) => dispatch(setActiveOrganization(value))}
         keepMounted={false}
@@ -196,6 +197,12 @@ function Home() {
         <Header
           height={vp.tab ? "auto" : HEADER_HEIGHT}
           sx={{ overflow: "hidden", border: "none", paddingLeft: 0 }}
+          style={{
+            position: "sticky",
+            top: "35px",
+            backgroundColor: "#1a1b1eba",
+            backdropFilter: "blur(7px)",
+          }}
         >
           <Box className={classes.vmiddle} sx={{ width: "100%" }}>
             <Tabs.List

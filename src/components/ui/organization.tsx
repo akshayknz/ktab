@@ -542,6 +542,12 @@ function Organization({ organization }: OrganizationComponentProps) {
       };
     },
   };
+  function getContrastColor(rgba: string) {
+    let arr = rgba.replace("rgba(", "").replace(")", "").split(",");
+    return +arr[0] * 0.299 + +arr[1] * 0.587 + +arr[2] * 0.114 > 186
+      ? "#000000"
+      : "#FFFFFF";
+  }
   return (
     <Box
       style={{
@@ -560,7 +566,9 @@ function Organization({ organization }: OrganizationComponentProps) {
       >
         <Grid sx={{ width: "100%" }}>
           <Grid.Col md={6} sm={12}>
-            <Title weight={100}>{organization.name}</Title>
+            <Title color={getContrastColor(organizationColor)} weight={100}>
+              {organization.name}
+            </Title>
           </Grid.Col>
           <Grid.Col
             md={6}
@@ -576,6 +584,7 @@ function Organization({ organization }: OrganizationComponentProps) {
             <Button
               variant="light"
               compact
+              style={{ color: getContrastColor(organizationColor) }}
               mx={4}
               leftIcon={<MdOutlineAdd />}
               onClick={() => dispatch(toggleOrganizationModal("collection"))}
@@ -595,6 +604,7 @@ function Organization({ organization }: OrganizationComponentProps) {
                 <Button
                   variant="light"
                   compact
+                  style={{ color: getContrastColor(organizationColor) }}
                   mx={4}
                   onClick={() => setFilterPopover((prev) => !prev)}
                   leftIcon={<IoFilterSharp />}
@@ -661,6 +671,7 @@ function Organization({ organization }: OrganizationComponentProps) {
               <Popover.Target>
                 <Button
                   variant="light"
+                  style={{ color: getContrastColor(organizationColor) }}
                   compact
                   mx={4}
                   onClick={() => setViewPopover((prev) => !prev)}
@@ -706,6 +717,7 @@ function Organization({ organization }: OrganizationComponentProps) {
             {minimized.length === collections.length ? (
               <Button
                 variant="light"
+                style={{ color: getContrastColor(organizationColor) }}
                 compact
                 mx={4}
                 leftIcon={<FiMaximize2 />}
@@ -723,6 +735,7 @@ function Organization({ organization }: OrganizationComponentProps) {
             ) : (
               <Button
                 variant="light"
+                style={{ color: getContrastColor(organizationColor) }}
                 compact
                 mx={4}
                 leftIcon={<FiMinimize2 />}
@@ -751,6 +764,7 @@ function Organization({ organization }: OrganizationComponentProps) {
                 <Button
                   variant="light"
                   compact
+                  style={{ color: getContrastColor(organizationColor) }}
                   mx={4}
                   onClick={() => setColorPopover((prev) => !prev)}
                   leftIcon={<IoColorFilterOutline />}
@@ -803,6 +817,7 @@ function Organization({ organization }: OrganizationComponentProps) {
             </Popover>
             <Button
               variant="light"
+              style={{ color: getContrastColor(organizationColor) }}
               compact
               mx={4}
               leftIcon={<FiEdit3 />}
@@ -830,6 +845,7 @@ function Organization({ organization }: OrganizationComponentProps) {
                 <Button
                   variant="light"
                   compact
+                  style={{ color: getContrastColor(organizationColor) }}
                   mx={4}
                   leftIcon={<AiOutlineDelete />}
                   onClick={() => setTrashPopover((prev) => !prev)}
@@ -1442,18 +1458,8 @@ const SortableItemOverlay = ({
   const { organizationColor, viewWidth, viewMargins } = useSelector(
     (state: RootState) => state.states
   );
-  let width = "204.1%";
+  let width = "auto";
   let margin = "5px";
-  switch (viewWidth) {
-    case ViewWidthType.FLOW:
-      width = "auto";
-      break;
-    case ViewWidthType.COMPACT:
-      width = "19%";
-      break;
-    default:
-      break;
-  }
   switch (viewMargins) {
     case ViewMarginsType.COMPACT:
       margin = "3px";
