@@ -86,7 +86,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
       type: "" as ItemType,
       color: "",
       isDeleted: "0",
-      archive: "false",
+      archive: "0",
       order: "",
     },
     validate: {
@@ -98,6 +98,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
     settingsForm.setFieldValue("type", data.type as ItemType);
     settingsForm.setFieldValue("color", data.color);
     settingsForm.setFieldValue("order", data.order);
+    settingsForm.setFieldValue("archive", JSON.stringify(data.archive));
     setLink(data.link || "");
   }, [open]);
   function handleLinkChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -118,7 +119,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
         name: inputRef.current?.value,
         order: settingsForm.values.order,
         type: settingsForm.values.type,
-        archive: settingsForm.values.archive,
+        archive: +settingsForm.values.archive,
         isDeleted: +settingsForm.values.isDeleted,
         color: settingsForm.values.color,
         link: link,
@@ -132,8 +133,8 @@ export default function ItemModal({ open, setOpen, data }: Props) {
     setOpen(false);
   }
   function handleClose() {
+    setTimeout(() => setOpen(false), 100);
     handleSubmit();
-    setOpen(false);
   }
   function handleCloseWithoutSave() {
     setOpen(false);
@@ -325,8 +326,8 @@ export default function ItemModal({ open, setOpen, data }: Props) {
                   placeholder="Pick one"
                   defaultValue={"0"}
                   data={[
-                    { value: "false", label: "False" },
-                    { value: "true", label: "True" },
+                    { value: "0", label: "False" },
+                    { value: "1", label: "True" },
                   ]}
                 />
               </Grid.Col>

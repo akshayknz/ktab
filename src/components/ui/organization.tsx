@@ -260,7 +260,8 @@ function Organization({ organization }: OrganizationComponentProps) {
       query(
         collection(db, "ktab-manager", user?.uid ? user.uid : "guest", "items"),
         where("orgparent", "==", organization.id),
-        where("isDeleted", "==", 0)
+        where("isDeleted", "==", 0),
+        where("archive", "!=", 1),
       ),
       (itemSnapshot) => {
         const re2: ItemProps[] = itemSnapshot.docs.map((doc) => {
@@ -332,6 +333,7 @@ function Organization({ organization }: OrganizationComponentProps) {
       link: doc.data().link,
       icon: doc.data().icon,
       order: doc.data().order,
+      archive: doc.data().archive,
       isShared: doc.data().isShared,
     };
   };

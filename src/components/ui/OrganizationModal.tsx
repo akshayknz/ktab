@@ -241,7 +241,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
           link: "",
           icon: "",
           order: 0,
-          archive: false,
+          archive: 0,
           isDeleted: 0,
           updatedAt: +new Date(),
           createdAt: +new Date(),

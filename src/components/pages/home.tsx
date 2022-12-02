@@ -8,6 +8,7 @@ import {
   Tabs,
   Text,
   useMantineTheme,
+  Kbd,
 } from "@mantine/core";
 import Organization from "../ui/organization";
 import { MdDragIndicator, MdOutlineAdd } from "react-icons/md";
@@ -202,6 +203,10 @@ function Home() {
             top: "35px",
             backgroundColor: "#1a1b1eba",
             backdropFilter: "blur(7px)",
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "baseline",
+            zIndex: 2,
           }}
         >
           <Box className={classes.vmiddle} sx={{ width: "100%" }}>
@@ -239,6 +244,11 @@ function Home() {
                 <MdOutlineAdd />
               </Button>
             </Tabs.List>
+          </Box>
+          <Box style={{ width: "200px" }}>
+            <Text size="xs">
+              <Kbd>⌘</Kbd> + <Kbd>V</Kbd> to paste links
+            </Text>
           </Box>
         </Header>
         {organizations

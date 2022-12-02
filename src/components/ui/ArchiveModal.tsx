@@ -47,7 +47,7 @@ export default function ArchiveModal({ open, setOpen }: Props) {
     const unsub1 = onSnapshot(
       query(
         collection(db, "ktab-manager", user?.uid ? user.uid : "guest", "items"),
-        where("archive", "==", true)
+        where("archive", "==", 1)
       ),
       (itemSnapshot) => {
         const re2 = itemSnapshot.docs.map((doc) => {
@@ -64,7 +64,7 @@ export default function ArchiveModal({ open, setOpen }: Props) {
           user?.uid ? user.uid : "guest",
           "collections"
         ),
-        where("archive", "==", true)
+        where("archive", "==", 1)
       ),
       (itemSnapshot) => {
         const re2 = itemSnapshot.docs.map((doc) => {
@@ -81,7 +81,7 @@ export default function ArchiveModal({ open, setOpen }: Props) {
           user?.uid ? user.uid : "guest",
           "organizations"
         ),
-        where("archive", "==", true)
+        where("archive", "==", 1)
       ),
       (itemSnapshot) => {
         const re2 = itemSnapshot.docs.map((doc) => {
@@ -104,7 +104,7 @@ export default function ArchiveModal({ open, setOpen }: Props) {
     await updateDoc(
       doc(db, "ktab-manager", user?.uid ? user.uid : "guest", type, id),
       {
-        archive: false,
+        archive: 0,
       }
     );
   };
