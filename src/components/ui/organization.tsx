@@ -47,6 +47,7 @@ import {
   useMantineTheme,
   ThemeIcon,
   SegmentedControl,
+  useMantineColorScheme,
 } from "@mantine/core";
 import React, {
   SetStateAction,
@@ -95,7 +96,11 @@ import {
   toggleEditOrganizationModal,
   toggleOrganizationModal,
 } from "../data/contexts/redux/states";
-import { useClickOutside, useDebouncedValue } from "@mantine/hooks";
+import {
+  useClickOutside,
+  useColorScheme,
+  useDebouncedValue,
+} from "@mantine/hooks";
 import {
   minimizeCollections,
   softDeleteDocument,
@@ -151,7 +156,9 @@ const useStyles = createStyles((theme) => ({
 
 function Organization({ organization }: OrganizationComponentProps) {
   const user = useContext(AuthContext);
+  const theme = useMantineTheme();
   const vp = useViewport();
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const [cursor, setCursor] = useState("auto");
   const [currentlyContainer, setCurrentlyContainer] = useState(false);
   const [dragStarted, setDragStarted] = useState(true);
@@ -270,7 +277,6 @@ function Organization({ organization }: OrganizationComponentProps) {
         setItemss(re2);
       }
     );
-    
   }, []);
   useEffect(() => {
     //set collecitons and items for render
@@ -587,7 +593,12 @@ function Organization({ organization }: OrganizationComponentProps) {
             <Button
               variant="light"
               compact
-              style={{ color: getContrastColor(organizationColor) }}
+              style={{
+                color:
+                  colorScheme === "light"
+                    ? theme.colors["black-alpha"][7]
+                    : getContrastColor(organizationColor),
+              }}
               mx={4}
               leftIcon={<MdOutlineAdd />}
               onClick={() => dispatch(toggleOrganizationModal("collection"))}
@@ -607,7 +618,12 @@ function Organization({ organization }: OrganizationComponentProps) {
                 <Button
                   variant="light"
                   compact
-                  style={{ color: getContrastColor(organizationColor) }}
+                  style={{
+                    color:
+                      colorScheme === "light"
+                        ? theme.colors["black-alpha"][7]
+                        : getContrastColor(organizationColor),
+                  }}
                   mx={4}
                   onClick={() => setFilterPopover((prev) => !prev)}
                   leftIcon={<IoFilterSharp />}
@@ -674,7 +690,12 @@ function Organization({ organization }: OrganizationComponentProps) {
               <Popover.Target>
                 <Button
                   variant="light"
-                  style={{ color: getContrastColor(organizationColor) }}
+                  style={{
+                    color:
+                      colorScheme === "light"
+                        ? theme.colors["black-alpha"][7]
+                        : getContrastColor(organizationColor),
+                  }}
                   compact
                   mx={4}
                   onClick={() => setViewPopover((prev) => !prev)}
@@ -720,7 +741,12 @@ function Organization({ organization }: OrganizationComponentProps) {
             {minimized.length === collections.length ? (
               <Button
                 variant="light"
-                style={{ color: getContrastColor(organizationColor) }}
+                style={{
+                  color:
+                    colorScheme === "light"
+                      ? theme.colors["black-alpha"][7]
+                      : getContrastColor(organizationColor),
+                }}
                 compact
                 mx={4}
                 leftIcon={<FiMaximize2 />}
@@ -738,7 +764,12 @@ function Organization({ organization }: OrganizationComponentProps) {
             ) : (
               <Button
                 variant="light"
-                style={{ color: getContrastColor(organizationColor) }}
+                style={{
+                  color:
+                    colorScheme === "light"
+                      ? theme.colors["black-alpha"][7]
+                      : getContrastColor(organizationColor),
+                }}
                 compact
                 mx={4}
                 leftIcon={<FiMinimize2 />}
@@ -767,7 +798,12 @@ function Organization({ organization }: OrganizationComponentProps) {
                 <Button
                   variant="light"
                   compact
-                  style={{ color: getContrastColor(organizationColor) }}
+                  style={{
+                    color:
+                      colorScheme === "light"
+                        ? theme.colors["black-alpha"][7]
+                        : getContrastColor(organizationColor),
+                  }}
                   mx={4}
                   onClick={() => setColorPopover((prev) => !prev)}
                   leftIcon={<IoColorFilterOutline />}
@@ -820,7 +856,12 @@ function Organization({ organization }: OrganizationComponentProps) {
             </Popover>
             <Button
               variant="light"
-              style={{ color: getContrastColor(organizationColor) }}
+              style={{
+                color:
+                  colorScheme === "light"
+                    ? theme.colors["black-alpha"][7]
+                    : getContrastColor(organizationColor),
+              }}
               compact
               mx={4}
               leftIcon={<FiEdit3 />}
@@ -848,7 +889,12 @@ function Organization({ organization }: OrganizationComponentProps) {
                 <Button
                   variant="light"
                   compact
-                  style={{ color: getContrastColor(organizationColor) }}
+                  style={{
+                    color:
+                      colorScheme === "light"
+                        ? theme.colors["black-alpha"][7]
+                        : getContrastColor(organizationColor),
+                  }}
                   mx={4}
                   leftIcon={<AiOutlineDelete />}
                   onClick={() => setTrashPopover((prev) => !prev)}
@@ -1290,9 +1336,10 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
     transition,
     zIndex: isDragging ? "100" : "auto",
     opacity: isDragging ? 0.5 : 1,
-    color: theme.colorScheme === "dark"
-    ? theme.colors.gray[3]
-    : theme.colors.dark[3],
+    color:
+      theme.colorScheme === "dark"
+        ? theme.colors.gray[3]
+        : theme.colors.dark[3],
     width: width,
     margin: margin,
     maxWidth: vp.tab ? "100%" : "24.1%",
@@ -1315,6 +1362,10 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
           {...listeners}
           {...attributes}
           sx={(theme) => ({
+            border:
+              theme.colorScheme === "dark"
+                ? "2px solid " + theme.colors["white-alpha"][1]
+                : "2px solid " + theme.colors["black-alpha"][1],
             backgroundColor:
               theme.colorScheme === "dark"
                 ? theme.colors["black-alpha"][3]
@@ -1398,7 +1449,12 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
           {...attributes}
           onClick={openModal}
           sx={(theme) => ({
-            backgroundColor: "rgba(255 255 255 / 1%)",
+            border:
+              theme.colorScheme === "dark"
+                ? "2px solid " + theme.colors["white-alpha"][1]
+                : "2px solid " + theme.colors["black-alpha"][1],
+            backgroundColor:
+              theme.colorScheme === "dark" ? "#ffffff10" : "#00000010",
           })}
         >
           <Box

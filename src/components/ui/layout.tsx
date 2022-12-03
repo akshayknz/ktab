@@ -37,6 +37,7 @@ import { RootState } from "../data/contexts/redux/configureStore";
 import { useDispatch } from "react-redux";
 import {
   setFilterText,
+  setFilterType,
   toggleLoginModal,
   toggleOrganizationModal,
 } from "../data/contexts/redux/states";
@@ -63,6 +64,7 @@ export function Layout({ children }: DoubleHeaderProps) {
   );
   const { syncing } = useSelector((state: RootState) => state.actions);
   const dispatch = useDispatch();
+  const { filterType } = useSelector((state: RootState) => state.states);
   useEffect(() => {
     dispatch(setUserId(user?.uid ? user.uid : "guest"));
   }, [user]);
@@ -327,18 +329,20 @@ export function Layout({ children }: DoubleHeaderProps) {
             mr={10}
             data={[
               {
-                value: "light",
+                value: "all",
                 label: <Text style={{ fontSize: 10 }}>All</Text>,
               },
               {
-                value: "l",
+                value: "link",
                 label: <Text style={{ fontSize: 10 }}>Links</Text>,
               },
               {
-                value: "n",
+                value: "text",
                 label: <Text style={{ fontSize: 10 }}>Notes</Text>,
               },
             ]}
+            value={filterType}
+            onChange={(value) => dispatch(setFilterType(value))}
           />
           <SegmentedControl
             value={colorScheme}
@@ -391,7 +395,11 @@ export function Layout({ children }: DoubleHeaderProps) {
               >
                 <MdPersonOutline size={15} />
               </Avatar>
-              {user ? <Text className="animated-welcome">Welcome, {user?.displayName}</Text> : null}
+              {user ? (
+                <Text className="animated-welcome">
+                  Welcome, {user?.displayName}
+                </Text>
+              ) : null}
             </Button>
           )}
           {/* {vp.tab ? null : (
