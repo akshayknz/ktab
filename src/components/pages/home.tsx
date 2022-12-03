@@ -269,7 +269,7 @@ function Home() {
               </Button>
             </Tabs.List>
           </Box>
-          <Box style={{ width: "200px" }}>
+          <Box style={{ width: "235px" }}>
             <Text size="xs" mr={16} style={{ display: "inline-block" }}>
               <Kbd style={{ fontSize: 9, fontWeight:100 }}>⌘</Kbd> +{" "}
               <Kbd style={{ fontSize: 9 }}>V</Kbd> to paste links
