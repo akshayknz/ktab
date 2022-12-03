@@ -526,7 +526,7 @@ export function Layout({ children }: DoubleHeaderProps) {
           >
             Created by&nbsp;
             <Anchor href="https://akshaykn.vercel.app/" target="_blank">
-              Morpheus
+              Akshay K Nair
             </Anchor>
             ⚽, help me at&nbsp;
             <Anchor href="https://github.com/akshayknz/ktab" target="_blank">
