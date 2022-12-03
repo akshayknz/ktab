@@ -9,6 +9,9 @@ import {
   Text,
   useMantineTheme,
   Kbd,
+  useMantineColorScheme,
+  SegmentedControl,
+  Center,
 } from "@mantine/core";
 import Organization from "../ui/organization";
 import { MdDragIndicator, MdOutlineAdd } from "react-icons/md";
@@ -35,6 +38,7 @@ import {
   QuerySnapshot,
   setDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "../data/firebaseConfig";
 import { AuthContext } from "../data/contexts/AuthContext";
@@ -49,6 +53,8 @@ import { TimeInput } from "@mantine/dates";
 import useViewport from "../data/useViewport";
 import { useParams } from "react-router-dom";
 import ItemModal from "../ui/ItemModal";
+import { IoSunnyOutline } from "react-icons/io5";
+import { BsMoon } from "react-icons/bs";
 
 const HEADER_HEIGHT = 28;
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
@@ -76,6 +82,7 @@ interface ItemProps {
 function Home() {
   const user = useContext(AuthContext);
   const theme = useMantineTheme();
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const vp = useViewport();
   const { classes, cx } = useStyles();
   const { activeOrganization } = useSelector(
@@ -168,6 +175,19 @@ function Home() {
         setItemOpened(true);
       });
     }
+    /**
+     * [START] DELETE THIS SHIT
+     * DO SOMETHING TO ALL DATA PRESENT IN THE DB
+     */
+    //  const run = async () => {
+    //   const querySnapshot = await getDocs(collection(db, "ktab-manager", "guest", "items"));
+    //   const batch = writeBatch(db);
+    //   querySnapshot.forEach((docc) => {batch.update(doc(db, "ktab-manager", "guest", "items", docc.id), { archive: 0 });});
+    //   batch.commit().then(() => {console.log("commited");});
+    // };run();
+    /**
+     * [END] DELETE THIS SHIT
+     */
   }, []);
   const docsToItems = (doc: DocumentData) => {
     return {
@@ -197,22 +217,26 @@ function Home() {
       >
         <Header
           height={vp.tab ? "auto" : HEADER_HEIGHT}
-          sx={{ overflow: "hidden", border: "none", paddingLeft: 0 }}
+          sx={{ overflow: "visible", border: "none", paddingLeft: 0 }}
           style={{
             position: "sticky",
             top: "35px",
-            backgroundColor: "#1a1b1eba",
+            backgroundColor:
+              colorScheme === "light"
+                ? theme.colors["white-alpha"][4]
+                : theme.colors["black-alpha"][4],
             backdropFilter: "blur(7px)",
             display: "flex",
             flexDirection: "row",
             alignItems: "baseline",
-            zIndex: 2,
+            zIndex: 12,
           }}
         >
           <Box className={classes.vmiddle} sx={{ width: "100%" }}>
             <Tabs.List
               className={cx(classes.vmiddle, classes.lineHeightFix)}
               sx={{ paddingInline: vp.tab ? 5 : 53 }}
+              style={{ borderBottom: "none" }}
             >
               {organizations
                 ? organizations?.map((organization) => (
@@ -245,10 +269,12 @@ function Home() {
               </Button>
             </Tabs.List>
           </Box>
-          <Box style={{ width: "200px" }}>
-            <Text size="xs">
-              <Kbd>⌘</Kbd> + <Kbd>V</Kbd> to paste links
+          <Box style={{ width: "300px" }}>
+            <Text size="xs" mr={16} style={{ display: "inline-block" }}>
+              <Kbd style={{ fontSize: 9, fontWeight:100 }}>⌘</Kbd> +{" "}
+              <Kbd style={{ fontSize: 9 }}>V</Kbd> to paste links
             </Text>
+            
           </Box>
         </Header>
         {organizations

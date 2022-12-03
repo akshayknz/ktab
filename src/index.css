@@ -108,3 +108,25 @@ code {
 .mantine-Tabs-tab[data-active="true"] {
   opacity: 1;
 }
+
+.animated-welcome {
+  width: 0px;
+  animation: welcomeAnimation 5s cubic-bezier(0.42, 0, 0, 1.01) 1s 1;
+  transition: all cubic-bezier(0.42, 0, 0, 1.01) .3s;
+}
+
+@keyframes welcomeAnimation {
+  0% {
+    width: 100px;
+  }
+  90% {
+    width: 100px;
+  }
+  100% {
+    width: 0px;
+  }
+}
+
+.mantine-Button-root:hover .animated-welcome {
+  width: 100px;
+}

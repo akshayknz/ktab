@@ -261,7 +261,7 @@ function Organization({ organization }: OrganizationComponentProps) {
         collection(db, "ktab-manager", user?.uid ? user.uid : "guest", "items"),
         where("orgparent", "==", organization.id),
         where("isDeleted", "==", 0),
-        where("archive", "!=", 1),
+        where("archive", "==", 0)
       ),
       (itemSnapshot) => {
         const re2: ItemProps[] = itemSnapshot.docs.map((doc) => {
@@ -270,6 +270,7 @@ function Organization({ organization }: OrganizationComponentProps) {
         setItemss(re2);
       }
     );
+    
   }, []);
   useEffect(() => {
     //set collecitons and items for render
@@ -1289,7 +1290,9 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
     transition,
     zIndex: isDragging ? "100" : "auto",
     opacity: isDragging ? 0.5 : 1,
-    color: theme.colors.gray[3],
+    color: theme.colorScheme === "dark"
+    ? theme.colors.gray[3]
+    : theme.colors.dark[3],
     width: width,
     margin: margin,
     maxWidth: vp.tab ? "100%" : "24.1%",

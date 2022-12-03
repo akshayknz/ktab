@@ -16,6 +16,9 @@ import {
   Loader,
   useMantineTheme,
   Input,
+  useMantineColorScheme,
+  Center,
+  SegmentedControl,
 } from "@mantine/core";
 import { useContext, useEffect, useRef, useState } from "react";
 import { RiTableFill } from "react-icons/ri";
@@ -41,9 +44,12 @@ import TrashModal from "./TrashModal";
 import ArchiveModal from "./ArchiveModal";
 import { setUserId } from "../data/contexts/redux/actions";
 import useViewport from "../data/useViewport";
+import { BsMoon } from "react-icons/bs";
+import { IoSunnyOutline } from "react-icons/io5";
 export function Layout({ children }: DoubleHeaderProps) {
   const user = useContext(AuthContext);
   const theme = useMantineTheme();
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const vp = useViewport();
   const { classes, cx } = useStyles();
   const inputRef = useRef<any>(null);
@@ -75,7 +81,10 @@ export function Layout({ children }: DoubleHeaderProps) {
         px={vp.tab ? 10 : 57}
         style={{
           position: "sticky",
-          backgroundColor: "#1a1b1eba",
+          backgroundColor:
+            colorScheme === "light"
+              ? theme.colors["white-alpha"][4]
+              : theme.colors["black-alpha"][4],
           backdropFilter: "blur(7px)",
         }}
       >
@@ -297,18 +306,64 @@ export function Layout({ children }: DoubleHeaderProps) {
               </Button>
             </SpotlightProvider>
           )}
-          
         </Box>
-        
-        <Box className={classes.vmiddle} style={{ float: "right"}}>
-        <Input
+
+        <Box
+          className={classes.vmiddle}
+          style={{ float: "right", display: "flex", alignItems: "center" }}
+        >
+          <Input
             variant="filled"
             placeholder="Search"
             size="xs"
-            sx={{ display: "inline-block", width: "200px", marginTop:"2px" }}
+            sx={{ display: "inline-block", width: "180px", marginTop: "0px" }}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
               dispatch(setFilterText(event.currentTarget.value))
             }
+            mr={10}
+          />
+          <SegmentedControl
+            size="xs"
+            mr={10}
+            data={[
+              {
+                value: "light",
+                label: <Text style={{ fontSize: 10 }}>All</Text>,
+              },
+              {
+                value: "l",
+                label: <Text style={{ fontSize: 10 }}>Links</Text>,
+              },
+              {
+                value: "n",
+                label: <Text style={{ fontSize: 10 }}>Notes</Text>,
+              },
+            ]}
+          />
+          <SegmentedControl
+            value={colorScheme}
+            size="xs"
+            onChange={(value: "light" | "dark") => toggleColorScheme(value)}
+            data={[
+              {
+                value: "light",
+                label: (
+                  <Center>
+                    <IoSunnyOutline size={14} />
+                    <Text style={{ fontSize: 10 }}></Text>
+                  </Center>
+                ),
+              },
+              {
+                value: "dark",
+                label: (
+                  <Center>
+                    <BsMoon size={14} />
+                    <Text style={{ fontSize: 10 }}></Text>
+                  </Center>
+                ),
+              },
+            ]}
           />
           {vp.tab ? null : (
             <Button
@@ -332,13 +387,14 @@ export function Layout({ children }: DoubleHeaderProps) {
                 radius="md"
                 src={user?.photoURL}
                 mr={user ? 10 : 0}
+                className={"animated-welcome-avatar"}
               >
                 <MdPersonOutline size={15} />
               </Avatar>
-              {user ? <>Welcome, {user?.displayName}</> : null}
+              {user ? <Text className="animated-welcome">Welcome, {user?.displayName}</Text> : null}
             </Button>
           )}
-          {vp.tab ? null : (
+          {/* {vp.tab ? null : (
             <Popover
               transition="pop"
               width={400}
@@ -406,19 +462,9 @@ export function Layout({ children }: DoubleHeaderProps) {
                 </ScrollArea>
               </Popover.Dropdown>
             </Popover>
-          )}
-          {user ? (
-            <Button
-              variant="default"
-              radius="xs"
-              size="xs"
-              compact
-              className={cx(classes.vmiddle, classes.menuitem)}
-              onClick={signOut}
-            >
-              Logout
-            </Button>
-          ) : (
+          )} */}
+
+          {user ? null : (
             <>
               <Button
                 variant="default"
