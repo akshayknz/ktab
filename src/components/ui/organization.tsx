@@ -167,6 +167,7 @@ function Organization({ organization }: OrganizationComponentProps) {
   const [colorPopover, setColorPopover] = useState(false);
   const [filterPopover, setFilterPopover] = useState(false);
   const [viewPopover, setViewPopover] = useState(false);
+  const [lodaingItems, setLodaingItems] = useState(true);
   // const [debouncedFilterText] = useDebouncedValue(filterText, 59);
   // const [debouncedFilterType] = useDebouncedValue(filterType, 59);
   const colorboxRef = useClickOutside(() => {
@@ -275,6 +276,7 @@ function Organization({ organization }: OrganizationComponentProps) {
           return docsToItems(doc);
         });
         setItemss(re2);
+        setTimeout(()=>setLodaingItems(false),500)
       }
     );
   }, []);
@@ -958,7 +960,40 @@ function Organization({ organization }: OrganizationComponentProps) {
                 mt={10}
                 style={{ borderRadius: "10px" }}
                 mb="xl"
-              />
+                animate={lodaingItems}
+              >
+                {lodaingItems ? (
+                  <Text
+                    size={"xs"}
+                    style={{
+                      zIndex: "9999",
+                      position: "relative",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: theme.colors.dark[2],
+                    }}
+                  >
+                    Loading collections
+                  </Text>
+                ) : (
+                  <Text
+                    size={"xs"}
+                    style={{
+                      zIndex: "9999",
+                      position: "relative",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: theme.colors.dark[2],
+                    }}
+                  >
+                    This organization has no data.
+                  </Text>
+                )}
+              </Skeleton>
             )}
             {containers.map((containerId, index) => (
               <ContainerItem

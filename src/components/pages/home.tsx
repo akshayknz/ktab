@@ -95,10 +95,10 @@ function Home() {
     defaultValue: [
       {
         id: activeOrganization || "",
-        name: "string",
-        icon: "string",
-        color: "string",
-        accent: "string",
+        name: "",
+        icon: "",
+        color: "",
+        accent: "",
       },
     ],
   });
