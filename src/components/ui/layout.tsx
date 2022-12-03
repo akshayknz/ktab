@@ -494,12 +494,15 @@ export function Layout({ children }: DoubleHeaderProps) {
       <Box
         className={`syncing-popup ${syncing && "syncing-true"}`}
         sx={{
-          background: theme.colors.dark,
+          background:
+            colorScheme === "dark"
+              ? theme.colors.dark
+              : theme.colors["white-alpha"][5],
         }}
       >
-        <Loader color="white" size="xs" />
+        <Loader color={colorScheme === "dark" ? "white" : "black"} size="xs" />
         <Text pl={9} size="xs">
-          Syncing {syncing}
+          Syncing
         </Text>
       </Box>
       <OrganizationModal open={showOrganizationModal} />

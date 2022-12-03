@@ -253,7 +253,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
                 variant="default"
                 radius="md"
                 size="xs"
-                onClick={handleClose}
+                onClick={handleCloseWithoutSave}
               >
                 <VscChromeClose size={13} />
               </Button>
