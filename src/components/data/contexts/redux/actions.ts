@@ -14,7 +14,7 @@ const fetchUserById = createAsyncThunk(
 export const actionSlice = createSlice({
   name: "actions",
   initialState: {
-    userId: "guest",
+    userId: "" as string,
     syncing: false,
   },
   reducers: {

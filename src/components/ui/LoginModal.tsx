@@ -104,7 +104,11 @@ export default function LoginModal({ open }: Props) {
           >
             Login using Google
           </Button>
-          <Button leftIcon={<ImFacebook size={14} />} color="indigo">
+          <Button
+            leftIcon={<ImFacebook size={14} />}
+            color="indigo"
+            style={{ opacity: ".5" }}
+          >
             Login using Facebook
           </Button>
         </SimpleGrid>

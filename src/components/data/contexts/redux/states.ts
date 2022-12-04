@@ -12,8 +12,8 @@ export const stateSlice = createSlice({
     editOrganizationData: {} as OrganizationProps,
     editCollectionData: {} as CollectionProps,
     editItemData: {} as ItemProps,
-    viewWidth: localStorage.getItem("viewWidth")||ViewWidthType.DEFAULT,
-    viewMargins: localStorage.getItem("viewMargins")||ViewMarginsType.DEFAULT,
+    viewWidth: localStorage.getItem("viewWidth") || ViewWidthType.DEFAULT,
+    viewMargins: localStorage.getItem("viewMargins") || ViewMarginsType.DEFAULT,
     filterText: "",
     filterType: "all",
   },
@@ -83,7 +83,9 @@ export const {
   setOrganizationOrCollection,
   setActiveOrganization,
   setViewWidth,
-  setViewMargins,setFilterText,setFilterType
+  setViewMargins,
+  setFilterText,
+  setFilterType,
 } = stateSlice.actions;
 
 export default stateSlice.reducer;

@@ -206,7 +206,7 @@ export function Layout({ children }: DoubleHeaderProps) {
               <Menu.Item className={classes.submenuItem}>Refresh</Menu.Item>
             </Menu.Dropdown>
           </Menu>
-          {vp.tab ? null : (
+          
             <Menu
               shadow="md"
               width={200}
@@ -271,7 +271,6 @@ export function Layout({ children }: DoubleHeaderProps) {
                 </Menu.Item>
               </Menu.Dropdown>
             </Menu>
-          )}
           {vp.tab ? null : (
             <Button
               variant="default"
@@ -314,93 +313,100 @@ export function Layout({ children }: DoubleHeaderProps) {
           className={classes.vmiddle}
           style={{ float: "right", display: "flex", alignItems: "center" }}
         >
-          <Input
-            variant="filled"
-            placeholder="Search"
-            size="xs"
-            sx={{ display: "inline-block", width: "180px", marginTop: "0px" }}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              dispatch(setFilterText(event.currentTarget.value))
-            }
-            mr={10}
-          />
-          <SegmentedControl
-            size="xs"
-            mr={10}
-            data={[
-              {
-                value: "all",
-                label: <Text style={{ fontSize: 10 }}>All</Text>,
-              },
-              {
-                value: "link",
-                label: <Text style={{ fontSize: 10 }}>Links</Text>,
-              },
-              {
-                value: "text",
-                label: <Text style={{ fontSize: 10 }}>Notes</Text>,
-              },
-            ]}
-            value={filterType}
-            onChange={(value) => dispatch(setFilterType(value))}
-          />
-          <SegmentedControl
-            value={colorScheme}
-            size="xs"
-            onChange={(value: "light" | "dark") => toggleColorScheme(value)}
-            data={[
-              {
-                value: "light",
-                label: (
-                  <Center>
-                    <IoSunnyOutline size={14} />
-                    <Text style={{ fontSize: 10 }}></Text>
-                  </Center>
-                ),
-              },
-              {
-                value: "dark",
-                label: (
-                  <Center>
-                    <BsMoon size={14} />
-                    <Text style={{ fontSize: 10 }}></Text>
-                  </Center>
-                ),
-              },
-            ]}
-          />
           {vp.tab ? null : (
-            <Button
-              variant="default"
-              radius="xs"
-              size="xs"
-              compact
-              className={cx(classes.vmiddle, classes.menuitem)}
-              onClick={() => {
-                if (user) {
-                  setSettingsModal((prevState) => !prevState);
-                  setPersonalizeModal(false);
-                } else {
-                  dispatch(toggleLoginModal());
+            <>
+              <Input
+                variant="filled"
+                placeholder="Search"
+                size="xs"
+                sx={{
+                  display: "inline-block",
+                  width: "180px",
+                  marginTop: "0px",
+                }}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                  dispatch(setFilterText(event.currentTarget.value))
                 }
-              }}
-            >
-              <Avatar
-                size="sm"
-                color="green"
-                radius="md"
-                src={user?.photoURL}
-                mr={user ? 10 : 0}
-                className={"animated-welcome-avatar"}
+                mr={10}
+              />
+              <SegmentedControl
+                size="xs"
+                mr={10}
+                data={[
+                  {
+                    value: "all",
+                    label: <Text style={{ fontSize: 10 }}>All</Text>,
+                  },
+                  {
+                    value: "link",
+                    label: <Text style={{ fontSize: 10 }}>Links</Text>,
+                  },
+                  {
+                    value: "text",
+                    label: <Text style={{ fontSize: 10 }}>Notes</Text>,
+                  },
+                ]}
+                value={filterType}
+                onChange={(value) => dispatch(setFilterType(value))}
+              />
+              <SegmentedControl
+                value={colorScheme}
+                size="xs"
+                onChange={(value: "light" | "dark") => toggleColorScheme(value)}
+                data={[
+                  {
+                    value: "light",
+                    label: (
+                      <Center>
+                        <IoSunnyOutline size={14} />
+                        <Text style={{ fontSize: 10 }}></Text>
+                      </Center>
+                    ),
+                  },
+                  {
+                    value: "dark",
+                    label: (
+                      <Center>
+                        <BsMoon size={14} />
+                        <Text style={{ fontSize: 10 }}></Text>
+                      </Center>
+                    ),
+                  },
+                ]}
+              />
+
+              <Button
+                variant="default"
+                radius="xs"
+                size="xs"
+                compact
+                className={cx(classes.vmiddle, classes.menuitem)}
+                onClick={() => {
+                  if (user) {
+                    setSettingsModal((prevState) => !prevState);
+                    setPersonalizeModal(false);
+                  } else {
+                    dispatch(toggleLoginModal());
+                  }
+                }}
               >
-                <MdPersonOutline size={15} />
-              </Avatar>
-              {user ? (
-                <Text className="animated-welcome">
-                  Welcome, {user?.displayName}
-                </Text>
-              ) : null}
-            </Button>
+                <Avatar
+                  size="sm"
+                  color="green"
+                  radius="md"
+                  src={user?.photoURL}
+                  mr={user ? 10 : 0}
+                  className={"animated-welcome-avatar"}
+                >
+                  <MdPersonOutline size={15} />
+                </Avatar>
+                {user ? (
+                  <Text className="animated-welcome">
+                    Welcome, {user?.displayName}
+                  </Text>
+                ) : null}
+              </Button>
+            </>
           )}
           {/* {vp.tab ? null : (
             <Popover

@@ -18,6 +18,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../data/contexts/redux/configureStore";
 import { toggleLoginModal } from "../data/contexts/redux/states";
 import { useForm } from "@mantine/form";
+import { auth } from "../data/firebaseConfig";
 
 interface Props {
   open: boolean;
@@ -52,12 +53,15 @@ export default function LoginModal({ open, setOpen, personalize }: Props) {
       })
       .then(
         function () {
-          setOpen(false)
+          setOpen(false);
         },
         function (error) {
           console.log(error);
         }
       );
+  };
+  const signOut = async () => {
+    await auth.signOut();
   };
   return (
     <>
@@ -104,68 +108,98 @@ export default function LoginModal({ open, setOpen, personalize }: Props) {
                     disabled
                     {...profileForm.getInputProps("email")}
                   />
-                  <Button type="submit">Save</Button>
+                  <Button type="submit" mr={7}>
+                    Save
+                  </Button>
+                  <Button
+                    variant="outline"
+                    mr={7}
+                    onClick={() => setOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="outline"
+                    color="red"
+                    mr={7}
+                    onClick={signOut}
+                  >
+                    Logout
+                  </Button>
                 </form>
               </Box>
             ) : (
-              <Box
-                px={20}
-                pt={30}
-                mb={30}
-                mx="auto"
-                style={{ textAlign: "center" }}
-              >
-                <Text mb={10} size="xs">
-                  Login to use this section
-                </Text>
-                <Button
-                  onClick={() => dispatch(toggleLoginModal())}
-                  size={"xs"}
-                >
-                  Login
-                </Button>
-              </Box>
+              <LoginToUse open={open} setOpen={setOpen} />
             )}
           </Tabs.Panel>
 
           <Tabs.Panel value="personalize" pt="xs">
-            <Box px={20} pt={10} pb={20} mx="auto">
-              <FileInput placeholder="Pick file" label="Your resume" mb={20} />
-              <Image
-                width={"100%"}
-                height={120}
-                src={undefined}
-                alt="With default placeholder"
-                withPlaceholder
-                mb={20}
-              />
-              <Text weight={500} sx={{ fontSize: 14 }} pb={7}>
-                Opacity{" "}
-              </Text>
-              <AlphaSlider
-                color="#1c7ed6"
-                onChange={() => {}}
-                onChangeEnd={() => {}}
-                value={0}
-                mb={20}
-              />
-              <Text weight={500} sx={{ fontSize: 14 }} pb={7}>
-                Blur{" "}
-              </Text>
-              <Slider
-                size="lg"
-                radius="xl"
-                showLabelOnHover={false}
-                mb={20}
-                marks={[
-                  { value: 0, label: "0%" },
-                  { value: 100, label: "100%" },
-                ]}
-              />
-            </Box>
+            {user ? (
+              <Box px={20} pt={10} pb={20} mx="auto">
+                <FileInput
+                  placeholder="Pick file"
+                  label="Your resume"
+                  mb={20}
+                />
+                <Image
+                  width={"100%"}
+                  height={120}
+                  src={undefined}
+                  alt="With default placeholder"
+                  withPlaceholder
+                  mb={20}
+                />
+                <Text weight={500} sx={{ fontSize: 14 }} pb={7}>
+                  Opacity{" "}
+                </Text>
+                <AlphaSlider
+                  color="#1c7ed6"
+                  onChange={() => {}}
+                  onChangeEnd={() => {}}
+                  value={0}
+                  mb={20}
+                />
+                <Text weight={500} sx={{ fontSize: 14 }} pb={7}>
+                  Blur{" "}
+                </Text>
+                <Slider
+                  size="lg"
+                  radius="xl"
+                  showLabelOnHover={false}
+                  mb={20}
+                  marks={[
+                    { value: 0, label: "0%" },
+                    { value: 100, label: "100%" },
+                  ]}
+                />
+              </Box>
+            ) : (
+              <LoginToUse open={open} setOpen={setOpen} />
+            )}
           </Tabs.Panel>
         </Tabs>
       </Modal>
     </>
+  );
+}
+
+function LoginToUse({ setOpen }: Props) {
+  const dispatch = useDispatch();
+
+  return (
+    <Box px={20} pt={30} mb={30} mx="auto" style={{ textAlign: "center" }}>
+      <Text mb={10} size="xs">
+        Login to use this section
+      </Text>
+      <Button
+        onClick={() => {
+          dispatch(toggleLoginModal());
+          setOpen(false);
+        }}
+        size={"xs"}
+      >
+        Login
+      </Button>
+    </Box>
   );
 }

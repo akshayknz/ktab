@@ -40,7 +40,7 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import { db } from "../data/firebaseConfig";
+import { auth, db } from "../data/firebaseConfig";
 import { AuthContext } from "../data/contexts/AuthContext";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -55,6 +55,7 @@ import { useParams } from "react-router-dom";
 import ItemModal from "../ui/ItemModal";
 import { IoSunnyOutline } from "react-icons/io5";
 import { BsMoon } from "react-icons/bs";
+import { setUserId } from "../data/contexts/redux/actions";
 
 const HEADER_HEIGHT = 28;
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
@@ -106,24 +107,30 @@ function Home() {
   const dispatch = useDispatch();
   const { userId } = useSelector((state: RootState) => state.actions);
   useEffect(() => {
-    //organizations live updates
-    const unsub = onSnapshot(
-      query(
-        collection(
-          db,
-          "ktab-manager",
-          user?.uid ? user.uid : "guest",
-          "organizations"
-        ),
-        where("isDeleted", "==", 0)
-      ),
-      (organizationSnapshot) => {
-        const re: OrganizationProps[] = organizationSnapshot.docs.map((doc) => {
-          return docsToOrganizations(doc);
-        });
-        setOrganizations(re);
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        dispatch(setUserId(user.uid));
+      } else {
+        dispatch(setUserId("guest"));
       }
-    );
+    });
+    //organizations live updates
+    if (userId != "") {
+      const unsub = onSnapshot(
+        query(
+          collection(db, "ktab-manager", userId, "organizations"),
+          where("isDeleted", "==", 0)
+        ),
+        (organizationSnapshot) => {
+          const re: OrganizationProps[] = organizationSnapshot.docs.map(
+            (doc) => {
+              return docsToOrganizations(doc);
+            }
+          );
+          setOrganizations(re);
+        }
+      );
+    }
 
     // const items = query(collectionGroup(db, 'items'));
     // const unsubii = onSnapshot(items, querySnapshot => {
@@ -131,8 +138,10 @@ function Home() {
     //       console.log(doc.id, ' => ', doc.data());
     //   });
     // })
-  }, [user?.uid]);
-
+  }, [userId]);
+  useEffect(() => {
+    console.log(organizations);
+  }, [organizations]);
   //function to map doc data to OrganizationProps[]
   const docsToOrganizations = (doc: DocumentData) => {
     return {
@@ -269,13 +278,14 @@ function Home() {
               </Button>
             </Tabs.List>
           </Box>
-          <Box style={{ width: "235px" }}>
-            <Text size="xs" mr={16} style={{ display: "inline-block" }}>
-              <Kbd style={{ fontSize: 9, fontWeight:100 }}>⌘</Kbd> +{" "}
-              <Kbd style={{ fontSize: 9 }}>V</Kbd> to paste links
-            </Text>
-            
-          </Box>
+          {!vp.tab && (
+            <Box style={{ width: "235px" }}>
+              <Text size="xs" mr={16} style={{ display: "inline-block" }}>
+                <Kbd style={{ fontSize: 9, fontWeight: 100 }}>⌘</Kbd> +{" "}
+                <Kbd style={{ fontSize: 9 }}>V</Kbd> to paste links
+              </Text>
+            </Box>
+          )}
         </Header>
         {organizations
           ? organizations?.map((organization) => (

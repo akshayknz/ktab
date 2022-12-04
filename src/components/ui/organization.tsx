@@ -178,6 +178,7 @@ function Organization({ organization }: OrganizationComponentProps) {
   const dispatch = useDispatch();
   const { organizationColor, viewWidth, viewMargins, filterText, filterType } =
     useSelector((state: RootState) => state.states);
+  const { userId } = useSelector((state: RootState) => state.actions);
   useEffect(() => {
     dispatch(setOrganizationColor(organization.color));
   }, [organization.color]);
@@ -245,13 +246,14 @@ function Organization({ organization }: OrganizationComponentProps) {
     }
   }, [dragStarted]);
   useEffect(() => {
+    if(userId=="") return;
     //Get collections and items of this organization
     const unsub1 = onSnapshot(
       query(
         collection(
           db,
           "ktab-manager",
-          user?.uid ? user.uid : "guest",
+          userId,
           "collections"
         ),
         where("parent", "==", organization.id),
@@ -264,9 +266,11 @@ function Organization({ organization }: OrganizationComponentProps) {
         setCollections(re);
       }
     );
+    console.log(userId, organization.id);
+    
     const unsub2 = onSnapshot(
       query(
-        collection(db, "ktab-manager", user?.uid ? user.uid : "guest", "items"),
+        collection(db, "ktab-manager", userId, "items"),
         where("orgparent", "==", organization.id),
         where("isDeleted", "==", 0),
         where("archive", "==", 0)
@@ -279,7 +283,7 @@ function Organization({ organization }: OrganizationComponentProps) {
         setTimeout(()=>setLodaingItems(false),500)
       }
     );
-  }, []);
+  }, [userId]);
   useEffect(() => {
     //set collecitons and items for render
     const getItems = (key: UniqueIdentifier) => {
@@ -292,7 +296,7 @@ function Organization({ organization }: OrganizationComponentProps) {
         );
       }
       if (filterType != "all") {
-        result = result?.filter((s) => s.type.toLowerCase() == filterType);
+        result = result?.filter((s) => s.type?.toLowerCase() == filterType);
       }
       result = result
         ?.sort((a, b) => (a.order > b.order ? 1 : -1))
