@@ -27,6 +27,7 @@ import {
   Loader,
   Badge,
   ActionIcon,
+  useMantineColorScheme,
 } from "@mantine/core";
 import { Editor } from "@mantine/rte";
 import { doc, updateDoc } from "firebase/firestore";
@@ -89,6 +90,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
   const dispatch = useDispatch();
   const user = useContext(AuthContext);
   const theme = useMantineTheme();
+  const { colorScheme } = useMantineColorScheme();
   const vp = useViewport();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [minimize, setMinimize] = useState(false);
@@ -137,7 +139,6 @@ export default function ItemModal({ open, setOpen, data }: Props) {
       })
     );
     const file = item && (await item.getType(image_type));
-    console.log(file);
     if (file) {
       var reader = new FileReader();
       reader.readAsDataURL(file);
@@ -148,7 +149,6 @@ export default function ItemModal({ open, setOpen, data }: Props) {
           .focus()
           .setImage({ src: (base64data ? base64data : "") as string })
           .run();
-        console.log(base64data);
       };
     }
   }, [editor]);
@@ -200,8 +200,6 @@ export default function ItemModal({ open, setOpen, data }: Props) {
     setLink(event.currentTarget.value);
   }
   async function handleSubmit() {
-    console.log(editor?.getJSON);
-
     dispatch(setSyncing({ state: true }));
     await updateDoc(
       doc(
@@ -272,7 +270,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
       onClose={handleClose}
       withCloseButton={false}
     >
-      <SimpleGrid verticalSpacing={20} pb={20} pt={minimize ? 30 : 0}>
+      <SimpleGrid verticalSpacing={20} pb={20} pt={minimize || vp.tab ? 30 : 0}>
         <Grid align="center">
           <Grid.Col sm={7} md={8}>
             <TextInput
@@ -445,12 +443,24 @@ export default function ItemModal({ open, setOpen, data }: Props) {
               ref={editorRef as Ref<Editor>}
               style={{ minHeight: "40vh" }}
             >
-              <RichTextEditor.Toolbar sticky stickyOffset={minimize ? 15 : -14}>
+              <RichTextEditor.Toolbar
+                sticky
+                stickyOffset={minimize || vp.tab ? 15 : -14}
+                style={{
+                  background:
+                    colorScheme === "light" ? "#ffffff10" : "#1a1b1e80",
+                  backdropFilter: "blur(7px)",
+                }}
+              >
                 <RichTextEditor.ControlsGroup>
-                  <RichTextEditor.Bold />
-                  {!vp.tab && <RichTextEditor.Italic />}
-                  <RichTextEditor.Underline />
-                  {!vp.tab && <RichTextEditor.Strikethrough />}
+                  {!vp.tab && (
+                    <>
+                      <RichTextEditor.Bold />
+                      <RichTextEditor.Italic />
+                      <RichTextEditor.Underline />
+                      <RichTextEditor.Strikethrough />
+                    </>
+                  )}
                   <RichTextEditor.ClearFormatting />
                   {!vp.tab && <RichTextEditor.Highlight />}
                   {!vp.tab && (
@@ -506,7 +516,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
               </RichTextEditor.Toolbar>
               <RichTextEditor.Content />
             </RichTextEditor>
-            <Text color="dark">
+            <Text color="grey" size={"xs"}>
               {editor?.storage.characterCount.words()} words,{" "}
               {editor?.storage.characterCount.characters()} characters
             </Text>

@@ -266,7 +266,6 @@ function Organization({ organization }: OrganizationComponentProps) {
         setCollections(re);
       }
     );
-    console.log(userId, organization.id);
     
     const unsub2 = onSnapshot(
       query(

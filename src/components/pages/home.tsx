@@ -131,17 +131,7 @@ function Home() {
         }
       );
     }
-
-    // const items = query(collectionGroup(db, 'items'));
-    // const unsubii = onSnapshot(items, querySnapshot => {
-    //     querySnapshot.forEach((doc) => {
-    //       console.log(doc.id, ' => ', doc.data());
-    //   });
-    // })
   }, [userId]);
-  useEffect(() => {
-    console.log(organizations);
-  }, [organizations]);
   //function to map doc data to OrganizationProps[]
   const docsToOrganizations = (doc: DocumentData) => {
     return {
@@ -176,10 +166,8 @@ function Home() {
   const [itemData, setItemData] = useState<any>();
   useEffect(() => {
     if (id && userid) {
-      console.log(id);
       const q = doc(db, "ktab-manager", userid, "items", id);
       const querySnapshot = getDoc(q).then((r) => {
-        console.log(r.data());
         setItemData(docsToItems(r));
         setItemOpened(true);
       });
