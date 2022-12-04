@@ -111,7 +111,7 @@ code {
 .animated-welcome {
   width: 0px;
   animation: welcomeAnimation 5s cubic-bezier(0.42, 0, 0, 1.01) 1s 1;
-  transition: all cubic-bezier(0.42, 0, 0, 1.01) .3s;
+  transition: all cubic-bezier(0.42, 0, 0, 1.01) 0.3s;
 }
 
 @keyframes welcomeAnimation {
@@ -128,4 +128,31 @@ code {
 
 .mantine-Button-root:hover .animated-welcome {
   width: 100px;
+}
+
+.rte-checkboxes {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.rte-checkboxes li {
+  list-style: none;
+}
+
+.rte-checkboxes ul li {
+  margin-top: 0 !important;
+  display: flex;
+}
+
+.rte-checkboxes li div {
+  display: inline-block;
+  margin-left: 10px;
+}
+
+.rte-checkboxes li[data-checked=true] {
+  text-decoration: line-through;
+}
+
+.rte-checkboxes li div p {
+  margin-bottom: 0;
 }

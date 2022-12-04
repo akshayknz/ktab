@@ -1,4 +1,12 @@
-import { Ref, RefObject, useContext, useEffect, useRef, useState } from "react";
+import {
+  Ref,
+  RefObject,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   Box,
   Button,
@@ -18,13 +26,14 @@ import {
   Skeleton,
   Loader,
   Badge,
+  ActionIcon,
 } from "@mantine/core";
-import { Editor, RichTextEditor } from "@mantine/rte";
+import { Editor } from "@mantine/rte";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../data/firebaseConfig";
 import { AuthContext } from "../data/contexts/AuthContext";
 import { FiCopy, FiMaximize2, FiMinimize2 } from "react-icons/fi";
-import { BsGear } from "react-icons/bs";
+import { BsCodeSquare, BsGear } from "react-icons/bs";
 import { VscChromeClose } from "react-icons/vsc";
 import { ItemType } from "../data/constants";
 import { useTheme } from "@emotion/react";
@@ -38,11 +47,44 @@ import { useForm } from "@mantine/form";
 import { useDebouncedValue } from "@mantine/hooks";
 import useViewport from "../data/useViewport";
 import { RootState } from "../data/contexts/redux/configureStore";
+import { RichTextEditor, Link } from "@mantine/tiptap";
+import { useEditor } from "@tiptap/react";
+import Highlight from "@tiptap/extension-highlight";
+import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
+import TextAlign from "@tiptap/extension-text-align";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import { lowlight } from "lowlight";
+import tsLanguageSyntax from "highlight.js/lib/languages/typescript";
+import jsLanguageSyntax from "highlight.js/lib/languages/javascript";
+import xmlLanguageSyntax from "highlight.js/lib/languages/xml";
+import phpLanguageSyntax from "highlight.js/lib/languages/php";
+import Document from "@tiptap/extension-document";
+import Dropcursor from "@tiptap/extension-dropcursor";
+import Image from "@tiptap/extension-image";
+import Paragraph from "@tiptap/extension-paragraph";
+import { Text as Text2 } from "@tiptap/extension-text";
+import {
+  BiCheckboxChecked,
+  BiCodeAlt,
+  BiCodeCurly,
+  BiImageAdd,
+  BiImageAlt,
+} from "react-icons/bi";
+import CharacterCount from "@tiptap/extension-character-count";
+import TaskItem from "@tiptap/extension-task-item";
+import TaskList from "@tiptap/extension-task-list";
+import { IoImagesOutline } from "react-icons/io5";
+import { MdOutlineCheckBox } from "react-icons/md";
+import { RiCheckboxLine } from "react-icons/ri";
 interface Props {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   data: ItemProps;
 }
+lowlight.registerLanguage("js", jsLanguageSyntax);
+lowlight.registerLanguage("html", xmlLanguageSyntax);
+lowlight.registerLanguage("php", phpLanguageSyntax);
 export default function ItemModal({ open, setOpen, data }: Props) {
   const dispatch = useDispatch();
   const user = useContext(AuthContext);
@@ -53,10 +95,63 @@ export default function ItemModal({ open, setOpen, data }: Props) {
   const [settings, setSettings] = useState(false);
   const [link, setLink] = useState("");
   const [debouncedLink] = useDebouncedValue(link, 500);
-  const [value, onChange] = useState(data?.content);
+  const [content, onChange] = useState<any>(data?.content);
   const editorRef = useRef<Editor>();
   const { syncing } = useSelector((state: RootState) => state.actions);
-
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Underline,
+      Link,
+      Highlight,
+      Document,
+      Paragraph,
+      Text2,
+      Image,
+      Dropcursor,
+      CharacterCount,
+      CodeBlockLowlight.configure({
+        lowlight,
+      }),
+      TaskItem.configure({
+        nested: true,
+      }),
+      TaskList.configure({
+        HTMLAttributes: {
+          class: "rte-checkboxes",
+        },
+      }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+    ],
+    content,
+  });
+  const addImage = useCallback(async () => {
+    let item_list = await navigator.clipboard.read();
+    let image_type = "";
+    const item = item_list.find((item) =>
+      item.types.some((type) => {
+        if (type.startsWith("image/")) {
+          image_type = type;
+          return true;
+        }
+      })
+    );
+    const file = item && (await item.getType(image_type));
+    console.log(file);
+    if (file) {
+      var reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onloadend = function () {
+        let base64data = reader.result;
+        editor
+          ?.chain()
+          .focus()
+          .setImage({ src: (base64data ? base64data : "") as string })
+          .run();
+        console.log(base64data);
+      };
+    }
+  }, [editor]);
   useEffect(() => {
     editorRef.current?.focus();
   }, [editorRef.current]);
@@ -105,6 +200,8 @@ export default function ItemModal({ open, setOpen, data }: Props) {
     setLink(event.currentTarget.value);
   }
   async function handleSubmit() {
+    console.log(editor?.getJSON);
+
     dispatch(setSyncing({ state: true }));
     await updateDoc(
       doc(
@@ -115,7 +212,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
         data?.id
       ),
       {
-        content: value ? value : "",
+        content: editor?.getJSON(),
         name: inputRef.current?.value,
         order: settingsForm.values.order,
         type: settingsForm.values.type,
@@ -166,15 +263,16 @@ export default function ItemModal({ open, setOpen, data }: Props) {
       }
     );
   }
+
   return (
     <Modal
       size={minimize ? "100%" : "70%"}
-      fullScreen={vp.tab}
+      fullScreen={vp.tab || minimize}
       opened={open}
       onClose={handleClose}
       withCloseButton={false}
     >
-      <SimpleGrid verticalSpacing={20} pb={20}>
+      <SimpleGrid verticalSpacing={20} pb={20} pt={minimize ? 30 : 0}>
         <Grid align="center">
           <Grid.Col sm={7} md={8}>
             <TextInput
@@ -340,14 +438,81 @@ export default function ItemModal({ open, setOpen, data }: Props) {
           </Box>
         )} */}
         {settingsForm.values.type == ItemType.TEXT && (
-          <RichTextEditor
-            stickyOffset={"-48px"}
-            value={value}
-            onChange={onChange}
-            ref={editorRef as Ref<Editor>}
-            style={{ minHeight: "40vh" }}
-          />
+          <>
+            <RichTextEditor
+              editor={editor}
+              onChange={onChange}
+              ref={editorRef as Ref<Editor>}
+              style={{ minHeight: "40vh" }}
+            >
+              <RichTextEditor.Toolbar sticky stickyOffset={minimize ? 15 : -14}>
+                <RichTextEditor.ControlsGroup>
+                  <RichTextEditor.Bold />
+                  {!vp.tab && <RichTextEditor.Italic />}
+                  <RichTextEditor.Underline />
+                  {!vp.tab && <RichTextEditor.Strikethrough />}
+                  <RichTextEditor.ClearFormatting />
+                  {!vp.tab && <RichTextEditor.Highlight />}
+                  {!vp.tab && (
+                    <RichTextEditor.Code
+                      icon={() => <BiCodeCurly size={13} />}
+                    />
+                  )}
+                  <RichTextEditor.CodeBlock />
+                  <RichTextEditor.Control
+                    onClick={() =>
+                      editor?.chain().focus().toggleTaskList().run()
+                    }
+                    className={editor?.isActive("taskList") ? "is-active" : ""}
+                  >
+                    <RiCheckboxLine size="14" opacity={0.8} />
+                  </RichTextEditor.Control>
+                  <RichTextEditor.Control
+                    onClick={addImage}
+                    aria-label="Paste image"
+                    title="Paste image"
+                  >
+                    <BiImageAlt size="14" opacity={0.8} />
+                  </RichTextEditor.Control>
+                </RichTextEditor.ControlsGroup>
+                {!vp.tab && (
+                  <RichTextEditor.ControlsGroup>
+                    <RichTextEditor.H1 />
+                    <RichTextEditor.H2 />
+                    <RichTextEditor.H3 />
+                    <RichTextEditor.H4 />
+                  </RichTextEditor.ControlsGroup>
+                )}
+                <RichTextEditor.ControlsGroup>
+                  {!vp.tab && <RichTextEditor.Blockquote />}
+                  {!vp.tab && <RichTextEditor.Hr />}
+                  <RichTextEditor.BulletList />
+                  {!vp.tab && <RichTextEditor.OrderedList />}
+                  {!vp.tab && <RichTextEditor.Subscript />}
+                  {!vp.tab && <RichTextEditor.Superscript />}
+                </RichTextEditor.ControlsGroup>
+                <RichTextEditor.ControlsGroup>
+                  <RichTextEditor.Link />
+                  <RichTextEditor.Unlink />
+                </RichTextEditor.ControlsGroup>
+                {!vp.tab && (
+                  <RichTextEditor.ControlsGroup>
+                    <RichTextEditor.AlignLeft />
+                    <RichTextEditor.AlignCenter />
+                    <RichTextEditor.AlignJustify />
+                    <RichTextEditor.AlignRight />
+                  </RichTextEditor.ControlsGroup>
+                )}
+              </RichTextEditor.Toolbar>
+              <RichTextEditor.Content />
+            </RichTextEditor>
+            <Text color="dark">
+              {editor?.storage.characterCount.words()} words,{" "}
+              {editor?.storage.characterCount.characters()} characters
+            </Text>
+          </>
         )}
+
         {settingsForm.values.type == ItemType.LINK && (
           <Grid align="center" grow>
             <Grid.Col
