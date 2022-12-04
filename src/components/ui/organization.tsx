@@ -58,6 +58,7 @@ import React, {
   useContext,
   MutableRefObject,
   useMemo,
+  Suspense,
 } from "react";
 import {
   MdContentPaste,
@@ -73,7 +74,6 @@ import {
   IoFilterSharp,
 } from "react-icons/io5";
 import { FiEdit3, FiFilter, FiMaximize2, FiMinimize2 } from "react-icons/fi";
-import ItemModal from "./ItemModal";
 import {
   onSnapshot,
   collection,
@@ -115,6 +115,7 @@ import { RootState } from "../data/contexts/redux/configureStore";
 import { ItemType, ViewMarginsType, ViewWidthType } from "../data/constants";
 import { BsEye, BsFilterCircle } from "react-icons/bs";
 import useViewport from "../data/useViewport";
+const ItemModal = React.lazy(() => import("./ItemModal"));
 
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
 const useStyles = createStyles((theme) => ({
@@ -246,16 +247,11 @@ function Organization({ organization }: OrganizationComponentProps) {
     }
   }, [dragStarted]);
   useEffect(() => {
-    if(userId=="") return;
+    if (userId == "") return;
     //Get collections and items of this organization
     const unsub1 = onSnapshot(
       query(
-        collection(
-          db,
-          "ktab-manager",
-          userId,
-          "collections"
-        ),
+        collection(db, "ktab-manager", userId, "collections"),
         where("parent", "==", organization.id),
         where("isDeleted", "==", 0)
       ),
@@ -266,7 +262,7 @@ function Organization({ organization }: OrganizationComponentProps) {
         setCollections(re);
       }
     );
-    
+
     const unsub2 = onSnapshot(
       query(
         collection(db, "ktab-manager", userId, "items"),
@@ -279,7 +275,7 @@ function Organization({ organization }: OrganizationComponentProps) {
           return docsToItems(doc);
         });
         setItemss(re2);
-        setTimeout(()=>setLodaingItems(false),500)
+        setTimeout(() => setLodaingItems(false), 500);
       }
     );
   }, [userId]);
@@ -1076,6 +1072,7 @@ const ContainerItem = ({
   setGlobalMinifyContainers,
   children,
 }: ContainerComponentProps) => {
+  const vp = useViewport();
   const {
     setNodeRef,
     attributes,
@@ -1085,14 +1082,13 @@ const ContainerItem = ({
     transition,
     transform,
     isDragging,
-  } = useSortable({ id: name });
+  } = useSortable({ id: name, disabled: vp.mob ? true : false });
   const dispatch = useDispatch();
   const { classes, cx } = useStyles();
   const [edit, setEdit] = useState(false);
   const [minimize, setMinimize] = useState(data.minimized);
   const [trashPopover, setTrashPopover] = useState(false);
   const trashboxRef = useClickOutside(() => setTrashPopover(false));
-  const vp = useViewport();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -1337,6 +1333,7 @@ const ContainerItem = ({
 };
 
 const SortableItem = ({ name, id, data }: SortableItemProps) => {
+  const vp = useViewport();
   const {
     setNodeRef,
     attributes,
@@ -1344,12 +1341,11 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
     transition,
     transform,
     isDragging,
-  } = useSortable({ id: name });
+  } = useSortable({ id: name, disabled: vp.mob ? true : false });
   const theme = useMantineTheme();
   const { organizationColor, viewWidth, viewMargins } = useSelector(
     (state: RootState) => state.states
   );
-  const vp = useViewport();
   let width = vp.tab ? "100%" : "24.1%";
   let margin = "5px";
   switch (viewWidth) {
@@ -1542,7 +1538,9 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
         </Box>
       )}
       {itemOpened && (
-        <ItemModal open={itemOpened} setOpen={setItemOpened} data={data} />
+        <Suspense fallback={<></>}>
+          <ItemModal open={itemOpened} setOpen={setItemOpened} data={data} />
+        </Suspense>
       )}
     </>
   );

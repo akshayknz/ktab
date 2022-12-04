@@ -19,6 +19,7 @@ import { AiOutlineDelete } from "react-icons/ai";
 import { BiMessageAltAdd } from "react-icons/bi";
 import {
   SetStateAction,
+  Suspense,
   SyntheticEvent,
   useContext,
   useEffect,
@@ -52,10 +53,11 @@ import { useLocalStorage } from "@mantine/hooks";
 import { TimeInput } from "@mantine/dates";
 import useViewport from "../data/useViewport";
 import { useParams } from "react-router-dom";
-import ItemModal from "../ui/ItemModal";
 import { IoSunnyOutline } from "react-icons/io5";
 import { BsMoon } from "react-icons/bs";
 import { setUserId } from "../data/contexts/redux/actions";
+import React from "react";
+const ItemModal = React.lazy(() => import("../ui/ItemModal"));
 
 const HEADER_HEIGHT = 28;
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
@@ -203,7 +205,13 @@ function Home() {
   return (
     <>
       {itemOpened && (
-        <ItemModal open={itemOpened} setOpen={setItemOpened} data={itemData} />
+        <Suspense fallback={<></>}>
+          <ItemModal
+            open={itemOpened}
+            setOpen={setItemOpened}
+            data={itemData}
+          />
+        </Suspense>
       )}
       <Tabs
         radius="xs"
