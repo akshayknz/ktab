@@ -254,7 +254,7 @@ function Home() {
                 ? organizations?.map((organization) => (
                     <Tabs.Tab
                       key={organization.id ? organization.id+'tab' : "undefined"}
-                      value={organization.id ? organization.id+'tab' : "undefined"}
+                      value={organization.id ? organization.id : "undefined"}
                       icon={organization.icon}
                       onClick={unsetLocalStorageItems}
                       sx={{
@@ -294,7 +294,7 @@ function Home() {
         {organizations
           ? organizations?.map((organization) => (
               <Tabs.Panel
-                key={organization.id? organization.id:"undefined"}
+                key={organization.id? organization.id+'panel':"undefined"}
                 value={organization.id? organization.id:"undefined"}
               >
                 <Organization organization={organization} />
