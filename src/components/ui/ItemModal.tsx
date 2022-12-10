@@ -78,6 +78,7 @@ import TaskList from "@tiptap/extension-task-list";
 import { IoImagesOutline } from "react-icons/io5";
 import { MdOutlineCheckBox } from "react-icons/md";
 import { RiCheckboxLine } from "react-icons/ri";
+import { AiOutlineEdit, AiFillEdit } from "react-icons/ai";
 interface Props {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -100,6 +101,8 @@ export default function ItemModal({ open, setOpen, data }: Props) {
   const [content, onChange] = useState<any>(data?.content);
   const editorRef = useRef<Editor>();
   const { syncing } = useSelector((state: RootState) => state.actions);
+  const [editableVar, setEditable] = useState(false);
+  const [editTitle, setEditTitle] = useState(false);
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -126,7 +129,14 @@ export default function ItemModal({ open, setOpen, data }: Props) {
       TextAlign.configure({ types: ["heading", "paragraph"] }),
     ],
     content,
+    editable: editableVar,
   });
+  useEffect(() => {
+    if (!editor) {
+      return undefined;
+    }
+    editor.setEditable(editableVar);
+  }, [editor, editableVar]);
   const addImage = useCallback(async () => {
     let item_list = await navigator.clipboard.read();
     let image_type = "";
@@ -152,9 +162,6 @@ export default function ItemModal({ open, setOpen, data }: Props) {
       };
     }
   }, [editor]);
-  useEffect(() => {
-    editorRef.current?.focus();
-  }, [editorRef.current]);
   useEffect(() => {
     if (link) {
       fetch(`https://textance.herokuapp.com/title/${link}`, {
@@ -276,6 +283,8 @@ export default function ItemModal({ open, setOpen, data }: Props) {
           <Grid align="center">
             <Grid.Col span={vp.tab ? 12 : 8} order={vp.tab ? 2 : 1}>
               <TextInput
+                readOnly={!editTitle}
+                onClick={() => setEditTitle(true)}
                 ref={inputRef}
                 placeholder="Name"
                 variant="unstyled"
@@ -443,7 +452,6 @@ export default function ItemModal({ open, setOpen, data }: Props) {
             <RichTextEditor
               editor={editor}
               onChange={onChange}
-              ref={editorRef as Ref<Editor>}
               style={{
                 minHeight: "40vh",
               }}
@@ -459,6 +467,15 @@ export default function ItemModal({ open, setOpen, data }: Props) {
                 }}
               >
                 <RichTextEditor.ControlsGroup>
+                  <RichTextEditor.Control
+                    onClick={() => setEditable((prev) => !prev)}
+                  >
+                    {editableVar ? (
+                      <AiFillEdit size="14" opacity={0.8} />
+                    ) : (
+                      <AiOutlineEdit size="14" opacity={0.8} />
+                    )}
+                  </RichTextEditor.Control>
                   {!vp.tab && (
                     <>
                       <RichTextEditor.Bold />
