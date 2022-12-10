@@ -294,8 +294,8 @@ function Home() {
         {organizations
           ? organizations?.map((organization) => (
               <Tabs.Panel
-                key={organization.id ? organization.id : "undefined"}
-                value={organization.id ? organization.id : "undefined"}
+                key={Math.trunc(Math.random()*10000)}
+                value={organization.id? organization.id:"undefined"}
               >
                 <Organization organization={organization} />
               </Tabs.Panel>
@@ -304,7 +304,7 @@ function Home() {
       </Tabs>
       {organizations
         ? organizations?.map((organization) => (
-            <>
+            <Box key={Math.trunc(Math.random()*10000)}>
               {organization.id === "" && (
                 <Skeleton height={100}>
                   <Text
@@ -323,7 +323,7 @@ function Home() {
                   </Text>
                 </Skeleton>
               )}
-            </>
+            </Box>
           ))
         : null}
     </>

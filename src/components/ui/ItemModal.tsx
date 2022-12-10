@@ -476,65 +476,77 @@ export default function ItemModal({ open, setOpen, data }: Props) {
                       <AiOutlineEdit size="14" opacity={0.8} />
                     )}
                   </RichTextEditor.Control>
-                  {!vp.tab && (
-                    <>
-                      <RichTextEditor.Bold />
-                      <RichTextEditor.Italic />
-                      <RichTextEditor.Underline />
-                      <RichTextEditor.Strikethrough />
-                    </>
-                  )}
-                  <RichTextEditor.ClearFormatting />
-                  {!vp.tab && <RichTextEditor.Highlight />}
-                  {!vp.tab && (
-                    <RichTextEditor.Code
-                      icon={() => <BiCodeCurly size={13} />}
-                    />
-                  )}
-                  <RichTextEditor.CodeBlock />
-                  <RichTextEditor.Control
-                    onClick={() =>
-                      editor?.chain().focus().toggleTaskList().run()
-                    }
-                    className={editor?.isActive("taskList") ? "is-active" : ""}
-                  >
-                    <RiCheckboxLine size="14" opacity={0.8} />
-                  </RichTextEditor.Control>
-                  <RichTextEditor.Control
-                    onClick={addImage}
-                    aria-label="Paste image"
-                    title="Paste image"
-                  >
-                    <BiImageAlt size="14" opacity={0.8} />
-                  </RichTextEditor.Control>
                 </RichTextEditor.ControlsGroup>
-                {!vp.tab && (
-                  <RichTextEditor.ControlsGroup>
-                    <RichTextEditor.H1 />
-                    <RichTextEditor.H2 />
-                    <RichTextEditor.H3 />
-                    <RichTextEditor.H4 />
-                  </RichTextEditor.ControlsGroup>
-                )}
-                <RichTextEditor.ControlsGroup>
-                  {!vp.tab && <RichTextEditor.Blockquote />}
-                  {!vp.tab && <RichTextEditor.Hr />}
-                  <RichTextEditor.BulletList />
-                  {!vp.tab && <RichTextEditor.OrderedList />}
-                  {!vp.tab && <RichTextEditor.Subscript />}
-                  {!vp.tab && <RichTextEditor.Superscript />}
-                </RichTextEditor.ControlsGroup>
-                <RichTextEditor.ControlsGroup>
-                  <RichTextEditor.Link />
-                  <RichTextEditor.Unlink />
-                </RichTextEditor.ControlsGroup>
-                {!vp.tab && (
-                  <RichTextEditor.ControlsGroup>
-                    <RichTextEditor.AlignLeft />
-                    <RichTextEditor.AlignCenter />
-                    <RichTextEditor.AlignJustify />
-                    <RichTextEditor.AlignRight />
-                  </RichTextEditor.ControlsGroup>
+                {editableVar && (
+                  <>
+                    <RichTextEditor.ControlsGroup>
+                      {!vp.tab && (
+                        <>
+                          <RichTextEditor.Bold />
+                          <RichTextEditor.Italic />
+                          <RichTextEditor.Underline />
+                          <RichTextEditor.Strikethrough />
+                        </>
+                      )}
+                      <RichTextEditor.ClearFormatting />
+                      {!vp.tab && <RichTextEditor.Highlight />}
+                      {!vp.tab && (
+                        <RichTextEditor.Code
+                          icon={() => <BiCodeCurly size={13} />}
+                        />
+                      )}
+                      <RichTextEditor.CodeBlock />
+                      <RichTextEditor.Control
+                        onClick={() =>
+                          editor?.chain().focus().toggleTaskList().run()
+                        }
+                        className={
+                          editor?.isActive("taskList") ? "is-active" : ""
+                        }
+                      >
+                        <RiCheckboxLine size="14" opacity={0.8} />
+                      </RichTextEditor.Control>
+                      <RichTextEditor.Control
+                        onClick={addImage}
+                        aria-label="Paste image"
+                        title="Paste image"
+                      >
+                        <BiImageAlt size="14" opacity={0.8} />
+                      </RichTextEditor.Control>
+                    </RichTextEditor.ControlsGroup>
+
+                    <RichTextEditor.ControlsGroup>
+                      <RichTextEditor.H1 />
+                      <RichTextEditor.H2 />
+                      {!vp.tab && (
+                        <>
+                          <RichTextEditor.H3 />
+                          <RichTextEditor.H4 />
+                        </>
+                      )}
+                    </RichTextEditor.ControlsGroup>
+
+                    <RichTextEditor.ControlsGroup>
+                      {!vp.tab && <RichTextEditor.Blockquote />}
+                      {!vp.tab && <RichTextEditor.Hr />}
+                      <RichTextEditor.BulletList />
+                      {!vp.tab && <RichTextEditor.OrderedList />}
+                      {!vp.tab && <RichTextEditor.Subscript />}
+                      {!vp.tab && <RichTextEditor.Superscript />}
+                    </RichTextEditor.ControlsGroup>
+                    <RichTextEditor.ControlsGroup>
+                      <RichTextEditor.Link />
+                      <RichTextEditor.Unlink />
+                    </RichTextEditor.ControlsGroup>
+                    {!vp.tab && (
+                      <RichTextEditor.ControlsGroup>
+                        <RichTextEditor.AlignLeft />
+                        <RichTextEditor.AlignCenter />
+                        <RichTextEditor.AlignJustify />
+                        <RichTextEditor.AlignRight />
+                      </RichTextEditor.ControlsGroup>
+                    )}
+                  </>
                 )}
               </RichTextEditor.Toolbar>
               <RichTextEditor.Content />
