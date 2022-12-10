@@ -57,7 +57,6 @@ export default function LoginModal({ open }: Props) {
     const provider = new GoogleAuthProvider();
     try {
       auth.signInWithPopup(provider).then((result) => {
-        console.log(result);
         dispatch(toggleLoginModal());
       });
     } catch (error) {}

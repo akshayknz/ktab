@@ -16,8 +16,12 @@ import { AuthContext } from "./components/data/contexts/AuthContext";
 import { setUserId } from "./components/data/contexts/redux/actions";
 import { BrowserRouter, Route, Routes, useRoutes } from "react-router-dom";
 import { DeepPartial } from "@reduxjs/toolkit";
+import { useLocalStorage } from "@mantine/hooks";
 function App() {
-  const [colorScheme, setColorScheme] = useState<ColorScheme>("dark");
+  const [colorScheme, setColorScheme] = useLocalStorage<ColorScheme>({
+    key: "colorScheme",
+    defaultValue: "dark",
+  });
   const toggleColorScheme = (value?: ColorScheme) =>
     setColorScheme(value || (colorScheme === "dark" ? "light" : "dark"));
   return (

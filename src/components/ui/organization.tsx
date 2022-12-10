@@ -100,6 +100,7 @@ import {
   useClickOutside,
   useColorScheme,
   useDebouncedValue,
+  useLocalStorage,
 } from "@mantine/hooks";
 import {
   minimizeCollections,
@@ -188,17 +189,26 @@ function Organization({ organization }: OrganizationComponentProps) {
    * My states: collections,itemss
    * States from DnD kit: containers, items
    */
-  const [collections, setCollections] = useState<CollectionProps[]>([
-    {},
-  ] as CollectionProps[]);
-  const [itemss, setItemss] = useState<ItemProps[]>();
-  const [allItems, setAllItems] = useState<any>();
-  const [items, setItems] = useState<Items>({
-    // Loading: createRange(0, (index) => `Loading...${index + 1}`),
+  const [collections, setCollections] = useLocalStorage<CollectionProps[]>({
+    key: "collections",
+    defaultValue: [{}] as CollectionProps[],
   });
-  const [containers, setContainers] = useState(
-    Object.keys(items) as UniqueIdentifier[]
-  );
+  const [itemss, setItemss] = useLocalStorage<ItemProps[]>({
+    key: "itemss",
+    defaultValue: [],
+  });
+  const [allItems, setAllItems] = useLocalStorage<any>({
+    key: "allItems",
+    defaultValue: {},
+  });
+  const [items, setItems] = useLocalStorage<Items>({
+    key: "items",
+    defaultValue: {},
+  });
+  const [containers, setContainers] = useLocalStorage({
+    key: "containers",
+    defaultValue: Object.keys(items) as UniqueIdentifier[],
+  });
   const minimized = useMemo(
     () => collections.filter((e) => e.minimized === true),
     [collections]
@@ -280,15 +290,22 @@ function Organization({ organization }: OrganizationComponentProps) {
     );
   }, [userId]);
   useEffect(() => {
+    if (localStorage.getItem("allItems")) {
+      setTimeout(() => setLodaingItems(false), 10);
+    }
+  }, []);
+  useEffect(() => {
     //set collecitons and items for render
     const getItems = (key: UniqueIdentifier) => {
       let result = itemss?.filter((e) => e.parent == key);
       if (filterText) {
         let re = new RegExp(filterText.toLowerCase(), "g");
-        result = result?.filter(
-          (s) =>
-            s.name.toLowerCase().match(re) || s.content?.toLowerCase().match(re)
-        );
+        result = result?.filter((s) => {
+          if (s.name?.toLowerCase().match(re)) return true;
+          if (s.content) {
+            return JSON.stringify(s.content).toLowerCase().match(re);
+          }
+        });
       }
       if (filterType != "all") {
         result = result?.filter((s) => s.type?.toLowerCase() == filterType);
@@ -302,12 +319,12 @@ function Organization({ organization }: OrganizationComponentProps) {
       let cont = collections
         ?.sort((a, b) => (a.order > b.order ? 1 : -1))
         .map((e) => e.id);
-      setContainers(cont);
+      if (itemss.length > 0) setContainers(cont);
 
       let ob = collections.reduce((prev, key) => {
         return Object.assign(prev, { [key.id]: getItems(key.id) });
       }, {});
-      setItems(ob);
+      if (itemss.length > 0) setItems(ob);
       const itemsi = Object.assign(
         collections.reduce((prev, curr) => {
           return Object.assign(prev, { [curr.id]: curr });
@@ -316,7 +333,7 @@ function Organization({ organization }: OrganizationComponentProps) {
           return Object.assign(prev, { [curr.id]: curr });
         }, {})
       );
-      setAllItems(itemsi);
+      if (itemss.length > 0) setAllItems(itemsi);
     }
   }, [collections, itemss, filterText, filterType]);
   const docsToCollections = (doc: DocumentData) => {
@@ -606,6 +623,7 @@ function Organization({ organization }: OrganizationComponentProps) {
             >
               Add New Collection
             </Button>
+
             <Popover
               closeOnClickOutside
               transition="skew-up"
@@ -679,113 +697,118 @@ function Organization({ organization }: OrganizationComponentProps) {
                 </Box>
               </Popover.Dropdown>
             </Popover>
-            <Popover
-              closeOnClickOutside
-              transition="skew-up"
-              withArrow
-              withRoles
-              trapFocus
-              position="bottom"
-              opened={viewPopover}
-            >
-              <Popover.Target>
-                <Button
-                  variant="light"
-                  style={{
-                    color:
-                      colorScheme === "light"
-                        ? theme.colors["black-alpha"][7]
-                        : getContrastColor(organizationColor),
-                  }}
-                  compact
-                  mx={4}
-                  onClick={() => setViewPopover((prev) => !prev)}
-                  leftIcon={<AiOutlineEye />}
+            {!vp.tab && (
+              <>
+                <Popover
+                  closeOnClickOutside
+                  transition="skew-up"
+                  withArrow
+                  withRoles
+                  trapFocus
+                  position="bottom"
+                  opened={viewPopover}
                 >
-                  View
-                </Button>
-              </Popover.Target>
-              <Popover.Dropdown>
-                <Box ref={colorboxRef}>
-                  <Text weight={500} sx={{ fontSize: 14 }} pb={5}>
-                    Width
-                  </Text>
-                  <SegmentedControl
-                    size="xs"
-                    fullWidth
-                    mb={10}
-                    data={[
-                      { label: "Default", value: ViewWidthType.DEFAULT },
-                      { label: "Compact", value: ViewWidthType.COMPACT },
-                      { label: "Flow", value: ViewWidthType.FLOW },
-                    ]}
-                    value={viewWidth}
-                    onChange={(v) => dispatch(setViewWidth(v))}
-                  />
-                  <Text weight={500} sx={{ fontSize: 14 }} pb={5}>
-                    Margins
-                  </Text>
-                  <SegmentedControl
-                    size="xs"
-                    fullWidth
-                    mb={10}
-                    data={[
-                      { label: "Default", value: ViewMarginsType.DEFAULT },
-                      { label: "Compact", value: ViewMarginsType.COMPACT },
-                    ]}
-                    value={viewMargins}
-                    onChange={(v) => dispatch(setViewMargins(v))}
-                  />
-                </Box>
-              </Popover.Dropdown>
-            </Popover>
-            {minimized.length === collections.length ? (
-              <Button
-                variant="light"
-                style={{
-                  color:
-                    colorScheme === "light"
-                      ? theme.colors["black-alpha"][7]
-                      : getContrastColor(organizationColor),
-                }}
-                compact
-                mx={4}
-                leftIcon={<FiMaximize2 />}
-                onClick={() => {
-                  dispatch(
-                    minimizeCollections({
-                      ids: collections.map((e) => e.id),
-                      state: false,
-                    })
-                  );
-                }}
-              >
-                Maximize
-              </Button>
-            ) : (
-              <Button
-                variant="light"
-                style={{
-                  color:
-                    colorScheme === "light"
-                      ? theme.colors["black-alpha"][7]
-                      : getContrastColor(organizationColor),
-                }}
-                compact
-                mx={4}
-                leftIcon={<FiMinimize2 />}
-                onClick={() => {
-                  dispatch(
-                    minimizeCollections({
-                      ids: collections.map((e) => e.id),
-                      state: true,
-                    })
-                  );
-                }}
-              >
-                Minimize
-              </Button>
+                  <Popover.Target>
+                    <Button
+                      variant="light"
+                      style={{
+                        color:
+                          colorScheme === "light"
+                            ? theme.colors["black-alpha"][7]
+                            : getContrastColor(organizationColor),
+                      }}
+                      compact
+                      mx={4}
+                      onClick={() => setViewPopover((prev) => !prev)}
+                      leftIcon={<AiOutlineEye />}
+                    >
+                      View
+                    </Button>
+                  </Popover.Target>
+                  <Popover.Dropdown>
+                    <Box ref={colorboxRef}>
+                      <Text weight={500} sx={{ fontSize: 14 }} pb={5}>
+                        Width
+                      </Text>
+                      <SegmentedControl
+                        size="xs"
+                        fullWidth
+                        mb={10}
+                        data={[
+                          { label: "Default", value: ViewWidthType.DEFAULT },
+                          { label: "Compact", value: ViewWidthType.COMPACT },
+                          { label: "Flow", value: ViewWidthType.FLOW },
+                        ]}
+                        value={viewWidth}
+                        onChange={(v) => dispatch(setViewWidth(v))}
+                      />
+                      <Text weight={500} sx={{ fontSize: 14 }} pb={5}>
+                        Margins
+                      </Text>
+                      <SegmentedControl
+                        size="xs"
+                        fullWidth
+                        mb={10}
+                        data={[
+                          { label: "Default", value: ViewMarginsType.DEFAULT },
+                          { label: "Compact", value: ViewMarginsType.COMPACT },
+                        ]}
+                        value={viewMargins}
+                        onChange={(v) => dispatch(setViewMargins(v))}
+                      />
+                    </Box>
+                  </Popover.Dropdown>
+                </Popover>
+                {minimized.length === collections.length ? (
+                  <Button
+                    variant="light"
+                    style={{
+                      color:
+                        colorScheme === "light"
+                          ? theme.colors["black-alpha"][7]
+                          : getContrastColor(organizationColor),
+                    }}
+                    compact
+                    mx={4}
+                    leftIcon={<FiMaximize2 />}
+                    onClick={() => {
+                      dispatch(
+                        minimizeCollections({
+                          ids: collections.map((e) => e.id),
+                          state: false,
+                        })
+                      );
+                    }}
+                  >
+                    Maximize
+                  </Button>
+                ) : (
+                  <Button
+                    variant="light"
+                    style={{
+                      color:
+                        colorScheme === "light"
+                          ? theme.colors["black-alpha"][7]
+                          : getContrastColor(organizationColor),
+                    }}
+                    compact
+                    mx={4}
+                    leftIcon={<FiMinimize2 />}
+                    onClick={() => {
+                      dispatch(
+                        minimizeCollections({
+                          ids: collections.map((e) => e.id),
+                          state: true,
+                        })
+                      );
+                    }}
+                  >
+                    Minimize
+                  </Button>
+                )}
+              </>
             )}
+
             <Popover
               closeOnClickOutside
               transition="pop"
@@ -1144,7 +1167,7 @@ const ContainerItem = ({
     >
       <Box sx={{ height: vp.tab ? "auto" : "50px" }}>
         <Grid>
-          <Grid.Col md={6} sm={12}>
+          <Grid.Col md={6} xs={6}>
             {edit ? (
               <Group>
                 <Input
@@ -1182,24 +1205,26 @@ const ContainerItem = ({
               </Group>
             )}
           </Grid.Col>
-          <Grid.Col md={6} sm={12}>
+          <Grid.Col md={6} xs={6}>
             <Group position="right">
               <Group
                 className={`${classes.buttonGroup} ${
                   isDragging && classes.buttonGroupDragging
                 }`}
               >
-                <Tooltip label="Edit title">
-                  <Button
-                    variant="light"
-                    color="dark"
-                    radius="md"
-                    size="xs"
-                    onClick={() => setEdit(true)}
-                  >
-                    <FiEdit3 />
-                  </Button>
-                </Tooltip>
+                {!vp.tab && (
+                  <Tooltip label="Edit title">
+                    <Button
+                      variant="light"
+                      color="dark"
+                      radius="md"
+                      size="xs"
+                      onClick={() => setEdit(true)}
+                    >
+                      <FiEdit3 />
+                    </Button>
+                  </Tooltip>
+                )}
                 <Tooltip label="Add new item">
                   <Button
                     variant="light"
@@ -1301,19 +1326,21 @@ const ContainerItem = ({
                   </Button>
                 </Tooltip>
               </Group>
-              <Tooltip label="Reorder collections">
-                <Button
-                  style={{ cursor: "grab" }}
-                  variant="light"
-                  color="dark"
-                  radius="md"
-                  size="xs"
-                  {...listeners}
-                  {...attributes}
-                >
-                  <MdDragIndicator />
-                </Button>
-              </Tooltip>
+              {!vp.tab && (
+                <Tooltip label="Reorder collections">
+                  <Button
+                    style={{ cursor: "grab" }}
+                    variant="light"
+                    color="dark"
+                    radius="md"
+                    size="xs"
+                    {...listeners}
+                    {...attributes}
+                  >
+                    <MdDragIndicator />
+                  </Button>
+                </Tooltip>
+              )}
             </Group>
           </Grid.Col>
         </Grid>
@@ -1373,7 +1400,7 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
     color:
       theme.colorScheme === "dark"
         ? theme.colors.gray[3]
-        : theme.colors.dark[3],
+        : theme.colors.dark[7],
     width: width,
     margin: margin,
     maxWidth: vp.tab ? "100%" : "24.1%",

@@ -206,71 +206,71 @@ export function Layout({ children }: DoubleHeaderProps) {
               <Menu.Item className={classes.submenuItem}>Refresh</Menu.Item>
             </Menu.Dropdown>
           </Menu>
-          
-            <Menu
-              shadow="md"
-              width={200}
-              offset={0}
-              position="bottom-start"
-              closeOnClickOutside={true}
-              clickOutsideEvents={["click"]}
-              transitionDuration={65}
-              transition={"rotate-right"}
-            >
-              <Menu.Target>
-                <Button
-                  variant="default"
-                  radius="xs"
-                  size="xs"
-                  compact
-                  className={cx(classes.vmiddle, classes.menuitem)}
-                >
-                  Preferences
-                </Button>
-              </Menu.Target>
-              <Menu.Dropdown>
-                <Menu.Item
-                  className={classes.submenuItem}
-                  onClick={() => {
-                    closeMenu();
-                    setSettingsModal((prevState) => !prevState);
-                    setPersonalizeModal(false);
-                  }}
-                >
-                  Settings
-                </Menu.Item>
-                <Menu.Item
-                  className={classes.submenuItem}
-                  onClick={() => {
-                    closeMenu();
-                    setAboutModal((prevState) => !prevState);
-                  }}
-                >
-                  About
-                </Menu.Item>
-                <Menu.Item
-                  className={classes.submenuItem}
-                  onClick={() => {
-                    closeMenu();
-                    setArchiveModal((prevState) => !prevState);
-                  }}
-                >
-                  Archive
-                </Menu.Item>
-                <Menu.Item
-                  className={classes.submenuItem}
-                  onClick={() => {
-                    closeMenu();
-                    setTrashModal((prevState) => !prevState);
-                  }}
-                >
-                  Trash
-                </Menu.Item>
-                <Menu.Item className={classes.submenuItem} onClick={signOut}>
-                  Log out
-                </Menu.Item>
-              </Menu.Dropdown>
-            </Menu>
+
+          <Menu
+            shadow="md"
+            width={200}
+            offset={0}
+            position="bottom-start"
+            closeOnClickOutside={true}
+            clickOutsideEvents={["click"]}
+            transitionDuration={65}
+            transition={"rotate-right"}
+          >
+            <Menu.Target>
+              <Button
+                variant="default"
+                radius="xs"
+                size="xs"
+                compact
+                className={cx(classes.vmiddle, classes.menuitem)}
+              >
+                Preferences
+              </Button>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item
+                className={classes.submenuItem}
+                onClick={() => {
+                  closeMenu();
+                  setSettingsModal((prevState) => !prevState);
+                  setPersonalizeModal(false);
+                }}
+              >
+                Settings
+              </Menu.Item>
+              <Menu.Item
+                className={classes.submenuItem}
+                onClick={() => {
+                  closeMenu();
+                  setAboutModal((prevState) => !prevState);
+                }}
+              >
+                About
+              </Menu.Item>
+              <Menu.Item
+                className={classes.submenuItem}
+                onClick={() => {
+                  closeMenu();
+                  setArchiveModal((prevState) => !prevState);
+                }}
+              >
+                Archive
+              </Menu.Item>
+              <Menu.Item
+                className={classes.submenuItem}
+                onClick={() => {
+                  closeMenu();
+                  setTrashModal((prevState) => !prevState);
+                }}
+              >
+                Trash
+              </Menu.Item>
+              <Menu.Item className={classes.submenuItem} onClick={signOut}>
+                Log out
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
           {vp.tab ? null : (
             <Button
               variant="default"
@@ -349,64 +349,66 @@ export function Layout({ children }: DoubleHeaderProps) {
                 value={filterType}
                 onChange={(value) => dispatch(setFilterType(value))}
               />
-              <SegmentedControl
-                value={colorScheme}
-                size="xs"
-                onChange={(value: "light" | "dark") => toggleColorScheme(value)}
-                data={[
-                  {
-                    value: "light",
-                    label: (
-                      <Center>
-                        <IoSunnyOutline size={14} />
-                        <Text style={{ fontSize: 10 }}></Text>
-                      </Center>
-                    ),
-                  },
-                  {
-                    value: "dark",
-                    label: (
-                      <Center>
-                        <BsMoon size={14} />
-                        <Text style={{ fontSize: 10 }}></Text>
-                      </Center>
-                    ),
-                  },
-                ]}
-              />
-
-              <Button
-                variant="default"
-                radius="xs"
-                size="xs"
-                compact
-                className={cx(classes.vmiddle, classes.menuitem)}
-                onClick={() => {
-                  if (user) {
-                    setSettingsModal((prevState) => !prevState);
-                    setPersonalizeModal(false);
-                  } else {
-                    dispatch(toggleLoginModal());
-                  }
-                }}
-              >
-                <Avatar
-                  size="sm"
-                  color="green"
-                  radius="md"
-                  src={user?.photoURL}
-                  mr={user ? 10 : 0}
-                  className={"animated-welcome-avatar"}
-                >
-                  <MdPersonOutline size={15} />
-                </Avatar>
-                {user ? (
-                  <Text className="animated-welcome">
-                    Welcome, {user?.displayName}
-                  </Text>
-                ) : null}
-              </Button>
             </>
+          )}
+          <SegmentedControl
+            value={colorScheme}
+            size="xs"
+            onChange={(value: "light" | "dark") => toggleColorScheme(value)}
+            data={[
+              {
+                value: "light",
+                label: (
+                  <Center>
+                    <IoSunnyOutline size={14} />
+                    <Text style={{ fontSize: 10 }}></Text>
+                  </Center>
+                ),
+              },
+              {
+                value: "dark",
+                label: (
+                  <Center>
+                    <BsMoon size={14} />
+                    <Text style={{ fontSize: 10 }}></Text>
+                  </Center>
+                ),
+              },
+            ]}
+          />
+
+          {vp.tab ? null : (
+            <Button
+              variant="default"
+              radius="xs"
+              size="xs"
+              compact
+              className={cx(classes.vmiddle, classes.menuitem)}
+              onClick={() => {
+                if (user) {
+                  setSettingsModal((prevState) => !prevState);
+                  setPersonalizeModal(false);
+                } else {
+                  dispatch(toggleLoginModal());
+                }
+              }}
+            >
+              <Avatar
+                size="sm"
+                color="green"
+                radius="md"
+                src={user?.photoURL}
+                mr={user ? 10 : 0}
+                className={"animated-welcome-avatar"}
+              >
+                <MdPersonOutline size={15} />
+              </Avatar>
+              {user ? (
+                <Text className="animated-welcome">
+                  Welcome, {user?.displayName}
+                </Text>
+              ) : null}
+            </Button>
           )}
           {/* {vp.tab ? null : (
             <Popover

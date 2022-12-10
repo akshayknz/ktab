@@ -137,11 +137,11 @@ code {
 
 .rte-checkboxes li {
   list-style: none;
+  display: flex;
 }
 
 .rte-checkboxes ul li {
   margin-top: 0 !important;
-  display: flex;
 }
 
 .rte-checkboxes li div {
@@ -149,10 +149,19 @@ code {
   margin-left: 10px;
 }
 
-.rte-checkboxes li[data-checked=true] {
+.rte-checkboxes li[data-checked="true"] {
   text-decoration: line-through;
 }
 
 .rte-checkboxes li div p {
   margin-bottom: 0;
+}
+
+.item-modal-tab .mantine-Modal-modal {
+  padding: 0;
+}
+
+.rte-no-x-border {
+  border-left: none;
+  border-right: none;
 }

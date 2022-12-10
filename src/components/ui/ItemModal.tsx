@@ -267,103 +267,106 @@ export default function ItemModal({ open, setOpen, data }: Props) {
       size={minimize ? "100%" : "70%"}
       fullScreen={vp.tab || minimize}
       opened={open}
+      className={vp.tab ? "item-modal-tab" : ""}
       onClose={handleClose}
       withCloseButton={false}
     >
       <SimpleGrid verticalSpacing={20} pb={20} pt={minimize || vp.tab ? 30 : 0}>
-        <Grid align="center">
-          <Grid.Col sm={7} md={8}>
-            <TextInput
-              ref={inputRef}
-              placeholder="Name"
-              variant="unstyled"
-              size="xl"
-              defaultValue={data?.name}
-            />
-          </Grid.Col>
-          <Grid.Col sm={5} md={4}>
-            <Box
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                alignItems: "center",
-              }}
-            >
-              {data.isShared && (
-                <Tooltip label="Shared item">
-                  <Badge radius="sm" mr={7}>
-                    Shared item
-                  </Badge>
-                </Tooltip>
-              )}
-              <Tooltip label="Share link">
-                <Button
-                  p={0}
-                  sx={{ width: "30px" }}
-                  mr={7}
-                  variant={"default"}
-                  radius="md"
-                  size="xs"
-                  onClick={copyShareLink}
-                >
-                  <FiCopy size={10} />
-                </Button>
-              </Tooltip>
-              <Tooltip label="Settings">
-                <Button
-                  p={0}
-                  sx={{ width: "30px" }}
-                  mr={7}
-                  variant={settings ? "outline" : "default"}
-                  radius="md"
-                  size="xs"
-                  onClick={() => setSettings((prev) => !prev)}
-                >
-                  <BsGear size={10} />
-                </Button>
-              </Tooltip>
-              {!vp.tab && (
-                <Tooltip label="Minimize this collection">
+        <Box p={vp.tab ? 20 : 0}>
+          <Grid align="center">
+            <Grid.Col span={vp.tab ? 12 : 8} order={vp.tab ? 2 : 1}>
+              <TextInput
+                ref={inputRef}
+                placeholder="Name"
+                variant="unstyled"
+                size="xl"
+                defaultValue={data?.name}
+              />
+            </Grid.Col>
+            <Grid.Col span={vp.tab ? 12 : 4} order={vp.tab ? 1 : 2}>
+              <Box
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                }}
+              >
+                {data.isShared && (
+                  <Tooltip label="Shared item">
+                    <Badge radius="sm" mr={7}>
+                      Shared item
+                    </Badge>
+                  </Tooltip>
+                )}
+                <Tooltip label="Share link">
                   <Button
                     p={0}
                     sx={{ width: "30px" }}
                     mr={7}
-                    variant="default"
+                    variant={"default"}
                     radius="md"
                     size="xs"
-                    onClick={() => setMinimize((prev) => !prev)}
+                    onClick={copyShareLink}
                   >
-                    {minimize ? (
-                      <FiMinimize2 size={10} />
-                    ) : (
-                      <FiMaximize2 size={10} />
-                    )}
+                    <FiCopy size={10} />
                   </Button>
                 </Tooltip>
-              )}
+                <Tooltip label="Settings">
+                  <Button
+                    p={0}
+                    sx={{ width: "30px" }}
+                    mr={7}
+                    variant={settings ? "outline" : "default"}
+                    radius="md"
+                    size="xs"
+                    onClick={() => setSettings((prev) => !prev)}
+                  >
+                    <BsGear size={10} />
+                  </Button>
+                </Tooltip>
+                {!vp.tab && (
+                  <Tooltip label="Minimize this collection">
+                    <Button
+                      p={0}
+                      sx={{ width: "30px" }}
+                      mr={7}
+                      variant="default"
+                      radius="md"
+                      size="xs"
+                      onClick={() => setMinimize((prev) => !prev)}
+                    >
+                      {minimize ? (
+                        <FiMinimize2 size={10} />
+                      ) : (
+                        <FiMaximize2 size={10} />
+                      )}
+                    </Button>
+                  </Tooltip>
+                )}
 
-              <Button
-                p={0}
-                sx={{ width: "30px" }}
-                mr={7}
-                variant="default"
-                radius="md"
-                size="xs"
-                onClick={handleCloseWithoutSave}
-              >
-                <VscChromeClose size={13} />
-              </Button>
-            </Box>
-          </Grid.Col>
-        </Grid>
+                <Button
+                  p={0}
+                  sx={{ width: "30px" }}
+                  mr={7}
+                  variant="default"
+                  radius="md"
+                  size="xs"
+                  onClick={handleCloseWithoutSave}
+                >
+                  <VscChromeClose size={13} />
+                </Button>
+              </Box>
+            </Grid.Col>
+          </Grid>
+        </Box>
         {copyLink && (
-          <>
+          <Box p={20}>
             <Input value={copyLink} ref={copyRef} />
-          </>
+          </Box>
         )}
         {settings && (
           <form>
-            <Grid align="center">
+            <Grid align="center" p={20}>
               <Grid.Col span={4}>
                 <Select
                   label="Item type"
@@ -441,11 +444,14 @@ export default function ItemModal({ open, setOpen, data }: Props) {
               editor={editor}
               onChange={onChange}
               ref={editorRef as Ref<Editor>}
-              style={{ minHeight: "40vh" }}
+              style={{
+                minHeight: "40vh",
+              }}
+              className={vp.tab ? "rte-no-x-border" : ""}
             >
               <RichTextEditor.Toolbar
                 sticky
-                stickyOffset={minimize || vp.tab ? 15 : -14}
+                stickyOffset={minimize || vp.tab ? 32 : -14}
                 style={{
                   background:
                     colorScheme === "light" ? "#ffffff10" : "#1a1b1e80",
@@ -516,7 +522,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
               </RichTextEditor.Toolbar>
               <RichTextEditor.Content />
             </RichTextEditor>
-            <Text color="grey" size={"xs"}>
+            <Text color="grey" size={"xs"} px={20}>
               {editor?.storage.characterCount.words()} words,{" "}
               {editor?.storage.characterCount.characters()} characters
             </Text>
@@ -549,7 +555,12 @@ export default function ItemModal({ open, setOpen, data }: Props) {
         {settingsForm.values.type == ItemType.REMINDER && (
           <code>under construction</code>
         )}
-        <Box style={{ display: "flex", justifyContent: "flex-end" }} mt={20}>
+        <Box
+          style={{ display: "flex", justifyContent: "flex-end" }}
+          mt={20}
+          px={vp.tab ? 20 : 0}
+          pb={vp.tab ? 30 : 0}
+        >
           <SimpleGrid cols={3}>
             <Button
               variant="subtle"

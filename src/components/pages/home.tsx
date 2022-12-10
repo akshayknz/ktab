@@ -202,6 +202,13 @@ function Home() {
       order: doc.data().order,
     };
   };
+  const unsetLocalStorageItems = () => {
+    localStorage.setItem('collections', '[{}]')
+    localStorage.setItem('itemss', '[]')
+    localStorage.setItem('allItems', '{}')
+    localStorage.setItem('items', '{}')
+    localStorage.setItem('containers', '[]')
+  }
   return (
     <>
       {itemOpened && (
@@ -249,6 +256,7 @@ function Home() {
                       key={organization.id ? organization.id : "undefined"}
                       value={organization.id ? organization.id : "undefined"}
                       icon={organization.icon}
+                      onClick={unsetLocalStorageItems}
                       sx={{
                         height: 28,
                         fontSize: "12px",
