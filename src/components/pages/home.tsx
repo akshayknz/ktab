@@ -253,8 +253,8 @@ function Home() {
               {organizations
                 ? organizations?.map((organization) => (
                     <Tabs.Tab
-                      key={organization.id ? organization.id : "undefined"}
-                      value={organization.id ? organization.id : "undefined"}
+                      key={organization.id ? organization.id+'tab' : "undefined"}
+                      value={organization.id ? organization.id+'tab' : "undefined"}
                       icon={organization.icon}
                       onClick={unsetLocalStorageItems}
                       sx={{
@@ -294,7 +294,7 @@ function Home() {
         {organizations
           ? organizations?.map((organization) => (
               <Tabs.Panel
-                key={Math.trunc(Math.random()*10000)}
+                key={organization.id? organization.id:"undefined"}
                 value={organization.id? organization.id:"undefined"}
               >
                 <Organization organization={organization} />
@@ -304,7 +304,7 @@ function Home() {
       </Tabs>
       {organizations
         ? organizations?.map((organization) => (
-            <Box key={Math.trunc(Math.random()*10000)}>
+            <>
               {organization.id === "" && (
                 <Skeleton height={100}>
                   <Text
@@ -323,7 +323,7 @@ function Home() {
                   </Text>
                 </Skeleton>
               )}
-            </Box>
+            </>
           ))
         : null}
     </>
