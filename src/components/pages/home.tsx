@@ -289,7 +289,7 @@ function Home() {
                 <Kbd style={{ fontSize: 9 }}>V</Kbd> to paste links
               </Text>
             </Box>
-          )}
+          )} 
         </Header>
         {organizations
           ? organizations?.map((organization) => (
