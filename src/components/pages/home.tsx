@@ -91,20 +91,9 @@ function Home() {
   const { activeOrganization } = useSelector(
     (state: RootState) => state.states
   );
-  const [organizations, setOrganizations] = useLocalStorage<
+  const [organizations, setOrganizations] = useState<
     OrganizationProps[]
-  >({
-    key: "organizations",
-    defaultValue: [
-      {
-        id: activeOrganization || "",
-        name: "",
-        icon: "",
-        color: "",
-        accent: "",
-      },
-    ],
-  });
+  >([]);
   const [activeTab, setActiveTab] = useState<string | null>("skeleton");
   const dispatch = useDispatch();
   const { userId } = useSelector((state: RootState) => state.actions);

@@ -189,26 +189,11 @@ function Organization({ organization }: OrganizationComponentProps) {
    * My states: collections,itemss
    * States from DnD kit: containers, items
    */
-  const [collections, setCollections] = useLocalStorage<CollectionProps[]>({
-    key: "collections",
-    defaultValue: [{}] as CollectionProps[],
-  });
-  const [itemss, setItemss] = useLocalStorage<ItemProps[]>({
-    key: "itemss",
-    defaultValue: [],
-  });
-  const [allItems, setAllItems] = useLocalStorage<any>({
-    key: "allItems",
-    defaultValue: {},
-  });
-  const [items, setItems] = useLocalStorage<Items>({
-    key: "items",
-    defaultValue: {},
-  });
-  const [containers, setContainers] = useLocalStorage({
-    key: "containers",
-    defaultValue: Object.keys(items) as UniqueIdentifier[],
-  });
+  const [collections, setCollections] = useState<CollectionProps[]>([{}] as CollectionProps[]);
+  const [itemss, setItemss] = useState<ItemProps[]>([]);
+  const [allItems, setAllItems] = useState<any>({});
+  const [items, setItems] = useState<Items>({});
+  const [containers, setContainers] = useState(Object.keys(items) as UniqueIdentifier[]);
   const minimized = useMemo(
     () => collections.filter((e) => e.minimized === true),
     [collections]

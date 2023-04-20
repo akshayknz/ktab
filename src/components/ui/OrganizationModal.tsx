@@ -200,6 +200,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
     setLoading("collection");
     dispatch(toggleOrganizationModal(organizationOrCollection));
     const upload = async () => {
+      let docId = ""
       await addDoc(
         collection(
           db,
@@ -218,11 +219,19 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
           updatedAt: +new Date(),
           createdAt: +new Date(),
         }
-      );
+      ).then(docRef=>docId=docRef.id);
+      return docId
     };
-    upload().then(() => {
+    upload().then((docRef) => {
       setLoading("");
       collectionForm.reset();
+      handleSubmitItem({
+        id: "_blank",
+        orgparent: values.parent,
+        parent: docRef,
+        name: "Notes",
+        color: "#000",
+      })
     });
   }
 
