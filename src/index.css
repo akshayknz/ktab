@@ -14,7 +14,7 @@ code {
 
 .sort-item {
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 5px;
   display: inline-block;
   transition: all 0.1s;
   overflow: hidden;
@@ -100,9 +100,6 @@ code {
   width: 0px;
 }
 
-.mantine-Tabs-tab {
-  opacity: 0.5;
-}
 
 .mantine-Tabs-tab[data-active="true"] {
   opacity: 1;
@@ -118,9 +115,11 @@ code {
   0% {
     width: 100px;
   }
+
   90% {
     width: 100px;
   }
+
   100% {
     width: 0px;
   }
@@ -164,4 +163,12 @@ code {
 .rte-no-x-border {
   border-left: none;
   border-right: none;
+}
+
+/* This sets the font size for item's rte*/
+.small-font-size-rte,
+.small-font-size-rte *,
+.small-font-size-rte h1 {
+  font-size: 12px !important;
+  background-color: transparent;
 }

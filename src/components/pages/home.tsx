@@ -57,8 +57,8 @@ import { IoSunnyOutline } from "react-icons/io5";
 import { BsMoon } from "react-icons/bs";
 import { setUserId } from "../data/contexts/redux/actions";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 const ItemModal = React.lazy(() => import("../ui/ItemModal"));
-
 const HEADER_HEIGHT = 28;
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
 interface OrganizationProps {
@@ -85,6 +85,7 @@ interface ItemProps {
 function Home() {
   const user = useContext(AuthContext);
   const theme = useMantineTheme();
+  const navigate = useNavigate();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const vp = useViewport();
   const { classes, cx } = useStyles();
@@ -134,9 +135,12 @@ function Home() {
       //...doc.data(),
     };
   };
-
+  const { userid, id, orgid } = useParams();
+  console.log(userid, id, orgid);
+  
   useEffect(() => {
     let temp = organizations.map((e) => e.id);
+    if(orgid) dispatch(setActiveOrganization( orgid ));
     if (
       (!activeOrganization || !temp.includes(activeOrganization)) &&
       organizations.length > 0
@@ -150,9 +154,10 @@ function Home() {
             : "guest"
         )
       );
+      
     }
+    
   }, [organizations?.length]);
-  const { userid, id } = useParams();
   const [itemOpened, setItemOpened] = useState(false);
   const [itemData, setItemData] = useState<any>();
   useEffect(() => {
@@ -191,12 +196,13 @@ function Home() {
       order: doc.data().order,
     };
   };
-  const unsetLocalStorageItems = () => {
+  const unsetLocalStorageItems = (id: string | undefined) => {
     localStorage.setItem('collections', '[{}]')
     localStorage.setItem('itemss', '[]')
     localStorage.setItem('allItems', '{}')
     localStorage.setItem('items', '{}')
     localStorage.setItem('containers', '[]')
+    navigate(`/org/${id}`)
   }
   return (
     <>
@@ -245,11 +251,11 @@ function Home() {
                       key={organization.id ? organization.id+'tab' : "undefined"}
                       value={organization.id ? organization.id : "undefined"}
                       icon={organization.icon}
-                      onClick={unsetLocalStorageItems}
+                      onClick={()=>{unsetLocalStorageItems(organization?.id)}}
                       sx={{
                         height: 28,
                         fontSize: "12px",
-                        background: `linear-gradient(transparent,${organization.color} 170%)`,
+                        background: `linear-gradient(transparent,${organization.color} 160%)`,
                       }}
                     >
                       {organization.name}

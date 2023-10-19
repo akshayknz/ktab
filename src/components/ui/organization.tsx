@@ -66,8 +66,8 @@ import {
   MdOutlineAdd,
   MdOutlineStickyNote2,
 } from "react-icons/md";
-import { AiOutlineDelete, AiOutlineEye } from "react-icons/ai";
-import { BiMessageAltAdd } from "react-icons/bi";
+import { AiFillEdit, AiOutlineDelete, AiOutlineEdit, AiOutlineEye } from "react-icons/ai";
+import { BiCodeCurly, BiImageAlt, BiMessageAltAdd } from "react-icons/bi";
 import {
   IoColorFilterOutline,
   IoFilterOutline,
@@ -116,6 +116,29 @@ import { RootState } from "../data/contexts/redux/configureStore";
 import { ItemType, ViewMarginsType, ViewWidthType } from "../data/constants";
 import { BsEye, BsFilterCircle } from "react-icons/bs";
 import useViewport from "../data/useViewport";
+import { Editor } from "@mantine/rte";
+import { RichTextEditor } from "@mantine/tiptap";
+import CharacterCount from "@tiptap/extension-character-count";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import TaskItem from "@tiptap/extension-task-item";
+import TaskList from "@tiptap/extension-task-list";
+import TextAlign from "@tiptap/extension-text-align";
+import Underline from "@tiptap/extension-underline";
+import { useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import { lowlight } from "lowlight";
+import { Link } from "react-router-dom";
+import Paragraph from "@tiptap/extension-paragraph";
+import { Text as Text2 } from "@tiptap/extension-text";
+import Dropcursor from "@tiptap/extension-dropcursor";
+import Image from "@tiptap/extension-image";
+import Heading from "@tiptap/extension-heading";
+import Document from "@tiptap/extension-document";
+import Highlight from "@tiptap/extension-highlight";
+import { Link as Link2 } from "@mantine/tiptap";
+import { RiCheckboxLine } from "react-icons/ri";
+import { TextStyle } from "@tiptap/extension-text-style";
+
 const ItemModal = React.lazy(() => import("./ItemModal"));
 
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
@@ -237,7 +260,7 @@ function Organization({ organization }: OrganizationComponentProps) {
         false
       );
       return () => {
-        document?.removeEventListener("commit", () => {});
+        document?.removeEventListener("commit", () => { });
       };
     }
   }, [dragStarted]);
@@ -428,7 +451,7 @@ function Organization({ organization }: OrganizationComponentProps) {
             over &&
             active.rect.current.translated &&
             active.rect.current.translated.top >
-              over.rect.top + over.rect.height;
+            over.rect.top + over.rect.height;
 
           const modifier = isBelowOverItem ? 1 : 0;
 
@@ -470,7 +493,7 @@ function Organization({ organization }: OrganizationComponentProps) {
       const intersections =
         pointerIntersections.length > 0
           ? // If there are droppables intersecting with the pointer, return those
-            pointerIntersections
+          pointerIntersections
           : rectIntersection(args);
       let overId = getFirstCollision(intersections, "id");
 
@@ -571,14 +594,14 @@ function Organization({ organization }: OrganizationComponentProps) {
         size={"xl"}
         pt={20}
         pb={50}
-        px={"5%"}
+        px={vp.tab?"3%":"5%"}
         style={{
           cursor: cursor,
         }}
       >
         <Grid sx={{ width: "100%" }}>
           <Grid.Col md={6} sm={12}>
-            <Title color={getContrastColor(organizationColor)} weight={100}>
+            <Title color={getContrastColor(organizationColor)} weight={500}>
               {organization.name}
             </Title>
           </Grid.Col>
@@ -723,6 +746,7 @@ function Organization({ organization }: OrganizationComponentProps) {
                           { label: "Default", value: ViewWidthType.DEFAULT },
                           { label: "Compact", value: ViewWidthType.COMPACT },
                           { label: "Flow", value: ViewWidthType.FLOW },
+                          { label: "Expanded", value: ViewWidthType.EXPANDED },
                         ]}
                         value={viewWidth}
                         onChange={(v) => dispatch(setViewWidth(v))}
@@ -1008,7 +1032,7 @@ function Organization({ organization }: OrganizationComponentProps) {
                 data={allItems && allItems[containerId]}
                 classNames={
                   (filterText || filterType != "all") &&
-                  items[containerId].length === 0
+                    items[containerId].length === 0
                     ? "empty-container"
                     : ""
                 }
@@ -1102,10 +1126,10 @@ const ContainerItem = ({
     transform: CSS.Transform.toString(transform),
     transition,
     width: "100%",
-    marginBlock: "10px",
+    marginBlock: "20px",
     border: isDragging
-      ? "3px solid rgb(255 255 255 / 20%)"
-      : "3px solid rgb(255 255 255 / 0%)",
+      ? "3px solid rgb(0 0 0 / 20%)"
+      : "1px solid rgb(0 0 0 / 90%)",
     zIndex: isDragging ? "100" : "auto",
     opacity: isDragging ? 0.3 : 1,
     borderRadius: 8,
@@ -1146,8 +1170,8 @@ const ContainerItem = ({
             ? theme.colors["black-alpha"][3]
             : theme.colors["white-alpha"][3],
         padding: 4,
-        paddingTop: 9,
-        paddingInline: 30,
+        paddingTop: 13,
+        paddingInline: vp.tab ?10:20,
       })}
     >
       <Box sx={{ height: vp.tab ? "auto" : "50px" }}>
@@ -1181,6 +1205,7 @@ const ContainerItem = ({
                 <Text
                   onClick={() => setEdit(true)}
                   className={classes.titleInput}
+                  style={{fontWeight:400}}
                 >
                   {data?.name}
                 </Text>
@@ -1193,9 +1218,8 @@ const ContainerItem = ({
           <Grid.Col md={6} xs={6}>
             <Group position="right">
               <Group
-                className={`${classes.buttonGroup} ${
-                  isDragging && classes.buttonGroupDragging
-                }`}
+                className={`${classes.buttonGroup} ${isDragging && classes.buttonGroupDragging
+                  }`}
               >
                 {!vp.tab && (
                   <Tooltip label="Edit title">
@@ -1395,9 +1419,63 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
     event.preventDefault();
     setItemOpened((prev) => !prev);
   };
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [minimize, setMinimize] = useState(false);
+  const [settings, setSettings] = useState(false);
+  const [link, setLink] = useState("");
+  const [debouncedLink] = useDebouncedValue(link, 500);
+  const [content, onChange] = useState<any>(data?.content);
+  const editorRef = useRef<Editor>();
+  const { syncing } = useSelector((state: RootState) => state.actions);
+  const [editableVar, setEditable] = useState(true);
+  const [editTitle, setEditTitle] = useState(false);
+  const { colorScheme } = useMantineColorScheme();
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Underline,
+      Link2,
+      Highlight,
+      Heading.configure({
+        HTMLAttributes: {
+          class: "small-font-size-rte",
+        }
+      }),
+      Document,
+      Paragraph.configure({
+        HTMLAttributes: {
+          class: "small-font-size-rte",
+        }
+      }),
+      Text2,
+      Image,
+      Dropcursor,
+      CharacterCount,
+      CodeBlockLowlight.configure({
+        lowlight,
+      }),
+      TaskItem.configure({
+        nested: true,
+      }),
+      TaskList.configure({
+        HTMLAttributes: {
+          class: "rte-checkboxes",
+        },
+      }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+    ],
+    content,
+    editable: editableVar,
+  });
+  useEffect(() => {
+    if (!editor) {
+      return undefined;
+    }
+    editor.setEditable(editableVar);
+  }, [editor, editableVar]);
   return (
     <>
-      {data.type == ItemType.LINK && (
+      {data.type === ItemType.LINK && (
         <Box
           component="a"
           href={data.link ? data.link : "#"}
@@ -1410,8 +1488,8 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
           sx={(theme) => ({
             border:
               theme.colorScheme === "dark"
-                ? "2px solid " + theme.colors["white-alpha"][1]
-                : "2px solid " + theme.colors["black-alpha"][1],
+                ? "1px solid " + theme.colors["white-alpha"][1]
+                : "1px solid " + theme.colors["black-alpha"][1],
             backgroundColor:
               theme.colorScheme === "dark"
                 ? theme.colors["black-alpha"][3]
@@ -1486,68 +1564,85 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
           </Box>
         </Box>
       )}
-      {data.type != ItemType.LINK && (
-        <Box
-          ref={setNodeRef}
-          className={itemOpened ? "sort-item item-opened" : "sort-item"}
-          style={style}
-          {...listeners}
-          {...attributes}
-          onClick={openModal}
-          sx={(theme) => ({
-            border:
-              theme.colorScheme === "dark"
-                ? "2px solid " + theme.colors["white-alpha"][1]
-                : "2px solid " + theme.colors["black-alpha"][1],
-            backgroundColor:
-              theme.colorScheme === "dark" ? "#ffffff10" : "#00000010",
-          })}
-        >
+      {data.type === ItemType.TEXT && (
+        <>
           <Box
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
+            ref={setNodeRef}
+            className={itemOpened ? "sort-item item-opened" : "sort-item"}
+            style={style}
+            {...listeners}
+            {...attributes}
+            onClick={openModal}
+            sx={(theme) => ({
+              border:
+                theme.colorScheme === "dark"
+                  ? "1px solid " + theme.colors["white-alpha"][3]
+                  : "1px solid " + theme.colors["black-alpha"][3],
+              backgroundColor:
+                theme.colorScheme === "dark" ? "#ffffff10" : "#00000010",
+            })}
           >
             <Box
               style={{
                 display: "flex",
+                justifyContent: "space-between",
                 alignItems: "center",
-                width: "100%",
               }}
             >
               <Box
                 style={{
                   display: "flex",
-                  padding: "10px 0px 0 10px",
-                  paddingBlock: "0px",
+                  alignItems: "center",
+                  width: "100%",
                 }}
               >
-                <span
+                <Box
                   style={{
-                    width: 10,
-                    borderRadius: 10,
-                    display: "inline-block",
-                    paddingTop: "6px",
+                    display: "flex",
+                    padding: "10px 0px 0 10px",
+                    paddingBlock: "0px",
                   }}
                 >
-                  <MdOutlineStickyNote2 color={data?.color} height={10} />
-                </span>
+                  <span
+                    style={{
+                      width: 10,
+                      borderRadius: 10,
+                      display: "inline-block",
+                      paddingTop: "6px",
+                    }}
+                  >
+                    <MdOutlineStickyNote2 color={data?.color} height={10} />
+                  </span>
+                </Box>
+                <Text
+                  className="sort-item-text"
+                  style={{
+                    display: "inline-block",
+                    padding: 5,
+                    paddingInline: 20,
+                  }}
+                >
+                  {data?.name}
+                </Text>
               </Box>
-              <Text
-                className="sort-item-text"
-                style={{
-                  display: "inline-block",
-                  padding: 5,
-                  paddingInline: 20,
-                }}
-              >
-                {data?.name}
-              </Text>
             </Box>
+            {viewWidth === ViewWidthType.EXPANDED && !editor?.isEmpty &&
+            <RichTextEditor
+              editor={editor}
+              onChange={onChange}
+              style={{
+                maxHeight: "200px",
+                overflow: "hidden",
+                width: "100%",
+              }}
+              className={vp.tab ? "rte-no-x-border" : ""}
+            >
+
+              <RichTextEditor.Content />
+            </RichTextEditor>}
           </Box>
-        </Box>
+
+        </>
       )}
       {itemOpened && (
         <Suspense fallback={<></>}>

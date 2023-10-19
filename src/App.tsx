@@ -56,7 +56,7 @@ export default App;
 const element = <Home />;
 const Stuff = () =>
   useRoutes(
-    ["/", "/:userid/:id", "/widgets"].map((path) => ({ path, element }))
+    ["/", "/:userid/:id", "/widgets","/org/:orgid"].map((path) => ({ path, element }))
   );
 
 const additionalColors = {
