@@ -95,6 +95,7 @@ import {
   setViewWidth,
   toggleEditOrganizationModal,
   toggleOrganizationModal,
+  toggleOrganizationShareModal,
 } from "../data/contexts/redux/states";
 import {
   useClickOutside,
@@ -630,6 +631,21 @@ function Organization({ organization }: OrganizationComponentProps) {
               onClick={() => dispatch(toggleOrganizationModal("collection"))}
             >
               Add New Collection
+            </Button>
+            <Button
+              variant="light"
+              compact
+              style={{
+                color:
+                  colorScheme === "light"
+                    ? theme.colors["black-alpha"][7]
+                    : getContrastColor(organizationColor),
+              }}
+              mx={4}
+              leftIcon={<MdOutlineAdd />}
+              onClick={() => dispatch(toggleOrganizationShareModal())}
+            >
+              Share
             </Button>
 
             <Popover

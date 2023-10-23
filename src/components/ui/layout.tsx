@@ -30,6 +30,7 @@ import { AuthContext } from "../data/contexts/AuthContext";
 import { auth } from "../data/firebaseConfig";
 import React from "react";
 import OrganizationModal from "./OrganizationModal";
+import OrganizationShareModal from "./OrganizationShareModal";
 import AboutModal from "./AboutModal";
 import SettingsModal from "./SettingsModal";
 import { useSelector } from "react-redux";
@@ -59,7 +60,7 @@ export function Layout({ children }: DoubleHeaderProps) {
   const [trashModal, setTrashModal] = useState(false);
   const [archiveModal, setArchiveModal] = useState(false);
   const [personalizeModal, setPersonalizeModal] = useState(false);
-  const { showOrganizationModal, showLoginModal } = useSelector(
+  const { showOrganizationModal,showOrganizationShareModal, showLoginModal } = useSelector(
     (state: RootState) => state.states
   );
   const { syncing } = useSelector((state: RootState) => state.actions);
@@ -514,6 +515,7 @@ export function Layout({ children }: DoubleHeaderProps) {
         </Text>
       </Box>
       <OrganizationModal open={showOrganizationModal} />
+      <OrganizationShareModal open={showOrganizationShareModal} />
       <AboutModal open={aboutModal} setOpen={setAboutModal} />
       <SettingsModal
         open={settingsModal}

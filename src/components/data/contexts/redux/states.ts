@@ -5,6 +5,7 @@ export const stateSlice = createSlice({
   name: "states",
   initialState: {
     showOrganizationModal: false, //Add Organization modal state
+    showOrganizationShareModal: false, //Add Organization share modal state
     showLoginModal: false, //Add Login modal state
     organizationOrCollection: "organization", //Show "organization" tab or "collection" tab
     activeOrganization: localStorage.getItem("activeOrganization"),
@@ -24,6 +25,9 @@ export const stateSlice = createSlice({
     },
     toggleLoginModal: (state) => {
       state.showLoginModal = !state.showLoginModal;
+    },
+    toggleOrganizationShareModal: (state) => {
+      state.showOrganizationShareModal = !state.showOrganizationShareModal;
     },
     toggleEditOrganizationModal: (state, action) => {
       state.showOrganizationModal = !state.showOrganizationModal;
@@ -80,6 +84,7 @@ export const {
   toggleEditOrganizationModal,
   resetEditOrganizationData,
   toggleOrganizationModal,
+  toggleOrganizationShareModal,
   setOrganizationOrCollection,
   setActiveOrganization,
   setViewWidth,
