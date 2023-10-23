@@ -8,6 +8,7 @@ interface OrganizationProps {
   icon: string;
   color: string;
   accent: string;
+  shareList: string[];
 }
 
 interface CollectionProps {

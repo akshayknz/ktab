@@ -154,6 +154,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
           order: 0,
           archive: false,
           isDeleted: 0,
+          shareList: [user?.email],
           updatedAt: +new Date(),
           createdAt: +new Date(),
         }

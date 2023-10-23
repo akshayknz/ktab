@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { ViewMarginsType, ViewWidthType } from "../../constants";
+import { useSelector } from "react-redux";
 
 export const stateSlice = createSlice({
   name: "states",

@@ -67,6 +67,7 @@ interface OrganizationProps {
   icon: string;
   color: string;
   accent: string;
+  shareList: string[];
 }
 interface CollectionProps {
   id?: string;
@@ -112,18 +113,37 @@ function Home() {
         query(
           collection(db, "ktab-manager", userId, "organizations"),
           where("isDeleted", "==", 0)
-        ),
+        ), 
         (organizationSnapshot) => {
           const re: OrganizationProps[] = organizationSnapshot.docs.map(
-            (doc) => {
-              return docsToOrganizations(doc);
-            }
+            (doc) => docsToOrganizations(doc)
           );
+          console.log(re);
           setOrganizations(re);
         }
       );
+      console.log(user?.email||"guest");
+      if(user?.email){
+        const unsubUpdatedWithShareList = onSnapshot(
+          query(
+            collectionGroup(db, "organizations"),
+            where("shareList", "array-contains", user?.email||"guest"),
+            where("isDeleted", "==", 0)
+          ), 
+          (organizationSnapshot) => {
+            const re: OrganizationProps[] = organizationSnapshot.docs.map(
+              (doc) => {
+                console.log(doc.data());
+                return docsToOrganizations(doc);
+              }
+            );
+            setOrganizations(re);
+          }
+        );
+      }
+      //const a = onSnapshot(query(collection(db, "ab", userId, "cd")), (snapshot) => {});
     }
-  }, [userId]);
+  }, [user||userId]);
   //function to map doc data to OrganizationProps[]
   const docsToOrganizations = (doc: DocumentData) => {
     return {
@@ -132,6 +152,7 @@ function Home() {
       icon: doc.data().icon,
       color: doc.data().color,
       accent: doc.data().accent,
+      shareList: doc.data().shareList,
       //...doc.data(),
     };
   };

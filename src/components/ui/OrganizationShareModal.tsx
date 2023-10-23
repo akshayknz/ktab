@@ -17,6 +17,7 @@ import { useForm } from "@mantine/form";
 import {
   addDoc,
   collection,
+  collectionGroup,
   doc,
   getDocs,
   query,
@@ -30,7 +31,9 @@ import { ItemType } from "../data/constants";
 import { RootState } from "../data/contexts/redux/configureStore";
 import {
   resetEditOrganizationData,
+  setActiveOrganization,
   setOrganizationOrCollection,
+  stateSlice,
   toggleOrganizationShareModal,
 } from "../data/contexts/redux/states";
 import { db } from "../data/firebaseConfig";
@@ -72,6 +75,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
     editOrganizationData,
     editCollectionData,
     editItemData,
+    activeOrganization
   } = useSelector((state: RootState) => state.states);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState<string>("");
@@ -264,8 +268,23 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
       itemForm.reset();
     });
   }
-
   useEffect(() => {
+    const unsub = async () => {
+      const q = query(
+        collectionGroup(db, "organizations"),
+        where("shareList", "array-contains", user?.email||"guest"),
+        where("isDeleted", "==", 0)
+      )
+      getDocs(q).then((r)=>{
+        const docss = r.docs.filter((doc)=>doc.id=== activeOrganization,"fgsdgagadadfadf").map((doc)=>({
+          id:doc.id,
+          shareList: doc.data().shareList
+        }))
+        console.log(docss);
+        
+      })
+    }
+    unsub()
     const runOrganizationQuery = async () => {
       const q = query(
         collection(
@@ -332,7 +351,7 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
           Share Organization
         </Title>
       }
-      size="calc(100vw - 13rem)"
+      size="lg"
     >
       <Box px={20} pt={10} pb={20} mx="auto">
         <form
@@ -357,22 +376,19 @@ export default function OrganizationModal({ open }: OrganizationModalProps) {
               Add to this Organization
             </Button>
           </Group>
-          <Title order={3} mt={"xl"}>Organizatoin Access</Title>
+          <Title order={3} mt={"xl"}>People on board</Title>
           <Table highlightOnHover striped mt={"xl"}>
             <thead>
               <tr>
-                <th>Name</th>
                 <th>Email</th>
-                <th>Shared on</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td>Akshay Kadambattu Nair</td><td>akshayakn6@gmail.com</td><td>19:30 3 Jan 2023</td><td>
+              <tr><td>akshayakn6@gmail.com</td><td>
               <Button.Group>
       <Button variant="outline" size="xs">Ping to join</Button>
-      <Button variant="outline" size="xs">Permissions</Button>
-      <Button variant="outline" size="xs" color="red">Remove</Button>
+      <Button variant="outline" size="xs" >Remove</Button>
     </Button.Group>
                 </td></tr>
             </tbody>

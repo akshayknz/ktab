@@ -65,6 +65,7 @@ import {
   MdDragIndicator,
   MdOutlineAdd,
   MdOutlineStickyNote2,
+  MdShare,
 } from "react-icons/md";
 import { AiFillEdit, AiOutlineDelete, AiOutlineEdit, AiOutlineEye } from "react-icons/ai";
 import { BiCodeCurly, BiImageAlt, BiMessageAltAdd } from "react-icons/bi";
@@ -83,6 +84,7 @@ import {
   orderBy,
   limit,
   addDoc,
+  collectionGroup,
 } from "firebase/firestore";
 import { db } from "../data/firebaseConfig";
 import { AuthContext } from "../data/contexts/AuthContext";
@@ -270,7 +272,7 @@ function Organization({ organization }: OrganizationComponentProps) {
     //Get collections and items of this organization
     const unsub1 = onSnapshot(
       query(
-        collection(db, "ktab-manager", userId, "collections"),
+        collectionGroup(db, "collections"),
         where("parent", "==", organization.id),
         where("isDeleted", "==", 0)
       ),
@@ -284,7 +286,7 @@ function Organization({ organization }: OrganizationComponentProps) {
 
     const unsub2 = onSnapshot(
       query(
-        collection(db, "ktab-manager", userId, "items"),
+        collectionGroup(db, "items"),
         where("orgparent", "==", organization.id),
         where("isDeleted", "==", 0),
         where("archive", "==", 0)
@@ -642,7 +644,7 @@ function Organization({ organization }: OrganizationComponentProps) {
                     : getContrastColor(organizationColor),
               }}
               mx={4}
-              leftIcon={<MdOutlineAdd />}
+              leftIcon={<MdShare />}
               onClick={() => dispatch(toggleOrganizationShareModal())}
             >
               Share
