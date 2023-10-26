@@ -101,7 +101,7 @@ export default function ItemModal({ open, setOpen, data }: Props) {
   const [content, onChange] = useState<any>(data?.content);
   const editorRef = useRef<Editor>();
   const { syncing } = useSelector((state: RootState) => state.actions);
-  const [editableVar, setEditable] = useState(false);
+  const [editableVar, setEditable] = useState(true);
   const [editTitle, setEditTitle] = useState(false);
   const editor = useEditor({
     extensions: [

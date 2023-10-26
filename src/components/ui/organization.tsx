@@ -48,6 +48,7 @@ import {
   ThemeIcon,
   SegmentedControl,
   useMantineColorScheme,
+  Menu,
 } from "@mantine/core";
 import React, {
   SetStateAction,
@@ -117,7 +118,7 @@ import {
 } from "../data/contexts/redux/actions";
 import { RootState } from "../data/contexts/redux/configureStore";
 import { ItemType, ViewMarginsType, ViewWidthType } from "../data/constants";
-import { BsEye, BsFilterCircle } from "react-icons/bs";
+import { BsEye, BsFilterCircle, BsThreeDotsVertical } from "react-icons/bs";
 import useViewport from "../data/useViewport";
 import { Editor } from "@mantine/rte";
 import { RichTextEditor } from "@mantine/tiptap";
@@ -597,7 +598,7 @@ function Organization({ organization }: OrganizationComponentProps) {
         size={"xl"}
         pt={20}
         pb={50}
-        px={vp.tab?"3%":"5%"}
+        px={vp.tab ? "3%" : "5%"}
         style={{
           cursor: cursor,
         }}
@@ -927,7 +928,40 @@ function Organization({ organization }: OrganizationComponentProps) {
             >
               Edit
             </Button>
-            <Popover
+            
+            <Menu shadow="md" width={200} position="bottom-end" offset={7} withArrow
+            transition="pop-top-right">
+              <Menu.Target>
+                <Button size={"sm"}
+                  compact
+                  mx={4}
+                  variant="light"><BsThreeDotsVertical /></Button>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Label>Actions</Menu.Label>
+                <Menu.Item>
+                  Minimize
+                </Menu.Item>
+                <Menu.Item>
+                  Edit
+                </Menu.Item>
+                <Menu.Item>
+                  Filter
+                </Menu.Item>
+                <Menu.Item
+                  rightSection={
+                    <Text size="xs" c="dimmed">
+                      ⌘K
+                    </Text>
+                  }
+                >
+                  Color
+                </Menu.Item>
+                <Menu.Divider />
+                <Menu.Label>Danger zone</Menu.Label>
+                <Menu.Item
+                  color="red">
+                  <Popover
               closeOnClickOutside
               transition="pop"
               withArrow
@@ -990,6 +1024,9 @@ function Organization({ organization }: OrganizationComponentProps) {
                 </Box>
               </Popover.Dropdown>
             </Popover>
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
           </Grid.Col>
         </Grid>
         <DndContext
@@ -1189,7 +1226,7 @@ const ContainerItem = ({
             : theme.colors["white-alpha"][3],
         padding: 4,
         paddingTop: 13,
-        paddingInline: vp.tab ?10:20,
+        paddingInline: vp.tab ? 10 : 20,
       })}
     >
       <Box sx={{ height: vp.tab ? "auto" : "50px" }}>
@@ -1223,7 +1260,7 @@ const ContainerItem = ({
                 <Text
                   onClick={() => setEdit(true)}
                   className={classes.titleInput}
-                  style={{fontWeight:400}}
+                  style={{ fontWeight: 400 }}
                 >
                   {data?.name}
                 </Text>
@@ -1431,6 +1468,7 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
     width: width,
     margin: margin,
     maxWidth: vp.tab ? "100%" : "24.1%",
+    flex: "1 0 20%"
   };
   const [itemOpened, setItemOpened] = useState(false);
   const openModal = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -1645,19 +1683,19 @@ const SortableItem = ({ name, id, data }: SortableItemProps) => {
               </Box>
             </Box>
             {viewWidth === ViewWidthType.EXPANDED && !editor?.isEmpty &&
-            <RichTextEditor
-              editor={editor}
-              onChange={onChange}
-              style={{
-                maxHeight: "200px",
-                overflow: "hidden",
-                width: "100%",
-              }}
-              className={vp.tab ? "rte-no-x-border" : ""}
-            >
+              <RichTextEditor
+                editor={editor}
+                onChange={onChange}
+                style={{
+                  maxHeight: "200px",
+                  overflow: "hidden",
+                  width: "100%",
+                }}
+                className={vp.tab ? "rte-no-x-border" : ""}
+              >
 
-              <RichTextEditor.Content />
-            </RichTextEditor>}
+                <RichTextEditor.Content />
+              </RichTextEditor>}
           </Box>
 
         </>
